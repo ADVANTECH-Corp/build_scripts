@@ -67,7 +67,6 @@ if [ ! -d $4 ]; then ERROR "$4: No such directory" 1; fi
 
 INTEL_VERSION="v${VENDOR_VER}"
 GIT_BASE="git://github.com/ADVANTECH-Corp"
-GIT_TEMP="http://172.22.15.145/ADVANTECH-Corp"
 LINUX_VERSION="3.14"
 PRODUCT=${1,,}
 VERSION=${2^^}
@@ -283,7 +282,7 @@ function fetch_souce_code_and_repack_bsp()
 	[ -d Quark_EDKII_${INTEL_VERSION} ] && rm -rf Quark_EDKII_${INTEL_VERSION}
 	[ -d sysimage_${INTEL_VERSION} ] && rm -rf sysimage_${INTEL_VERSION}
 	[ -d temp ] && rm -rf temp/
-	if ! git clone ${GIT_TEMP}/adv-quark-bsp -b ${INTEL_VERSION} temp; then
+	if ! git clone ${GIT_BASE}/adv-quark-bsp -b ${INTEL_VERSION} temp; then
 		ERROR "git clone" 1
 	fi
 	mv temp/* .

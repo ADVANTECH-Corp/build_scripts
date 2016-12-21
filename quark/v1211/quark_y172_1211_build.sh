@@ -278,15 +278,6 @@ function fetch_souce_code_and_repack_bsp()
 	[ -e spi-flash-tools ] && rm spi-flash-tools
 	[ -e Quark_EDKII ] && rm Quark_EDKII
 	[ -e sysimage ] && rm sysimage
-	[ -d spi-flash-tools_${INTEL_VERSION} ] && rm -rf spi-flash-tools_${INTEL_VERSION}
-	[ -d Quark_EDKII_${INTEL_VERSION} ] && rm -rf Quark_EDKII_${INTEL_VERSION}
-	[ -d sysimage_${INTEL_VERSION} ] && rm -rf sysimage_${INTEL_VERSION}
-	[ -d temp ] && rm -rf temp/
-	if ! git clone ${GIT_BASE}/adv-quark-bsp -b ${INTEL_VERSION} temp; then
-		ERROR "git clone" 1
-	fi
-	mv temp/* .
-	rm -rf temp/
 	./sysimage_${INTEL_VERSION}/create_symlinks.sh
 	popd
 }

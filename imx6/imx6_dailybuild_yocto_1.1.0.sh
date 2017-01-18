@@ -6,7 +6,6 @@ echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
 echo "[ADV] BSP_URL = ${BSP_URL}"
 echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
-echo "[ADV] BUILDALL_DIR = ${BUILDALL_DIR}"
 echo "[ADV] DEPLOY_IMAGE_NAME = ${DEPLOY_IMAGE_NAME}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] MACHINE_LIST = ${MACHINE_LIST}"
@@ -79,7 +78,7 @@ function building()
 function build_yocto_images()
 {
     cd $CURR_PATH/$ROOT_DIR
-
+    BUILDALL_DIR=build_"${NEW_MACHINE}"
     # set_environment
     echo "[ADV] change $NEW_MACHINE"
     sed -i "s/MACHINE ??=.*/MACHINE ??= '$NEW_MACHINE'/g" $BUILDALL_DIR/conf/local.conf

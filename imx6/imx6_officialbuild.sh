@@ -331,17 +331,17 @@ function rebuild_u-boot()
 
 function generate_mksd_linux()
 {
-    sudo mkdir $MOUNT_POINT/mk_inand
-    chmod 755 mksd-linux.sh
-    sudo mv mksd-linux.sh $MOUNT_POINT/mk_inand/
-    sudo chown 0.0 $MOUNT_POINT/mk_inand/mksd-linux.sh
+	sudo mkdir $MOUNT_POINT/mk_inand
+	chmod 755 $CURR_PATH/mksd-linux.sh
+	sudo mv $CURR_PATH/mksd-linux.sh $MOUNT_POINT/mk_inand/
+	sudo chown 0.0 $MOUNT_POINT/mk_inand/mksd-linux.sh
 }
 
 function generate_mkspi_advboot()
 {
         sudo mkdir $MOUNT_POINT/recovery
-        chmod 755 mkspi-advboot.sh
-        sudo mv mkspi-advboot.sh $MOUNT_POINT/recovery/
+        chmod 755 $CURR_PATH/mkspi-advboot.sh
+        sudo mv $CURR_PATH/mkspi-advboot.sh $MOUNT_POINT/recovery/
         sudo chown 0.0 $MOUNT_POINT/recovery/mkspi-advboot.sh
 }
 function insert_image_file()

@@ -238,8 +238,8 @@ function save_temp_log()
         tar czf $LOG_DIR.tgz $LOG_DIR
         generate_md5 $LOG_DIR.tgz
 
-        mv -f $LOG_DIR.tgz $STORAGE_PATH/$DATE_PATH/
-        mv -f $LOG_DIR.tgz.md5 $STORAGE_PATH/$DATE_PATH/
+        mv -f $LOG_DIR.tgz $CURR_PATH/$STORAGE_PATH/$DATE_PATH/
+        mv -f $LOG_DIR.tgz.md5 $CURR_PATH/$STORAGE_PATH/$DATE_PATH/
 
         # Remove all temp logs
         rm -rf $LOG_DIR

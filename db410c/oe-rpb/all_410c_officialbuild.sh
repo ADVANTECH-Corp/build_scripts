@@ -14,4 +14,4 @@ if [ $EPC_R4761 == true ]; then
 	./410c_oe_officialbuild.sh epc-r4761 4761LIV"$VERSION_NUM" 2>&1 |tee 4761LIV"$VERSION_NUM"_$DATE.log
 fi
 
-cp *.log $STORED/$DATE/
+mv *.log $STORED/$DATE/

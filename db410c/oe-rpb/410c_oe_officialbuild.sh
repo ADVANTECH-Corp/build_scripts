@@ -7,7 +7,6 @@ OFFICIAL_VER=$2
 VER_PREFIX="410c"
 TMP_DIR="tmp-rpb-glibc"
 DEFAULT_DEVICE="rsb-4760"
-KERNEL_SOURCE_DIR="$BUILDALL_DIR/$TMP_DIR/work-shared/$DEFAULT_DEVICE/kernel-source"
 NEW_MACHINE=${PRODUCT}
 #---------------------------
 
@@ -26,7 +25,7 @@ echo "[ADV] KERNEL_URL = ${KERNEL_URL}"
 echo "[ADV] KERNEL_BRANCH = ${KERNEL_BRANCH}"
 echo "[ADV] KERNEL_PATH = ${KERNEL_PATH}"
 
-VER_TAG="${VER_PREFIX}LB"$(echo $OFFICIAL_VER | sed 's/[.]//')
+VER_TAG="${VER_PREFIX}LB"$(echo $RELEASE_VERSION | sed 's/[.]//')
 
 CURR_PATH="$PWD"
 ROOT_DIR="${VER_TAG}"_"$DATE"
@@ -72,16 +71,17 @@ function check_tag_and_checkout()
                 META_TAG=`git tag | grep $VER_TAG`
                 if [ "$META_TAG" != "" ]; then
                         echo "[ADV] meta-advantech has been tagged ,and check to this $VER_TAG version"
+                        REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
                         git checkout $VER_TAG
                         git tag --delete $VER_TAG
-                        git push --delete origin refs/tags/$VER_TAG
+                        git push --delete $REMOTE_SERVER refs/tags/$VER_TAG
                 else
                         echo "[ADV] meta-advantech isn't tagged ,nothing to do"
                 fi
                 cd $CURR_PATH
         else
                 echo "[ADV] Directory $ROOT_DIR/$FILE_PATH doesn't exist"
-                exit 0
+                exit 1
         fi
 }
 
@@ -111,15 +111,16 @@ function auto_add_tag()
                 TAG_HASH_ID=`git tag -v $VER_TAG | grep object | cut -d ' ' -f 2`
                 if [ "$HEAD_HASH_ID" == "$TAG_HASH_ID" ]; then
                         echo "[ADV] tag exists! There is no need to add tag"
-	        else
-			echo "[ADV] Add tag $VER_TAG"
-			git tag -a $VER_TAG -m "official build $VER_TAG"
-			git push origin $VER_TAG
+                else
+                        echo "[ADV] Add tag $VER_TAG"
+                        REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+                        git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
+                        git push $REMOTE_SERVER $VER_TAG
                 fi
                 cd $CURR_PATH
         else
                 echo "[ADV] Directory $ROOT_DIR/$FILE_PATH doesn't exist"
-                exit 0
+                exit 1
         fi
 }
 
@@ -129,14 +130,16 @@ function create_branch_and_commit()
 
         if [ -d "$ROOT_DIR/$FILE_PATH" ];then
                 cd $ROOT_DIR/$FILE_PATH
+                echo "[ADV] create branch $VER_TAG"
+                REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
                 git checkout -b $VER_TAG
                 git add .
-                git commit -m "official build $VER_TAG"
-                git push origin $VER_TAG
+                git commit -m "[Official Release] $VER_TAG"
+                git push $REMOTE_SERVER $VER_TAG
                 cd $CURR_PATH
         else
                 echo "[ADV] Directory $ROOT_DIR/$FILE_PATH doesn't exist"
-                exit 0
+                exit 1
         fi
 }
 
@@ -182,15 +185,16 @@ function create_xml_and_commit()
                 update_revision_for_xml $VER_TAG.xml
 
                 # push to github
+                REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
                 git add $VER_TAG.xml
-                git commit -F $CURR_PATH/$REALEASE_NOTE
+                git commit -m "[Official Release] ${VER_TAG}"
                 git push
-		git tag -a $VER_TAG -F $CURR_PATH/$REALEASE_NOTE
-		git push origin $VER_TAG
+                git tag -a $VER_TAG -F $CURR_PATH/$REALEASE_NOTE
+                git push $REMOTE_SERVER $VER_TAG
                 cd $CURR_PATH
         else
                 echo "[ADV] Directory $ROOT_DIR/.repo/manifests doesn't exist"
-                exit 0
+                exit 1
         fi
 }
 
@@ -302,13 +306,13 @@ function set_environment()
     echo "[ADV] set environment"
 
     if [ "$1" == "sdk" ]; then
+        # Link downloads directory from backup
+        if [ -e $CURR_PATH/downloads ] ; then
+            echo "[ADV] link downloads directory"
+            ln -s $CURR_PATH/downloads downloads
+        fi
+        # Use default device for sdk
         NEW_MACHINE=$DEFAULT_DEVICE
-    fi
-
-    # Link downloads directory from backup
-    if [ -e $CURR_PATH/downloads ] ; then
-        echo "[ADV] link downloads directory"
-        ln -s $CURR_PATH/downloads downloads
     fi
 
     # Accept EULA if/when needed
@@ -317,6 +321,8 @@ function set_environment()
 
     BUILDALL_DIR=build_"${PRODUCT}"
     MACHINE=$NEW_MACHINE DISTRO=rpb source setup-environment $BUILDALL_DIR
+
+    KERNEL_SOURCE_DIR="$BUILDALL_DIR/$TMP_DIR/work-shared/$NEW_MACHINE/kernel-source"
 
     # Add job BUILD_NUMBER to output files names
     cat << EOF >> conf/auto.conf
@@ -334,6 +340,9 @@ EOF
 function build_yocto_sdk()
 {
     set_environment sdk
+
+    # Build kernel image first
+    building linux-linaro-qcomlt
 
     # Generate sdk image
     building populate_sdk
@@ -362,9 +371,6 @@ function prepare_images()
     fi
 
     case $IMAGE_TYPE in
-    "bsp")
-        # Do nothing
-        ;;
     "sdk")
         cp $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/sdk/* $OUTPUT_DIR
         ;;
@@ -407,11 +413,9 @@ function copy_image_to_storage()
     echo "[ADV] copy images to $STORAGE_PATH"
 
     case $1 in
-    "bsp")
-        mv -f $ROOT_DIR.tgz $STORAGE_PATH
-        ;;
     "sdk")
-        mv -f $SDK_DIR.tgz $STORAGE_PATH
+        mv -f ${ROOT_DIR}.tgz $STORAGE_PATH
+        mv -f ${SDK_DIR}.tgz $STORAGE_PATH
         ;;
     "normal")
         generate_csv ${IMAGE_DIR}.tgz
@@ -419,7 +423,7 @@ function copy_image_to_storage()
         mv -f ${IMAGE_DIR}.tgz $STORAGE_PATH
         ;;
     "installsd")
-        # [To-Do]
+        mv -f ${INSTALL_DIR}.tgz $STORAGE_PATH
         ;;
     *)
         echo "[ADV] copy_image_to_storage: invalid parameter #1!"
@@ -444,9 +448,9 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
     check_tag_and_replace $KERNEL_PATH $KERNEL_URL $KERNEL_BRANCH
 
     # BSP source code
-    echo "[ADV] generate bsp files"
-    prepare_images bsp $ROOT_DIR
-    copy_image_to_storage bsp
+    echo "[ADV] tar $ROOT_DIR.tgz file"
+    tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
+    generate_md5 $ROOT_DIR.tgz
 
     # Build Yocto SDK
     echo "[ADV] build yocto sdk"
@@ -483,7 +487,7 @@ else #"$PRODUCT" != "$VER_PREFIX"
     echo "[ADV] generate normal image"
     DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${NEW_MACHINE}"
 
-    IMAGE_DIR="$OFFICIAL_VER"_images_"$DATE"
+    IMAGE_DIR="$OFFICIAL_VER"_"$DATE"
     prepare_images normal $IMAGE_DIR
     copy_image_to_storage normal
 

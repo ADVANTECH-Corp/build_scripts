@@ -180,6 +180,7 @@ function create_xml_and_commit()
                 cd $ROOT_DIR/.repo
                 cp manifest.xml manifests/$VER_TAG.xml
                 cd manifests
+                git checkout $BSP_BRANCH
 
                 # add revision into xml
                 update_revision_for_xml $VER_TAG.xml

@@ -151,8 +151,8 @@ function auto_add_tag()
 {
         FILE_PATH=$1
 	DIR=`ls $FILE_PATH`
-        if [ -d "$ROOT_DIR/$FILE_PATH/$DIR/git" ];then
-                cd $ROOT_DIR/$FILE_PATH/$DIR/git
+        if [ -d "$FILE_PATH/$DIR/git" ];then
+                cd $FILE_PATH/$DIR/git
                 HEAD_HASH_ID=`git rev-parse HEAD`
                 TAG_HASH_ID=`git tag -v $VER_TAG | grep object | cut -d ' ' -f 2`
                 if [ "$HEAD_HASH_ID" == "$TAG_HASH_ID" ]; then
@@ -165,7 +165,7 @@ function auto_add_tag()
                 fi
                 cd $CURR_PATH
         else
-                echo "[ADV] Directory $ROOT_DIR/$FILE_PATH doesn't exist"
+                echo "[ADV] Directory $FILE_PATH doesn't exist"
                 exit 1
         fi
 }

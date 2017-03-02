@@ -660,7 +660,7 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 
         # BSP source code
         echo "[ADV] tar $ROOT_DIR.tgz file"
-	tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
+	tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs
         generate_md5 $ROOT_DIR.tgz
 
         # Build Yocto SDK

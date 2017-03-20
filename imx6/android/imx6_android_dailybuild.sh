@@ -138,9 +138,9 @@ function building()
     else
         make -j4 $1 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
     fi
-    echo "[ADV] simg2img... start"
-    out/host/linux-x86/bin/simg2img out/target/product/$NEW_MACHINE/system.img out/target/product/$NEW_MACHINE/system2.img
-    echo "[ADV] simg2img... end"
+#    echo "[ADV] simg2img... start"
+#    out/host/linux-x86/bin/simg2img out/target/product/$NEW_MACHINE/system.img out/target/product/$NEW_MACHINE/system2.img
+#    echo "[ADV] simg2img... end"
 
     [ "$?" -ne 0 ] && echo "[ADV] Build failure! Check log file '$LOG_FILE'" && exit 1
 }
@@ -186,6 +186,7 @@ function build_android_images()
 
     # Android & OTA images
 	building android
+	building otapackage
 }
 
 function prepare_images()
@@ -202,7 +203,7 @@ function prepare_images()
 
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/boot.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/recovery.img $IMAGE_DIR/image
-	mv -f $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/system2.img $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/system.img 
+#	mv -f $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/system2.img $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/system.img 
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/system.img $IMAGE_DIR/image 
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/u-boot_crc.bin $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/u-boot_crc.bin.crc $IMAGE_DIR/image

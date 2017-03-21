@@ -167,13 +167,13 @@ function set_environment()
 
     if [ "$1" == "sdk" ]; then
         lunch sdk-eng
-    elif [ "$MACHINE_LIST" == "imx6" ]; then
+    elif [ "$NEW_MACHINE" == "imx6" ]; then
         lunch rsb_4410-eng
     else
         if [ "$TYPE" == "" ]; then
-            lunch $MACHINE_LIST-eng
+            lunch $NEW_MACHINE-eng
         else
-            lunch $MACHINE_LIST-$TYPE
+            lunch $NEW_MACHINE-$TYPE
         fi
     fi
 }

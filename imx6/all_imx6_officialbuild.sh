@@ -32,7 +32,7 @@ if [ $RSB4411A1 == true ]; then
 	./imx6_officialbuild.sh rsb4411a1 4411A1LIV"$VERSION_NUM" 1G x11 2>&1 |tee 4411A1LIV"$VERSION_NUM"_DualQuad_$DATE.log
 fi
 if [ $ROM7420A1 == true ]; then
-	./imx6_officialbuild.sh rom7420a1 7420A1LIV"$VERSION_NUM" 1G x11 2>&1 |tee 7420A1LIV"$VERSION_NUM"_DualQuad_$DATE.log
+	./imx6_officialbuild.sh rom7420a1 7420A1LIV"$VERSION_NUM" 1G-2G x11 2>&1 |tee 7420A1LIV"$VERSION_NUM"_DualQuad_$DATE.log
 fi
 if [ $ROM3420A1 == true ]; then
 	./imx6_officialbuild.sh rom3420a1 3420A1LIV"$VERSION_NUM" 1G-2G x11 2>&1 |tee 3420A1LIV"$VERSION_NUM"_DualQuad_$DATE.log

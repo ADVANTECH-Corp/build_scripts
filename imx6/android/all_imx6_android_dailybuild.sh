@@ -11,7 +11,7 @@ fi
 if [ $ROM_3420_A1 == true ]; then
 	MACHINE_LIST="$MACHINE_LIST rom_3420_a1"
 fi
-if [ $ROM_7421_A1== true ]; then
+if [ $ROM_7421_A1 == true ]; then
 	MACHINE_LIST="$MACHINE_LIST rom_7421_a1"
 fi
 

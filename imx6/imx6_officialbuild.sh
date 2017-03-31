@@ -447,7 +447,7 @@ function generate_mkspi_advboot()
 {
         sudo mkdir $MOUNT_POINT/recovery
         chmod 755 $CURR_PATH/mkspi-advboot.sh
-        sudo mv $CURR_PATH/mkspi-advboot.sh $MOUNT_POINT/recovery/
+        sudo cp $CURR_PATH/mkspi-advboot.sh $MOUNT_POINT/recovery/
         sudo chown 0.0 $MOUNT_POINT/recovery/mkspi-advboot.sh
 }
 function insert_image_file()

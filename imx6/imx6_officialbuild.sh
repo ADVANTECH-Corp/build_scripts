@@ -439,7 +439,7 @@ function generate_mksd_linux()
 {
 	sudo mkdir $MOUNT_POINT/mk_inand
 	chmod 755 $CURR_PATH/mksd-linux.sh
-	sudo mv $CURR_PATH/mksd-linux.sh $MOUNT_POINT/mk_inand/
+	sudo cp $CURR_PATH/mksd-linux.sh $MOUNT_POINT/mk_inand/
 	sudo chown 0.0 $MOUNT_POINT/mk_inand/mksd-linux.sh
 }
 

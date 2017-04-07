@@ -310,9 +310,9 @@ function building()
     else
         make -j4 $1 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
     fi
-    echo "[ADV] simg2img... start"
-    out/host/linux-x86/bin/simg2img out/target/product/$NEW_MACHINE/system.img out/target/product/$NEW_MACHINE/system2.img
-    echo "[ADV] simg2img... end"
+#    echo "[ADV] simg2img... start"
+#    out/host/linux-x86/bin/simg2img out/target/product/$NEW_MACHINE/system.img out/target/product/$NEW_MACHINE/system2.img
+#    echo "[ADV] simg2img... end"
 
     [ "$?" -ne 0 ] && echo "[ADV] Build failure! Check log file '$LOG_FILE'" && exit 1
 }
@@ -368,26 +368,26 @@ function prepare_images()
     IMAGE_DIR="AI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
-	mkdir $IMAGE_DIR/image
+    mkdir $IMAGE_DIR/image
 
     # Copy image files to image directory
 
 
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/boot.img $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/recovery.img $IMAGE_DIR/image
-	mv -f $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/system2.img $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/system.img 
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/system.img $IMAGE_DIR/image 
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/u-boot_crc.bin $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/u-boot_crc.bin.crc $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/update.zip $IMAGE_DIR/image
+    cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/boot.img $IMAGE_DIR/image
+    cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/recovery.img $IMAGE_DIR/image
+#    mv -f $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/system2.img $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/system.img
+    cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/system.img $IMAGE_DIR/image
+    cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/u-boot_crc.bin $IMAGE_DIR/image
+    cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/u-boot_crc.bin.crc $IMAGE_DIR/image
+    cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/update.zip $IMAGE_DIR/image
+    cp -a /usr/bin/simg2img $IMAGE_DIR/image
 
-	mkdir $IMAGE_DIR/scripts
-	mv -f $CURR_PATH/mksd-android.sh $IMAGE_DIR/scripts
+    mkdir $IMAGE_DIR/scripts
+    cp -a $CURR_PATH/mksd-android.sh $IMAGE_DIR/scripts
 
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}.tgz
-
     #rm -rf $IMAGE_DIR
 }
 

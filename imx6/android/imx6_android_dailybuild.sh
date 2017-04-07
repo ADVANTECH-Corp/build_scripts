@@ -208,9 +208,10 @@ function prepare_images()
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/u-boot_crc.bin $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/u-boot_crc.bin.crc $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/update.zip $IMAGE_DIR/image
+    cp -a /usr/bin/simg2img $IMAGE_DIR/image
 
 	mkdir $IMAGE_DIR/scripts
-	mv -f $CURR_PATH/mksd-android.sh $IMAGE_DIR/scripts
+	cp -a $CURR_PATH/mksd-android.sh $IMAGE_DIR/scripts
 
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR

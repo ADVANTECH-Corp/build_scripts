@@ -13,16 +13,19 @@ echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] MACHINE_LIST = ${MACHINE_LIST}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
 
+echo "[ADV] META_ADVANTECH_PATH = ${META_ADVANTECH_PATH}"
+echo "[ADV] KERNEL_VERSION = ${KERNEL_VERSION}"
+echo "[ADV] KERNEL_PATH = ${KERNEL_PATH}"
 CURR_PATH="$PWD"
 ROOT_DIR="${VER_PREFIX}LB${RELEASE_VERSION}"_"$DATE"
-OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
+STORAGE_PATH="$CURR_PATH/$STORED/$DATE"
 
 # Make storage folder
-if [ -e $OUTPUT_DIR ] ; then
-    echo "[ADV] $OUTPUT_DIR had already been created"
+if [ -e $STORAGE_PATH ] ; then
+    echo "[ADV] $STORAGE_PATH had already been created"
 else
-    echo "[ADV] mkdir $OUTPUT_DIR"
-    mkdir -p $OUTPUT_DIR
+    echo "[ADV] mkdir $STORAGE_PATH"
+    mkdir -p $STORAGE_PATH
 fi
 
 # ===========
@@ -38,6 +41,33 @@ function generate_md5()
     fi
 }
 
+function save_temp_log()
+{
+    LOG_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR"
+    cd $LOG_PATH
+
+    echo "[ADV] mkdir $LOG_DIR"
+    mkdir $LOG_DIR
+
+    # Backup conf, run script & log file
+    cp -a conf $LOG_DIR
+    find $TMP_DIR/work -name "log.*_*" -o -name "run.*_*" | xargs -i cp -a --parents {} $LOG_DIR
+
+    echo "[ADV] creating ${LOG_DIR}.tgz ..."
+    tar czf $LOG_DIR.tgz $LOG_DIR
+    generate_md5 $LOG_DIR.tgz
+
+    mv -f $LOG_DIR.tgz $STORAGE_PATH
+    mv -f $LOG_DIR.tgz.md5 $STORAGE_PATH
+
+    # Remove all temp logs
+    rm -rf $LOG_DIR
+    find . -name "temp" | xargs rm -rf
+}
+
+# ===============================
+#  Functions [platform specific]
+# ===============================
 function generate_csv()
 {
     FILENAME=$1
@@ -58,10 +88,11 @@ function generate_csv()
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV
 ESSD Software/OS Update News
-OS,Linux 4.4.23
+OS,Linux ${KERNEL_VERSION}
 Part Number,N/A
 Author,
 Date,${DATE}
+Version,LI${RELEASE_VERSION}
 Build Number,${BUILD_NUMBER}
 TAG,
 Tested Platform,${NEW_MACHINE}
@@ -75,28 +106,11 @@ linux-linaro-qcomlt, ${HASH_KERNEL}
 END_OF_CSV
 }
 
-function save_temp_log()
+function add_version()
 {
-    LOG_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR"
-    cd $LOG_PATH
-
-    echo "[ADV] mkdir $LOG_DIR"
-    mkdir $LOG_DIR
-
-    # Backup conf, run script & log file
-    cp -a conf $LOG_DIR
-    find $TMP_DIR/work -name "log.*_*" -o -name "run.*_*" | xargs -i cp -a --parents {} $LOG_DIR
-
-    echo "[ADV] creating ${LOG_DIR}.tgz ..."
-    tar czf $LOG_DIR.tgz $LOG_DIR
-    generate_md5 $LOG_DIR.tgz
-
-    mv -f $LOG_DIR.tgz $OUTPUT_DIR
-    mv -f $LOG_DIR.tgz.md5 $OUTPUT_DIR
-
-    # Remove all temp logs
-    rm -rf $LOG_DIR
-    find . -name "temp" | xargs rm -rf
+    # Set Linux version
+    sed -i "/LOCALVERSION/d" $ROOT_DIR/$KERNEL_PATH
+    echo "LOCALVERSION = \"-LI${RELEASE_VERSION}-${BUILD_NUMBER}\"" >> $ROOT_DIR/$KERNEL_PATH
 }
 
 function building()
@@ -191,17 +205,17 @@ function prepare_images()
 
 function copy_image_to_storage()
 {
-    echo "[ADV] copy images to $OUTPUT_DIR"
+    echo "[ADV] copy images to $STORAGE_PATH"
 
     generate_csv ${IMAGE_DIR}.tgz
-    mv ${IMAGE_DIR}.csv $OUTPUT_DIR
+    mv ${IMAGE_DIR}.csv $STORAGE_PATH
 
-    mv -f ${IMAGE_DIR}.tgz $OUTPUT_DIR
-    mv -f *.md5 $OUTPUT_DIR
+    mv -f ${IMAGE_DIR}.tgz $STORAGE_PATH
+    mv -f *.md5 $STORAGE_PATH
 }
 
 # ================
-#  Main procedure 
+#  Main procedure
 # ================
 echo "[ADV] get yocto source code"
 mkdir $ROOT_DIR
@@ -218,6 +232,8 @@ repo sync
 echo "[ADV] build images"
 for NEW_MACHINE in $MACHINE_LIST
 do
+    add_version
+
     build_yocto_images
     prepare_images
     copy_image_to_storage

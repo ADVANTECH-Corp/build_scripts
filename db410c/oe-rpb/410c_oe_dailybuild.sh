@@ -108,6 +108,7 @@ END_OF_CSV
 
 function add_version()
 {
+    cd $CURR_PATH
     # Set Linux version
     sed -i "/LOCALVERSION/d" $ROOT_DIR/$KERNEL_PATH
     echo "LOCALVERSION = \"-LI${RELEASE_VERSION}-${BUILD_NUMBER}\"" >> $ROOT_DIR/$KERNEL_PATH

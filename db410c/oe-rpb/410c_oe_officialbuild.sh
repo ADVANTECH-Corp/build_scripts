@@ -392,8 +392,19 @@ function prepare_images()
             mv ${rootfs%.ext4.gz}.img.gz $OUTPUT_DIR
         done
         ;;
-    "installsd")
-        # [To-Do]
+    "misc")
+        # Kernel, DTS, Modules for Debian
+        echo "[ADV] copying kernel image ..."
+        FILE_NAME="Image--4.4*.bin"
+        mv $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
+
+        echo "[ADV] copying DT image ..."
+        FILE_NAME="dt-Image--4.4*.img"
+        mv $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
+
+        echo "[ADV] copying kernel modules ..."
+        FILE_NAME="modules--4.4*.tgz"
+        mv $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
         ;;
     *)
         echo "[ADV] prepare_images: invalid parameter #1!"
@@ -423,8 +434,8 @@ function copy_image_to_storage()
         mv ${IMAGE_DIR}.csv $STORAGE_PATH
         mv -f ${IMAGE_DIR}.tgz $STORAGE_PATH
         ;;
-    "installsd")
-        mv -f ${INSTALL_DIR}.tgz $STORAGE_PATH
+    "misc")
+        mv -f ${MISC_DIR}.tgz $STORAGE_PATH
         ;;
     *)
         echo "[ADV] copy_image_to_storage: invalid parameter #1!"
@@ -492,10 +503,10 @@ else #"$PRODUCT" != "$VER_PREFIX"
     prepare_images normal $IMAGE_DIR
     copy_image_to_storage normal
 
-    echo "[ADV] generate installation image"
-    INSTALL_DIR="$OFFICIAL_VER"_sdcard_install_"$DATE"
-    prepare_images installsd $INSTALL_DIR
-    copy_image_to_storage installsd
+    echo "[ADV] package misc images"
+    MISC_DIR="$OFFICIAL_VER"_"$DATE"_misc
+    prepare_images misc $MISC_DIR
+    copy_image_to_storage misc
 
     save_temp_log
 fi

@@ -129,12 +129,12 @@ function prepare_images()
     FILE_NAME=${SDK_IMAGE_NAME}"-"${NEW_MACHINE}"-*.tar.xz"
 
     echo "[ADV] SDK images:$FILE_NAME"
-    echo "[ADV] creating ${IMAGE_DIR}_sdkimg.gz for all SDK images..."
+    echo "[ADV] creating ${IMAGE_DIR}_sdkimg.tgz for all SDK images..."
     
     mv $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
-    gzip -c9 $IMAGE_DIR/$FILE_NAME > ${IMAGE_DIR}_sdkimg.gz
+    tar czf ${IMAGE_DIR}_sdkimg.tgz $IMAGE_DIR
 
-    generate_md5 ${IMAGE_DIR}_sdkimg.gz
+    generate_md5 ${IMAGE_DIR}_sdkimg.tgz
     rm -rf $IMAGE_DIR/$FILE_NAME
 
     # U-Boot & SPL & MLO
@@ -168,8 +168,8 @@ function prepare_images()
 function copy_image_to_storage()
 {
     echo "[ADV] copy all images to $OUTPUT_DIR"
-    echo "[ADV] copy ${IMAGE_DIR}_sdkimg.tar.xz to $OUTPUT_DIR"
-    mv -f ${IMAGE_DIR}_sdkimg.tar.xz $OUTPUT_DIR
+    echo "[ADV] copy ${IMAGE_DIR}_sdkimg.tgz to $OUTPUT_DIR"
+    mv -f ${IMAGE_DIR}_sdkimg.tgz $OUTPUT_DIR
 
     echo "[ADV] copy ${IMAGE_DIR}_spl.tgz image to $OUTPUT_DIR"
     mv -f ${IMAGE_DIR}_spl.tgz $OUTPUT_DIR

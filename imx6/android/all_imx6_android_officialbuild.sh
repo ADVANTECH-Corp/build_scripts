@@ -2,6 +2,9 @@
 MACHINE_LIST=""
 
 # Check build machine name
+if [ $RSB_4410_A1 == true ]; then
+        MACHINE_LIST="$MACHINE_LIST rsb_4410_a1"
+fi
 if [ $RSB_4410_A2 == true ]; then
 	MACHINE_LIST="$MACHINE_LIST rsb_4410_a2"
 fi

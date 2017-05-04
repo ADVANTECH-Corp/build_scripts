@@ -49,6 +49,7 @@ echo "[ADV] ANDROID_PREBUILTS = $CURR_PATH/$ROOT_DIR/prebuilts"
 echo "[ADV] ANDROID_VENDOR = $CURR_PATH/$ROOT_DIR/vendor"
 #--------------------------------------------------
 echo "[ADV] ANDROID_BUILD_URL = ${ANDROID_BUILD_URL}"
+echo "[ADV] ANDROID_PATCH = $CURR_PATH/$ROOT_DIR/patches_android_6.0.1"
 
 
 
@@ -426,6 +427,7 @@ function copy_image_to_storage()
     check_tag_and_checkout $ANDROID_FRAMEWORKS_PATH
     check_tag_and_checkout $ANDROID_PREBUILTS
 	check_tag_and_checkout $ANDROID_VENDOR
+    check_tag_and_checkout $ANDROID_PATCH
     # Check tag exist or not, and replace bbappend file SRCREV
 	#check_tag_and_replace $UBOOT_URL $UBOOT_PATH $UBOOT_BRANCH
 	#check_tag_and_replace $KERNEL_URL $KERNEL_PATH $KERNEL_BRANCH
@@ -447,7 +449,7 @@ function copy_image_to_storage()
 	auto_add_tag $CURR_PATH/$ROOT_DIR/frameworks
 	auto_add_tag $CURR_PATH/$ROOT_DIR/prebuilts
 	auto_add_tag $CURR_PATH/$ROOT_DIR/vendor
-
+	auto_add_tag $CURR_PATH/$ROOT_DIR/patches_android_6.0.1
 # ------------REMOVE FOR TEST   ------------- #
     # Create manifests xml and commit
 	echo "[ADV] create_xml_and_commit"

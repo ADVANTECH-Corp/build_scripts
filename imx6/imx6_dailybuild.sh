@@ -117,6 +117,11 @@ function build_yocto_images()
         building qtwebkit-examples cleansstate
     fi
 
+    if [ "$DEPLOY_IMAGE_NAME" == "core-image-full-cmdline" ]; then
+        echo "[ADV] build_OTA_image: build recovery image first!"
+	building initramfs-debug-image
+    fi
+
     # Build full image
     building $DEPLOY_IMAGE_NAME
 }
@@ -142,13 +147,15 @@ function prepare_images()
     rm $IMAGE_DIR/$FILE_NAME
 
     # Eng image
-    FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${NEW_MACHINE}"*.rootfs.eng.sdcard"
-    mv $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
+    if [ "$DEPLOY_IMAGE_NAME" == "fsl-image-qt5" ]; then
+	    FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${NEW_MACHINE}"*.rootfs.eng.sdcard"
+	    mv $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
 
-    echo "[ADV] creating ${IMAGE_DIR}_eng.img.gz ..."
-    gzip -c9 $IMAGE_DIR/$FILE_NAME > ${IMAGE_DIR}_eng.img.gz
-    generate_md5 ${IMAGE_DIR}_eng.img.gz
-    rm $IMAGE_DIR/$FILE_NAME
+	    echo "[ADV] creating ${IMAGE_DIR}_eng.img.gz ..."
+	    gzip -c9 $IMAGE_DIR/$FILE_NAME > ${IMAGE_DIR}_eng.img.gz
+	    generate_md5 ${IMAGE_DIR}_eng.img.gz
+	    rm $IMAGE_DIR/$FILE_NAME
+    fi
 
     # U-Boot & SPL
     echo "[ADV] creating ${IMAGE_DIR}.tgz for u-boot & SPL images ..."
@@ -157,6 +164,15 @@ function prepare_images()
     tar czf ${IMAGE_DIR}_spl.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}_spl.tgz
 
+    # OTA package
+    if [ "$DEPLOY_IMAGE_NAME" == "core-image-full-cmdline" ]; then
+	    echo "[ADV] creating ${IMAGE_DIR}_kernel.zip for OTA package ..."
+	    ./ota-package.sh -k $DEPLOY_IMAGE_PATH/zImage -d $DEPLOY_IMAGE_PATH/zImage-imx*.dtb -o update_${IMAGE_DIR}_kernel.zip 
+	    echo "[ADV] creating ${IMAGE_DIR}_rootfs.zip for OTA package ..."
+	    ./ota-package.sh -r $DEPLOY_IMAGE_PATH/$DEPLOY_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_rootfs.zip 
+	    echo "[ADV] creating ${IMAGE_DIR}_kernel_rootfs.zip for OTA package ..."
+	    ./ota-package.sh -k $DEPLOY_IMAGE_PATH/zImage -d $DEPLOY_IMAGE_PATH/zImage-imx*.dtb -r $DEPLOY_IMAGE_PATH/$DEPLOY_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_kernel_rootfs.zip 
+    fi
     rm -rf $IMAGE_DIR
 }
 
@@ -167,7 +183,7 @@ function copy_image_to_storage()
     mv -f ${IMAGE_DIR}.img.gz $OUTPUT_DIR
     mv -f ${IMAGE_DIR}_eng.img.gz $OUTPUT_DIR
     mv -f ${IMAGE_DIR}_spl.tgz $OUTPUT_DIR
-
+    mv -f update*.zip $OUTPUT_DIR
     mv -f *.md5 $OUTPUT_DIR
 }
 

@@ -166,12 +166,17 @@ function prepare_images()
 
     # OTA package
     if [ "$DEPLOY_IMAGE_NAME" == "core-image-full-cmdline" ]; then
+	    cp ota-package.sh $DEPLOY_IMAGE_PATH
+            cd $DEPLOY_IMAGE_PATH
+	    cp zImage-imx*.dtb `ls zImage-imx*.dtb | cut -d '-' -f 2-` 
 	    echo "[ADV] creating ${IMAGE_DIR}_kernel.zip for OTA package ..."
-	    ./ota-package.sh -k $DEPLOY_IMAGE_PATH/zImage -d $DEPLOY_IMAGE_PATH/zImage-imx*.dtb -o update_${IMAGE_DIR}_kernel.zip 
+	    ./ota-package.sh -k zImage -d imx*.dtb -o update_${IMAGE_DIR}_kernel.zip 
 	    echo "[ADV] creating ${IMAGE_DIR}_rootfs.zip for OTA package ..."
-	    ./ota-package.sh -r $DEPLOY_IMAGE_PATH/$DEPLOY_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_rootfs.zip 
+	    ./ota-package.sh -r $DEPLOY_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_rootfs.zip 
 	    echo "[ADV] creating ${IMAGE_DIR}_kernel_rootfs.zip for OTA package ..."
-	    ./ota-package.sh -k $DEPLOY_IMAGE_PATH/zImage -d $DEPLOY_IMAGE_PATH/zImage-imx*.dtb -r $DEPLOY_IMAGE_PATH/$DEPLOY_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_kernel_rootfs.zip 
+	    ./ota-package.sh -k zImage -d imx*.dtb -r $DEPLOY_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_kernel_rootfs.zip
+	    mv update*.zip $CURR_PATH 
+	    cd $CURR_PATH
     fi
     rm -rf $IMAGE_DIR
 }

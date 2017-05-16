@@ -8,6 +8,7 @@ echo "[ADV] BSP_URL = ${BSP_URL}"
 echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
 echo "[ADV] BUILDALL_DIR = ${BUILDALL_DIR}"
 echo "[ADV] DEPLOY_IMAGE_NAME = ${DEPLOY_IMAGE_NAME}"
+echo "[ADV] OTA_IMAGE_NAME = ${OTA_IMAGE_NAME}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] MACHINE_LIST = ${MACHINE_LIST}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
@@ -117,13 +118,15 @@ function build_yocto_images()
         building qtwebkit-examples cleansstate
     fi
 
-    if [ "$DEPLOY_IMAGE_NAME" == "core-image-full-cmdline" ]; then
-        echo "[ADV] build_OTA_image: build recovery image first!"
-	building initramfs-debug-image
-    fi
-
     # Build full image
     building $DEPLOY_IMAGE_NAME
+
+    echo "[ADV] build_OTA_image: build recovery image first!"
+    building initramfs-debug-image
+	
+    # Build OTA image
+    echo "[ADV] build_OTA_image!"
+    building $OTA_IMAGE_NAME
 }
 
 function prepare_images()
@@ -147,15 +150,13 @@ function prepare_images()
     rm $IMAGE_DIR/$FILE_NAME
 
     # Eng image
-    if [ "$DEPLOY_IMAGE_NAME" == "fsl-image-qt5" ]; then
-	    FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${NEW_MACHINE}"*.rootfs.eng.sdcard"
-	    mv $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
+    FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${NEW_MACHINE}"*.rootfs.eng.sdcard"
+    mv $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
 
-	    echo "[ADV] creating ${IMAGE_DIR}_eng.img.gz ..."
-	    gzip -c9 $IMAGE_DIR/$FILE_NAME > ${IMAGE_DIR}_eng.img.gz
-	    generate_md5 ${IMAGE_DIR}_eng.img.gz
-	    rm $IMAGE_DIR/$FILE_NAME
-    fi
+    echo "[ADV] creating ${IMAGE_DIR}_eng.img.gz ..."
+    gzip -c9 $IMAGE_DIR/$FILE_NAME > ${IMAGE_DIR}_eng.img.gz
+    generate_md5 ${IMAGE_DIR}_eng.img.gz
+    rm $IMAGE_DIR/$FILE_NAME
 
     # U-Boot & SPL
     echo "[ADV] creating ${IMAGE_DIR}.tgz for u-boot & SPL images ..."
@@ -164,20 +165,28 @@ function prepare_images()
     tar czf ${IMAGE_DIR}_spl.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}_spl.tgz
 
+    # OTA image
+    FILE_NAME=${OTA_IMAGE_NAME}"-"${NEW_MACHINE}"*.rootfs.sdcard"
+    mv $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
+
+    echo "[ADV] creating ${IMAGE_DIR}_ota.img.gz ..."
+    gzip -c9 $IMAGE_DIR/$FILE_NAME > ${IMAGE_DIR}_ota.img.gz
+    generate_md5 ${IMAGE_DIR}_ota.img.gz
+    rm $IMAGE_DIR/$FILE_NAME
+
     # OTA package
-    if [ "$DEPLOY_IMAGE_NAME" == "core-image-full-cmdline" ]; then
-	    cp ota-package.sh $DEPLOY_IMAGE_PATH
-            cd $DEPLOY_IMAGE_PATH
-	    cp zImage-imx*.dtb `ls zImage-imx*.dtb | cut -d '-' -f 2-` 
-	    echo "[ADV] creating ${IMAGE_DIR}_kernel.zip for OTA package ..."
-	    ./ota-package.sh -k zImage -d imx*.dtb -o update_${IMAGE_DIR}_kernel.zip 
-	    echo "[ADV] creating ${IMAGE_DIR}_rootfs.zip for OTA package ..."
-	    ./ota-package.sh -r $DEPLOY_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_rootfs.zip 
-	    echo "[ADV] creating ${IMAGE_DIR}_kernel_rootfs.zip for OTA package ..."
-	    ./ota-package.sh -k zImage -d imx*.dtb -r $DEPLOY_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_kernel_rootfs.zip
-	    mv update*.zip $CURR_PATH 
-	    cd $CURR_PATH
-    fi
+    cp ota-package.sh $DEPLOY_IMAGE_PATH
+    cd $DEPLOY_IMAGE_PATH
+    cp zImage-imx*.dtb `ls zImage-imx*.dtb | cut -d '-' -f 2-` 
+    echo "[ADV] creating ${IMAGE_DIR}_kernel.zip for OTA package ..."
+    ./ota-package.sh -k zImage -d imx*.dtb -o update_${IMAGE_DIR}_kernel.zip 
+    echo "[ADV] creating ${IMAGE_DIR}_rootfs.zip for OTA package ..."
+    ./ota-package.sh -r $DEPLOY_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_rootfs.zip 
+    echo "[ADV] creating ${IMAGE_DIR}_kernel_rootfs.zip for OTA package ..."
+    ./ota-package.sh -k zImage -d imx*.dtb -r $DEPLOY_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_kernel_rootfs.zip
+    mv update*.zip $CURR_PATH 
+    cd $CURR_PATH
+    
     rm -rf $IMAGE_DIR
 }
 

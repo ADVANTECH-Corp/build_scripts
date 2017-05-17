@@ -197,6 +197,7 @@ function copy_image_to_storage()
     mv -f ${IMAGE_DIR}.img.gz $OUTPUT_DIR
     mv -f ${IMAGE_DIR}_eng.img.gz $OUTPUT_DIR
     mv -f ${IMAGE_DIR}_spl.tgz $OUTPUT_DIR
+    mv -f ${IMAGE_DIR}_ota.img.gz $OUTPUT_DIR
     mv -f update*.zip $OUTPUT_DIR
     mv -f *.md5 $OUTPUT_DIR
 }

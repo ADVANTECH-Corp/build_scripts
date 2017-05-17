@@ -16,6 +16,7 @@ echo "[ADV] BSP_URL = ${BSP_URL}"
 echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
 echo "[ADV] BSP_XML = ${BSP_XML}"
 echo "[ADV] DEPLOY_IMAGE_NAME = ${DEPLOY_IMAGE_NAME}"
+echo "[ADV] OTA_IMAGE_NAME = ${OTA_IMAGE_NAME}"
 echo "[ADV] BACKEND_TYPE = ${BACKEND_TYPE}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
@@ -420,8 +421,16 @@ function build_yocto_images()
                 building qtwebkit-examples cleansstate
         fi
 
-        # Build full image
+	echo "[ADV] build recovery image first!"
+	building initramfs-debug-image
+        
+	# Build full image
         building $DEPLOY_IMAGE_NAME
+
+	# Build OTA image
+	echo "[ADV] build_OTA_image!"
+	building $OTA_IMAGE_NAME
+
 }
 function rebuild_u-boot()
 {
@@ -507,6 +516,11 @@ EOF
 			generate_mksd_linux
 			sudo rm $ORIGINAL_FILE_NAME
 			;;
+		"ota")
+			sudo cp -a $ORIGINAL_FILE_NAME $MOUNT_POINT/image/$FILE_NAME
+			generate_mksd_linux
+			sudo rm $ORIGINAL_FILE_NAME
+			;;
 		"eng")
 			sudo cp $DEPLOY_IMAGE_PATH/SPL-${KERNEL_CPU_TYPE}${PRODUCT}-${MEMORY} $MOUNT_POINT/image/SPL
 			generate_mkspi_advboot
@@ -547,6 +561,16 @@ function prepare_images()
                                 insert_image_file "normal" $OUTPUT_DIR $FILE_NAME
                         fi
                         ;;
+		"ota")
+                        FILE_NAME=${OTA_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
+                        cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
+                        if [ -e $OUTPUT_DIR/$FILE_NAME ]; then
+                                FILE_NAME=`ls $OUTPUT_DIR | grep rootfs.sdcard`
+
+                                # Insert mksd-linux.sh for both normal
+                                insert_image_file "ota" $OUTPUT_DIR $FILE_NAME
+                        fi
+                        ;;
                 "eng")
                         FILE_NAME=`readlink $DEPLOY_IMAGE_PATH/"${DEPLOY_IMAGE_NAME}-${KERNEL_CPU_TYPE}${PRODUCT}.sdcard" | cut -d '.' -f 1`".rootfs.eng.sdcard"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
@@ -585,6 +609,20 @@ function prepare_images()
         rm -rf $OUTPUT_DIR
 }
 
+function generate_OTA_update_package()
+{
+	cp ota-package.sh $DEPLOY_IMAGE_PATH
+	cd $DEPLOY_IMAGE_PATH
+	cp zImage-${KERNEL_CPU_TYPE}*.dtb `ls zImage-${KERNEL_CPU_TYPE}*.dtb | cut -d '-' -f 2-`	
+	echo "[ADV] creating ${IMAGE_DIR}_kernel.zip for OTA package ..."
+	./ota-package.sh -k zImage -d ${KERNEL_CPU_TYPE}*.dtb -o update_${IMAGE_DIR}_kernel.zip
+	echo "[ADV] creating ${IMAGE_DIR}_rootfs.zip for OTA package ..."
+	./ota-package.sh -r $DEPLOY_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_rootfs.zip
+	echo "[ADV] creating ${IMAGE_DIR}_kernel_rootfs.zip for OTA package ..."
+	./ota-package.sh -k zImage -d ${KERNEL_CPU_TYPE}*.dtb -r $DEPLOY_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_kernel_rootfs.zip
+	cd $CURR_PATH	
+}
+
 function copy_image_to_storage()
 {
 	echo "[ADV] copy $1 images to $STORAGE_PATH"
@@ -601,6 +639,12 @@ function copy_image_to_storage()
 			generate_csv $IMAGE_DIR.img.gz
 			mv ${IMAGE_DIR}.img.csv $STORAGE_PATH
 			mv -f $IMAGE_DIR.img.gz $STORAGE_PATH
+		;;
+		"ota")
+			generate_csv $OTA_IMAGE_DIR.img.gz
+			mv ${OTA_IMAGE_DIR}.img.csv $STORAGE_PATH
+			mv -f $OTA_IMAGE_DIR.img.gz $STORAGE_PATH
+			mv -f update*.zip $STORAGE_PATH
 		;;
 		"mfgtools")
 			mv -f $MFG_IMAGE_DIR.tgz $STORAGE_PATH
@@ -704,6 +748,9 @@ else #"$PRODUCT" != "$VER_PREFIX"
         prepare_images normal $IMAGE_DIR
         copy_image_to_storage normal
 
+	OTA_IMAGE_DIR="$IMAGE_DIR"_ota
+	prepare_images ota $OTA_IMAGE_DIR
+	copy_image_to_storage ota
 
         while [ "$MEMORY" != "$PRE_MEMORY" ]
         do

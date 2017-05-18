@@ -118,13 +118,12 @@ function build_yocto_images()
         building qtwebkit-examples cleansstate
     fi
 
-    # Build full image
-    building $DEPLOY_IMAGE_NAME
-
-    echo "[ADV] build_OTA_image: build recovery image first!"
+    echo "[ADV] build recovery image first!"
     building initramfs-debug-image
+    
+    echo "[ADV] Build full image!"
+    building $DEPLOY_IMAGE_NAME
 	
-    # Build OTA image
     echo "[ADV] build_OTA_image!"
     building $OTA_IMAGE_NAME
 }

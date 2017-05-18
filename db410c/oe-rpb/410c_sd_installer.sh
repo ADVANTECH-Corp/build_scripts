@@ -63,16 +63,19 @@ EOF
     tar zxf ${OS_FILE_NAME}.tgz
     rm ${OS_FILE_NAME}.tgz
 
-    if [ ${TARGET_OS} == "Yocto" ]; then
+    case ${TARGET_OS} in
+    "Yocto")
         cp ${OS_FILE_NAME}/boot-Image*.img os/${TARGET_OS}/boot.img
         cp ${OS_FILE_NAME}/*rootfs.img.gz os/${TARGET_OS}/rootfs.img.gz
         gunzip os/${TARGET_OS}/rootfs.img.gz
-
-    elif [ ${TARGET_OS} == "Debian" ]; then
+        ;;
+    "Debian")
         # To-Do
-    elif [ ${TARGET_OS} == "Android" ]; then
+        ;;
+    "Android")
         # To-Do
-    fi
+        ;;
+    esac
 # ------
 
     cat << EOF >> os/${TARGET_OS}/os.json

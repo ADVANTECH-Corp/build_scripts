@@ -378,6 +378,9 @@ function build_yocto_sdk()
 {
         set_environment sdk
 
+	echo "[ADV] Build recovery image!"
+	building initramfs-debug-image
+
         # Build imx6qrsb4410a1 full image first
         building $DEPLOY_IMAGE_NAME
 
@@ -421,7 +424,7 @@ function build_yocto_images()
                 building qtwebkit-examples cleansstate
         fi
 
-	echo "[ADV] build recovery image first!"
+	echo "[ADV] Build recovery image!"
 	building initramfs-debug-image
         
 	# Build full image
@@ -549,7 +552,7 @@ function prepare_images()
 
         case $IMAGE_TYPE in
                 "sdk")
-        cp $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/sdk/* $OUTPUT_DIR
+			cp $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/sdk/* $OUTPUT_DIR
                         ;;
                 "normal")
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"

@@ -461,6 +461,8 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 
     # BSP source code
     echo "[ADV] tar $ROOT_DIR.tgz file"
+    rm $ROOT_DIR/setup-environment
+    cp $ROOT_DIR/.repo/manifests/setup-environment-internal $ROOT_DIR/setup-environment
     tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
     generate_md5 $ROOT_DIR.tgz
 

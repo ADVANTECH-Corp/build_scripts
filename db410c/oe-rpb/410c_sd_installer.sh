@@ -91,7 +91,7 @@ EOF
     cp mksdcard flash os/
 
     if [ ${TARGET_OS} == "Android" ]; then
-        # To-Do
+        //To-Do
     else
         cp dragonboard410c/linux/partitions.txt os/${TARGET_OS}
         unzip -d os/${TARGET_OS} advantech_bootloader_emmc_linux-${BL_BUILD_NUMBER}.zip

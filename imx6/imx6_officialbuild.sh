@@ -469,7 +469,8 @@ function insert_image_file()
 	FILE_NAME=$3
 	DO_RESIZE="no"
 
-	if [ "$IMAGE_TYPE" == "normal" ]; then
+	echo "[ADV] insert file to $IMAGE_TYPE image"
+	if [ "$IMAGE_TYPE" == "normal" || "$IMAGE_TYPE" == "ota" ]; then
 		DO_RESIZE="yes"
 	fi
 
@@ -542,6 +543,7 @@ function prepare_images()
 
         IMAGE_TYPE=$1
         OUTPUT_DIR=$2
+	echo "[ADV] prepare $IMAGE_TYPE image"
         if [ "$OUTPUT_DIR" == "" ]; then
                 echo "[ADV] prepare_images: invalid parameter #2!"
                 exit 1;
@@ -549,7 +551,7 @@ function prepare_images()
                 echo "[ADV] mkdir $OUTPUT_DIR"
                 mkdir $OUTPUT_DIR
         fi
-
+	
         case $IMAGE_TYPE in
                 "sdk")
 			cp $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/sdk/* $OUTPUT_DIR
@@ -573,6 +575,7 @@ function prepare_images()
                                 # Insert mksd-linux.sh for both normal
                                 insert_image_file "ota" $OUTPUT_DIR $FILE_NAME
                         fi
+			generate_OTA_update_package
                         ;;
                 "eng")
                         FILE_NAME=`readlink $DEPLOY_IMAGE_PATH/"${DEPLOY_IMAGE_NAME}-${KERNEL_CPU_TYPE}${PRODUCT}.sdcard" | cut -d '.' -f 1`".rootfs.eng.sdcard"
@@ -614,6 +617,7 @@ function prepare_images()
 
 function generate_OTA_update_package()
 {
+	echo "[ADV] generate OTA update package"
 	cp ota-package.sh $DEPLOY_IMAGE_PATH
 	cd $DEPLOY_IMAGE_PATH
 	cp zImage-${KERNEL_CPU_TYPE}*.dtb `ls zImage-${KERNEL_CPU_TYPE}*.dtb | cut -d '-' -f 2-`	
@@ -754,6 +758,7 @@ else #"$PRODUCT" != "$VER_PREFIX"
         prepare_images normal $IMAGE_DIR
         copy_image_to_storage normal
 
+        echo "[ADV] generate ota image"
 	OTA_IMAGE_DIR="$IMAGE_DIR"_ota
 	prepare_images ota $OTA_IMAGE_DIR
 	copy_image_to_storage ota

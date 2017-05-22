@@ -8,6 +8,9 @@ echo "[ADV] BL_BUILD_NUMBER = ${BL_BUILD_NUMBER}"
 echo "[ADV] INSTALLER_LINARO_RELEASE = ${INSTALLER_LINARO_RELEASE}"
 echo "[ADV] INSTALLER_BUILD_VERSION = ${INSTALLER_BUILD_VERSION}"
 echo "[ADV] TARGET_OS = ${TARGET_OS}"
+echo "[ADV] STORED = ${STORED}"
+CURR_PATH="$PWD"
+STORAGE_PATH="$CURR_PATH/$STORED"
 
 # === 1. Put the installer images into out/ folder. =================================================
 function get_installer_images()
@@ -124,7 +127,7 @@ function make_os_img()
 
     # create archive for publishing
     tar czf ${RELEASE_VERSION}_sd_install.tgz ${RELEASE_VERSION}_sd_install.img
-    mv ${RELEASE_VERSION}_sd_install.tgz ../
+    mv ${RELEASE_VERSION}_sd_install.tgz $STORAGE_PATH
 }
 
 # === [Main] List Official Build Version ============================================================

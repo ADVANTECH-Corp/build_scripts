@@ -470,7 +470,7 @@ function insert_image_file()
 	DO_RESIZE="no"
 
 	echo "[ADV] insert file to $IMAGE_TYPE image"
-	if [ "$IMAGE_TYPE" == "normal" || "$IMAGE_TYPE" == "ota" ]; then
+	if [ "$IMAGE_TYPE" == "normal" ] || [ "$IMAGE_TYPE" == "ota" ]; then
 		DO_RESIZE="yes"
 	fi
 
@@ -560,7 +560,7 @@ function prepare_images()
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
                         if [ -e $OUTPUT_DIR/$FILE_NAME ]; then
-                                FILE_NAME=`ls $OUTPUT_DIR | grep rootfs.sdcard`
+                                FILE_NAME=`ls $OUTPUT_DIR | grep rootfs.sdcard | grep $DEPLOY_IMAGE_NAME`
 
                                 # Insert mksd-linux.sh for both normal
                                 insert_image_file "normal" $OUTPUT_DIR $FILE_NAME
@@ -570,7 +570,7 @@ function prepare_images()
                         FILE_NAME=${OTA_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
                         if [ -e $OUTPUT_DIR/$FILE_NAME ]; then
-                                FILE_NAME=`ls $OUTPUT_DIR | grep rootfs.sdcard`
+                                FILE_NAME=`ls $OUTPUT_DIR | grep rootfs.sdcard | grep $OTA_IMAGE_NAME`
 
                                 # Insert mksd-linux.sh for both normal
                                 insert_image_file "ota" $OUTPUT_DIR $FILE_NAME
@@ -624,9 +624,10 @@ function generate_OTA_update_package()
 	echo "[ADV] creating ${IMAGE_DIR}_kernel.zip for OTA package ..."
 	./ota-package.sh -k zImage -d ${KERNEL_CPU_TYPE}*.dtb -o update_${IMAGE_DIR}_kernel.zip
 	echo "[ADV] creating ${IMAGE_DIR}_rootfs.zip for OTA package ..."
-	./ota-package.sh -r $DEPLOY_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_rootfs.zip
+	./ota-package.sh -r $DEPLOY_IMAGE_NAME-${KERNEL_CPU_TYPE}${PRODUCT}.ext4 -o update_${IMAGE_DIR}_rootfs.zip
 	echo "[ADV] creating ${IMAGE_DIR}_kernel_rootfs.zip for OTA package ..."
-	./ota-package.sh -k zImage -d ${KERNEL_CPU_TYPE}*.dtb -r $DEPLOY_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_kernel_rootfs.zip
+	./ota-package.sh -k zImage -d ${KERNEL_CPU_TYPE}*.dtb -r $DEPLOY_IMAGE_NAME-${KERNEL_CPU_TYPE}${PRODUCT}.ext4 -o update_${IMAGE_DIR}_kernel_rootfs.zip
+	mv update*.zip $CURR_PATH
 	cd $CURR_PATH	
 }
 

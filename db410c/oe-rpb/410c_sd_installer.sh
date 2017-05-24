@@ -126,8 +126,8 @@ function make_os_img()
     sudo ./mksdcard -p dragonboard410c/linux/installer.txt -s $size_img -i out -o ${RELEASE_VERSION}_sd_install.img
 
     # create archive for publishing
-    tar czf ${RELEASE_VERSION}_sd_install.tgz ${RELEASE_VERSION}_sd_install.img
-    mv ${RELEASE_VERSION}_sd_install.tgz $STORAGE_PATH
+    gzip -c9 ${RELEASE_VERSION}_sd_install.img > ${RELEASE_VERSION}_sd_install.img.gz
+    mv ${RELEASE_VERSION}_sd_install.img.gz $STORAGE_PATH
 }
 
 # === [Main] List Official Build Version ============================================================

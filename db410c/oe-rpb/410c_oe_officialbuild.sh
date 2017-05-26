@@ -378,32 +378,32 @@ function prepare_images()
     "normal")
         # Boot image
         echo "[ADV] copying boot image ..."
-        FILE_NAME="boot-Image--4.4*.img"
+        FILE_NAME=$(readlink $DEPLOY_IMAGE_PATH/boot-${NEW_MACHINE}.img)
         mv $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
 
         # Rootfs
         echo "[ADV] sparse rootfs image ..."
-        for rootfs in ${DEPLOY_IMAGE_PATH}/*.rootfs.ext4.gz; do
-            gunzip -k ${rootfs}
-            sudo ext2simg -v ${rootfs%.gz} ${rootfs%.ext4.gz}.img
-            rm -f ${rootfs%.gz}
-            gzip -9 ${rootfs%.ext4.gz}.img
+        FILE_NAME=$(readlink $DEPLOY_IMAGE_PATH/${DEPLOY_IMAGE_NAME}-${NEW_MACHINE}.ext4.gz)
+        rootfs="$DEPLOY_IMAGE_PATH/$FILE_NAME"
+        gunzip -k ${rootfs}
+        sudo ext2simg -v ${rootfs%.gz} ${rootfs%.ext4.gz}.img
+        rm -f ${rootfs%.gz}
+        gzip -9 ${rootfs%.ext4.gz}.img
 
-            mv ${rootfs%.ext4.gz}.img.gz $OUTPUT_DIR
-        done
+        mv ${rootfs%.ext4.gz}.img.gz $OUTPUT_DIR
         ;;
     "misc")
         # Kernel, DTS, Modules for Debian
         echo "[ADV] copying kernel image ..."
-        FILE_NAME="Image--4.4*.bin"
+        FILE_NAME=$(readlink $DEPLOY_IMAGE_PATH/Image-${NEW_MACHINE}.bin)
         mv $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
 
         echo "[ADV] copying DT image ..."
-        FILE_NAME="dt-Image--4.4*.img"
+        FILE_NAME=$(readlink $DEPLOY_IMAGE_PATH/dt*-${NEW_MACHINE}.img)
         mv $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
 
         echo "[ADV] copying kernel modules ..."
-        FILE_NAME="modules--4.4*.tgz"
+        FILE_NAME=$(readlink $DEPLOY_IMAGE_PATH/modules-${NEW_MACHINE}.tgz)
         mv $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
         ;;
     *)

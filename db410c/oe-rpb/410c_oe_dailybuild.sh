@@ -183,19 +183,19 @@ function prepare_images()
 
     # Boot image
     echo "[ADV] copying boot image ..."
-    FILE_NAME="boot-Image--4.4*.img"
+    FILE_NAME=$(readlink $DEPLOY_IMAGE_PATH/boot-${NEW_MACHINE}.img)
     mv $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
 
     # Rootfs
     echo "[ADV] sparse rootfs image ..."
-    for rootfs in ${DEPLOY_IMAGE_PATH}/*.rootfs.ext4.gz; do
-        gunzip -k ${rootfs}
-        sudo ext2simg -v ${rootfs%.gz} ${rootfs%.ext4.gz}.img
-        rm -f ${rootfs%.gz}
-        gzip -9 ${rootfs%.ext4.gz}.img
+    FILE_NAME=$(readlink $DEPLOY_IMAGE_PATH/${DEPLOY_IMAGE_NAME}-${NEW_MACHINE}.ext4.gz)
+    rootfs="$DEPLOY_IMAGE_PATH/$FILE_NAME"
+    gunzip -k ${rootfs}
+    sudo ext2simg -v ${rootfs%.gz} ${rootfs%.ext4.gz}.img
+    rm -f ${rootfs%.gz}
+    gzip -9 ${rootfs%.ext4.gz}.img
 
-        mv ${rootfs%.ext4.gz}.img.gz $IMAGE_DIR
-    done
+    mv ${rootfs%.ext4.gz}.img.gz $IMAGE_DIR
 
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR

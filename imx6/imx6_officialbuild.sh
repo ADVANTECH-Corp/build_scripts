@@ -623,9 +623,9 @@ function generate_OTA_update_package()
 	echo "[ADV] creating ${IMAGE_DIR}_kernel.zip for OTA package ..."
 	./ota-package.sh -k zImage -d ${KERNEL_CPU_TYPE}*.dtb -o update_${IMAGE_DIR}_kernel.zip
 	echo "[ADV] creating ${IMAGE_DIR}_rootfs.zip for OTA package ..."
-	./ota-package.sh -r $DEPLOY_IMAGE_NAME-${KERNEL_CPU_TYPE}${PRODUCT}.ext4 -o update_${IMAGE_DIR}_rootfs.zip
+	./ota-package.sh -r $OTA_IMAGE_NAME-${KERNEL_CPU_TYPE}${PRODUCT}.ext4 -o update_${IMAGE_DIR}_rootfs.zip
 	echo "[ADV] creating ${IMAGE_DIR}_kernel_rootfs.zip for OTA package ..."
-	./ota-package.sh -k zImage -d ${KERNEL_CPU_TYPE}*.dtb -r $DEPLOY_IMAGE_NAME-${KERNEL_CPU_TYPE}${PRODUCT}.ext4 -o update_${IMAGE_DIR}_kernel_rootfs.zip
+	./ota-package.sh -k zImage -d ${KERNEL_CPU_TYPE}*.dtb -r $OTA_IMAGE_NAME-${KERNEL_CPU_TYPE}${PRODUCT}.ext4 -o update_${IMAGE_DIR}_kernel_rootfs.zip
 	mv update*.zip $CURR_PATH
 	cd $CURR_PATH	
 }

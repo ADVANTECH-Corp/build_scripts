@@ -493,7 +493,7 @@ function insert_image_file()
 		echo "[ADV] resize $FILE_NAME"
 		sudo dd if=$ORIGINAL_FILE_NAME of=$LOOP_DEV
 		sudo sync
-		rootfs_start=`sudo fdisk -u -l ${LOOP_DEV} | grep ${LOOP_DEV}p2 | awk '{print $2}'
+		rootfs_start=`sudo fdisk -u -l ${LOOP_DEV} | grep ${LOOP_DEV}p2 | awk '{print $2}'`
 sudo fdisk -u $LOOP_DEV << EOF &>/dev/null
 d
 2

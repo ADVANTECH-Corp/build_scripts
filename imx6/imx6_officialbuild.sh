@@ -34,6 +34,8 @@ echo "[ADV] KERNEL_PATH = ${KERNEL_PATH}"
 echo "[ADV] MFGTOOLS_URL = $MFGTOOLS_URL"
 echo "[ADV] MFGTOOLS_BRANCH = $MFGTOOLS_BRANCH"
 
+SDCARD_SIZE=6200
+
 VER_TAG="${VER_PREFIX}LB"$(echo $RELEASE_VERSION | sed 's/[.]//')
 
 CURR_PATH="$PWD"
@@ -483,7 +485,7 @@ function insert_image_file()
 	if [ "$DO_RESIZE" == "yes" ]; then
 		ORIGINAL_FILE_NAME="$FILE_NAME".original
 		mv $FILE_NAME $ORIGINAL_FILE_NAME
-		dd if=/dev/zero of=$FILE_NAME bs=1M count=4200
+		dd if=/dev/zero of=$FILE_NAME bs=1M count=$SDCARD_SIZE
 	fi
 
 	# Set up loop device

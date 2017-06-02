@@ -16,4 +16,4 @@ fi
 #fi
 
 export MACHINE_LIST
-./imx6_android_N7_ailybuild.sh
+./imx6_android_N7_dailybuild.sh

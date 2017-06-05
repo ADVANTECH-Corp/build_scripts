@@ -3,28 +3,25 @@
 echo "[ADV] FTP_DIR = ${FTP_DIR}"
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] VERSION = ${VERSION}"
-echo "[ADV] BL_LINARO_RELEASE = ${BL_LINARO_RELEASE}"
-echo "[ADV] BL_BUILD_NUMBER = ${BL_BUILD_NUMBER}"
-echo "[ADV] INSTALLER_LINARO_RELEASE = ${INSTALLER_LINARO_RELEASE}"
-echo "[ADV] INSTALLER_BUILD_VERSION = ${INSTALLER_BUILD_VERSION}"
+echo "[ADV] DEBIAN_LINARO_RELEASE = ${DEBIAN_LINARO_RELEASE}"
+echo "[ADV] DEBIAN_BUILD_VERSION = ${DEBIAN_BUILD_VERSION}"
 echo "[ADV] KERNEL_VERSION = ${KERNEL_VERSION}"
-echo "[ADV] TARGET_OS = ${TARGET_OS}"
 echo "[ADV] STORED = ${STORED}"
 CURR_PATH="$PWD"
 STORAGE_PATH="$CURR_PATH/$STORED"
 RAMDISK_IMAGE="initrd.img-${KERNEL_VERSION}-linaro-lt-qcom"
-BOOT_IMAGE="boot-linaro-stretch-qcom-snapdragon-arm64-${INSTALLER_BUILD_VERSION}"
-DEBIAN_ROOTFS="linaro-stretch-alip-qcom-snapdragon-arm64-${INSTALLER_BUILD_VERSION}"
+BOOT_IMAGE="boot-linaro-stretch-qcom-snapdragon-arm64-${DEBIAN_BUILD_VERSION}"
+DEBIAN_ROOTFS="linaro-stretch-alip-qcom-snapdragon-arm64-${DEBIAN_BUILD_VERSION}"
 
 # === 1. Put the debian images into out/ folder. =================================================
 function get_debian_images()
 {
     # Get Debian ramdisk image
 	wget --progress=dot -e dotbytes=2M -P ./out/ \
-		 https://builds.96boards.org/releases/dragonboard410c/linaro/debian/${INSTALLER_LINARO_RELEASE}/${RAMDISK_IMAGE}
+		 https://builds.96boards.org/releases/dragonboard410c/linaro/debian/${DEBIAN_LINARO_RELEASE}/${RAMDISK_IMAGE}
 	# Get Debian rootfs image
 	wget --progress=dot -e dotbytes=2M -P ./out/ \
-		 https://builds.96boards.org/releases/dragonboard410c/linaro/debian/${INSTALLER_LINARO_RELEASE}/${DEBIAN_ROOTFS}.img.gz
+		 https://builds.96boards.org/releases/dragonboard410c/linaro/debian/${DEBIAN_LINARO_RELEASE}/${DEBIAN_ROOTFS}.img.gz
 
     gunzip out/${DEBIAN_ROOTFS}.img.gz
 }
@@ -126,11 +123,8 @@ NUM1=`expr $VERSION : 'V\([0-9]*\)'`
 NUM2=`expr $VERSION : '.*[.]\([0-9]*\)'`
 VERSION_NUM=$NUM1$NUM2
 
-if [ $TARGET_OS == "Yocto" ]; then
-    OS_PREFIX="L"
-elif [ $TARGET_OS == "Debian" ]; then
-    OS_PREFIX="D"
-fi
+# Debian
+ OS_PREFIX="D"
 
 get_debian_images
 get_bootimg

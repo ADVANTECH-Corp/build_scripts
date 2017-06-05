@@ -81,15 +81,28 @@ function make_boot_image()
 
 function package_debian_rootfs()
 {
-	mkdir -p rootfs_folder
+        MODULE_VERSION=`echo $(ls lib/modules/)`
 	simg2img ./out/${DEBIAN_ROOTFS}.img rootfs_tmp.raw
 
-	sudo mount -o loop rootfs_tmp.raw rootfs_folder
+        sudo losetup /dev/loop1 rootfs_tmp.raw
+        sudo mount /dev/loop1 /mnt
 
-	sudo rm -rf rootfs_folder/lib/modules/*
-	sudo cp -ar lib/modules/ rootfs_folder/lib/
+        sudo rm -rf /mnt/lib/modules/*
+        sudo cp -ar lib/modules/ /mnt/lib/
 
-	sudo umount rootfs_folder
+	# Set up chroot
+	sudo cp /usr/bin/qemu-aarch64-static /mnt/usr/bin/
+
+	# Depmod in chroot mode
+	sudo chroot /mnt << EOF
+depmod -a ${MODULE_VERSION}
+chown -R root:root /lib/modules/${MODULE_VERSION}/
+exit
+EOF
+
+	sudo rm /mnt/usr/bin/qemu-aarch64-static
+	sudo umount /mnt
+	sudo losetup -d /dev/loop1
 
 	ext2simg -v rootfs_tmp.raw "${OUT_DEBIAN_ROOTFS}".img
 	gzip -c9 ${OUT_DEBIAN_ROOTFS}.img > ${OUT_DEBIAN_ROOTFS}.img.gz

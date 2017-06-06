@@ -5,13 +5,14 @@ echo "[ADV] DATE = ${DATE}"
 echo "[ADV] VERSION = ${VERSION}"
 echo "[ADV] DEBIAN_LINARO_RELEASE = ${DEBIAN_LINARO_RELEASE}"
 echo "[ADV] DEBIAN_BUILD_VERSION = ${DEBIAN_BUILD_VERSION}"
+echo "[ADV] DEBIAN_OS_FLAVOUR= ${DEBIAN_OS_FLAVOUR}"
 echo "[ADV] KERNEL_VERSION = ${KERNEL_VERSION}"
 echo "[ADV] STORED = ${STORED}"
 CURR_PATH="$PWD"
 STORAGE_PATH="$CURR_PATH/$STORED"
 RAMDISK_IMAGE="initrd.img-${KERNEL_VERSION}-linaro-lt-qcom"
 BOOT_IMAGE="boot-linaro-stretch-qcom-snapdragon-arm64-${DEBIAN_BUILD_VERSION}"
-DEBIAN_ROOTFS="linaro-stretch-alip-qcom-snapdragon-arm64-${DEBIAN_BUILD_VERSION}"
+DEBIAN_ROOTFS="linaro-${DEBIAN_OS_FLAVOUR}-alip-qcom-snapdragon-arm64-${DEBIAN_BUILD_VERSION}"
 
 # === 1. Put the debian images into out/ folder. =================================================
 function get_debian_images()

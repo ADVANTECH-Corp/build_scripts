@@ -35,6 +35,7 @@ close
 quit
 EOF
 
+	mv ${DEBIAN_ROOTFS}.img.gz ./out/
     gunzip out/${DEBIAN_ROOTFS}.img.gz
 }
 
@@ -65,7 +66,8 @@ EOF
 function get_bootimg()
 {
 	#Get mkbootimg source code
-	git clone https://github.com/osm0sis/mkbootimg
+	#git fork from https://github.com/osm0sis/mkbootimg
+	git clone https://github.com/ADVANTECH-Corp/mkbootimg
 	cd mkbootimg
 
 	make

@@ -131,10 +131,14 @@ function building()
 {
     echo "[ADV] building $1 ..."
     LOG_FILE="$NEW_MACHINE"_Build.log
+LOG2_FILE="$NEW_MACHINE"_Build2.log
+LOG3_FILE="$NEW_MACHINE"_Build3.log
 
     if [ "$1" == "android" ]; then
         #make -j4 droid otapackage 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
-        make -j4 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
+        make -j4 bootloader 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
+        make -j4 bootimage 2>> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
+        make -j4 systemimage 2>> $CURR_PATH/$ROOT_DIR/$LOG3_FILE
     else
         make -j4 $1 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
     fi

@@ -21,8 +21,19 @@ function get_debian_images()
 	wget --progress=dot -e dotbytes=2M -P ./out/ \
 		 https://builds.96boards.org/releases/dragonboard410c/linaro/debian/${DEBIAN_LINARO_RELEASE}/${RAMDISK_IMAGE}
 	# Get Debian rootfs image
-	wget --progress=dot -e dotbytes=2M -P ./out/ \
-		 https://builds.96boards.org/releases/dragonboard410c/linaro/debian/${DEBIAN_LINARO_RELEASE}/${DEBIAN_ROOTFS}.img.gz
+	#wget --progress=dot -e dotbytes=2M -P ./out/ \
+	#	 https://builds.96boards.org/releases/dragonboard410c/linaro/debian/${DEBIAN_LINARO_RELEASE}/${DEBIAN_ROOTFS}.img.gz
+
+    pftp -v -n 172.22.12.82 <<-EOF
+user "ftpuser" "P@ssw0rd"
+cd "Image/96boards_debian/"
+prompt
+binary
+ls
+mget ${DEBIAN_ROOTFS}.img.gz
+close
+quit
+EOF
 
     gunzip out/${DEBIAN_ROOTFS}.img.gz
 }

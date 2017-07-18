@@ -1,0 +1,189 @@
+#!/bin/bash  -xe
+
+echo "[ADV] FTP_DIR = ${FTP_DIR}"
+echo "[ADV] DATE = ${DATE}"
+echo "[ADV] VERSION = ${VERSION}"
+echo "[ADV] BL_LINARO_RELEASE = ${BL_LINARO_RELEASE}"
+echo "[ADV] BL_BUILD_NUMBER = ${BL_BUILD_NUMBER}"
+echo "[ADV] BUILD_VERSION = ${BUILD_VERSION}"
+echo "[ADV] OS_FLAVOUR= ${OS_FLAVOUR}"
+echo "[ADV] KERNEL_VERSION = ${KERNEL_VERSION}"
+echo "[ADV] STORED = ${STORED}"
+CURR_PATH="$PWD"
+STORAGE_PATH="$CURR_PATH/$STORED"
+
+# === 1. Put the debian images into out/ folder. =================================================
+function get_images()
+{
+
+# --- [Advantech] ---
+    if [ -e os ] ; then
+        sudo rm -rf os
+    fi
+    mkdir -p os/${TARGET_OS}
+
+    # Get target OS images from FTP
+
+    OS_FILE_NAME="${RELEASE_VERSION}_${DATE}"
+    MISC_FILE_NAME="${OS_FILE_NAME}_misc"
+    SDBOOT_NAME="${OS_FILE_NAME}_sdboot"
+    SDK_NAME="410c${OS_PREFIX}BV${VERSION_NUM}_${DATE}_sdk"
+
+    pftp -v -n 172.22.12.82 <<-EOF
+user "ftpuser" "P@ssw0rd"
+cd "officialbuild/${FTP_DIR}/${DATE}"
+prompt
+binary
+ls
+mget ${OS_FILE_NAME}.tgz
+mget ${MISC_FILE_NAME}.tgz
+mget ${SDBOOT_NAME}.tgz
+mget ${SDK_NAME}.tgz
+close
+quit
+EOF
+
+    tar zxf ${OS_FILE_NAME}.tgz
+    #rm ${OS_FILE_NAME}.tgz
+
+    tar zxf ${MISC_FILE_NAME}.tgz
+    #rm ${MISC_FILE_NAME}.tgz    
+
+    mkdir -p ${SDBOOT_NAME}
+    tar -C ${SDBOOT_NAME} -zxf ${SDBOOT_NAME}.tgz 
+    #rm ${SDBOOT_NAME}.tgz 
+
+    tar zxf ${SDK_NAME}.tgz
+    #rm ${SDK_NAME}.tgz 
+
+    mv ${OS_FILE_NAME}/*rootfs.img.gz os/${TARGET_OS}/rootfs.img.gz
+    mv ${MISC_FILE_NAME}/Image--*.bin os/${TARGET_OS}/Image.bin
+    mv ${MISC_FILE_NAME}/dt--*.img os/${TARGET_OS}/dt-Image.img
+    mv ${SDBOOT_NAME}/boot-sdboot*.img os/${TARGET_OS}/boot.img
+	mv ${SDK_NAME}/*.sh os/${TARGET_OS}/sdk.sh
+
+    gunzip os/${TARGET_OS}/rootfs.img.gz
+	
+	echo "This is not an initrd" > os/${TARGET_OS}/initrd.img
+}
+function install_sdk()
+{
+	./os/${TARGET_OS}/sdk.sh <<-EOF
+/opt/poky/oecore-x86_64
+y
+EOF
+	
+	source /opt/poky/oecore-x86_64/environment-setup-aarch64-oe-linux
+}
+
+function build_susi_3.0()
+{
+	svn export https://172.20.2.44/svn/essrisc/iMX6/Linux/tools_source/susi
+	cd susi
+	./configure --host aarch64-oe-linux --prefix /usr
+	make
+	make install DESTDIR=${CURR_PATH}/os/${TARGET_OS}/
+	cd ..
+}
+
+function build_susi_4.0()
+{
+	svn co https://172.20.2.44/svn/ess/SUSI/SUSI_4.0/SUSI/SourceCode
+	cd SourceCode
+	source risc-env qualcomm dragon yocto
+	make
+	cp -ar ./OtherOs/risc/Driver/libSUSI-4.00.so* ${CURR_PATH}/os/${TARGET_OS}/usr/lib/
+	cp -ar ./OtherOs/risc/Susi4Demo/*.h ${CURR_PATH}/os/${TARGET_OS}/usr/include/
+	cd ..
+}
+
+function build_diagnostic()
+{
+	git clone http://advgitlab.eastasia.cloudapp.azure.com/db410c/diagnostic.git
+	cd diagnostic
+	./configure --host aarch64-oe-linux --prefix / CPPFLAGS=-I${CURR_PATH}/os/${TARGET_OS}/usr/include LDFLAGS=-L${CURR_PATH}/os/${TARGET_OS}/usr/lib
+	make install DESTDIR=${CURR_PATH}/os/${TARGET_OS}/
+	cd ..
+}
+
+function package_rootfs()
+{
+	simg2img ./os/${TARGET_OS}/rootfs.img rootfs_tmp.raw
+
+    sudo losetup /dev/loop1 rootfs_tmp.raw
+    sudo mount /dev/loop1 /mnt
+
+    sudo cp -ar ./os/${TARGET_OS}/usr /mnt/
+    sudo cp -ar ./os/${TARGET_OS}/tools /mnt/
+
+	sudo umount /mnt
+	sudo losetup -d /dev/loop1
+	
+	ext2simg -v rootfs_tmp.raw rootfs.img
+
+	mv rootfs.img ./os/${TARGET_OS}/rootfs.img
+
+	rm rootfs_tmp.raw
+}
+
+function do_mksdcard()
+{
+	FACTORY_IMG_NAME="${RELEASE_VERSION}_${DATE}_sd_factor.img"
+
+	git clone https://github.com/ADVANTECH-Corp/db-boot-tools.git
+	cd db-boot-tools
+    wget --progress=dot -e dotbytes=2M \
+         https://github.com/ADVANTECH-Corp/db-boot-tools/raw/${BL_LINARO_RELEASE}-adv/advantech_bootloader_sd_linux-${BL_BUILD_NUMBER}.zip -P advantech_bootloader_sd_linux
+	
+	cd advantech_bootloader_sd_linux
+	unzip advantech_bootloader_sd_linux-${BL_BUILD_NUMBER}.zip
+	cp -ar ${CURR_PATH}/os/${TARGET_OS}/boot.img ./
+	cp -ar ${CURR_PATH}/os/${TARGET_OS}/rootfs.img ./
+	cd ..
+	sudo ./mksdcard -p dragonboard410c/linux/sdcard.txt -s 3G -i advantech_bootloader_sd_linux -o ${FACTORY_IMG_NAME}
+
+    gzip -c9 ${FACTORY_IMG_NAME} > ${FACTORY_IMG_NAME}.gz
+	mv ${FACTORY_IMG_NAME}.gz ${STORAGE_PATH}
+
+	rm ${FACTORY_IMG_NAME}
+}	
+
+# === [Main] List Official Build Version ============================================================
+if [ $RSB_4760 == true ]; then
+    MACHINE_LIST="$MACHINE_LIST 4760"
+fi
+if [ $EPC_R4761 == true ]; then
+    MACHINE_LIST="$MACHINE_LIST 4761"
+fi
+
+NUM1=`expr $VERSION : 'V\([0-9]*\)'`
+NUM2=`expr $VERSION : '.*[.]\([0-9]*\)'`
+VERSION_NUM=$NUM1$NUM2
+
+if [ $TARGET_OS == "Yocto" ]; then
+    OS_PREFIX="L"
+elif [ $TARGET_OS == "Debian" ]; then
+    OS_PREFIX="D"
+fi
+
+
+for NEW_MACHINE in $MACHINE_LIST
+do
+    RELEASE_VERSION="${NEW_MACHINE}${OS_PREFIX}IV${VERSION_NUM}"
+
+
+    if [ $NEW_MACHINE == "4760" ]; then
+        PRODUCT="RSB-4760"
+    elif [ $NEW_MACHINE == "4761" ]; then
+        PRODUCT="EPC-R4761"
+    fi
+	
+	get_images
+	install_sdk
+	build_susi_3.0
+	build_susi_4.0
+	build_diagnostic
+	package_rootfs
+
+	do_mksdcard
+done

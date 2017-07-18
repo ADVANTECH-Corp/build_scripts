@@ -58,9 +58,9 @@ EOF
     tar zxf ${MISC_FILE_NAME}.tgz
     rm ${MISC_FILE_NAME}.tgz
 
-    mv ${MISC_FILE_NAME}/Image--4.4-r0*.bin ./out/Image--4.4-r0.bin
-    mv ${MISC_FILE_NAME}/dt-Image--4.4-r0*.img ./out/dt-Image--4.4-r0.img
-    tar zxf ${MISC_FILE_NAME}/modules--4.4-r0*.tgz
+    mv ${MISC_FILE_NAME}/Image*.bin ./out/Image.bin
+    mv ${MISC_FILE_NAME}/dt*.img ./out/dt-Image.img
+    tar zxf ${MISC_FILE_NAME}/modules*.tgz
 }
 
 function get_bootimg()
@@ -81,10 +81,10 @@ function make_boot_image()
 {
 	#Generate boot image
 	mkbootimg \
-        --kernel ./out/Image--4.4-r0.bin \
+        --kernel ./out/Image.bin \
         --ramdisk ./out/${RAMDISK_IMAGE} \
         --output ${OUT_BOOT_IMAGE}.img \
-        --dt ./out/dt-Image--4.4-r0.img \
+        --dt ./out/dt-Image.img \
         --pagesize 2048 \
         --base 0x80000000 \
         --cmdline "root=/dev/disk/by-partlabel/rootfs rw rootwait console=ttyMSM0,115200n8"

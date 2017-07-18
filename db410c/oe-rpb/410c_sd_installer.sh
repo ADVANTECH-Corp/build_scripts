@@ -1,5 +1,6 @@
 #!/bin/bash -xe
 
+echo "[ADV] FTP_SITE = ${FTP_SITE}"
 echo "[ADV] FTP_DIR = ${FTP_DIR}"
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] VERSION = ${VERSION}"
@@ -12,6 +13,24 @@ echo "[ADV] STORED = ${STORED}"
 CURR_PATH="$PWD"
 STORAGE_PATH="$CURR_PATH/$STORED"
 
+function get_ftp_files()
+{
+    FILE_NAME="$1"
+
+    pftp -v -n ${FTP_SITE} <<-EOF
+user "ftpuser" "P@ssw0rd"
+cd "officialbuild/${FTP_DIR}/${DATE}"
+prompt
+binary
+ls
+mget ${FILE_NAME}
+close
+quit
+EOF
+    tar zxf ${FILE_NAME}
+    rm ${FILE_NAME}
+}
+
 # === 1. Put the installer images into out/ folder. =================================================
 function get_installer_images()
 {
@@ -23,21 +42,27 @@ function get_installer_images()
 
     # Get SD and EMMC bootloader package
     wget --progress=dot -e dotbytes=2M \
-         https://github.com/ADVANTECH-Corp/db-boot-tools/raw/${BL_LINARO_RELEASE}/dragonboard410c_bootloader_sd_linux-${BL_BUILD_NUMBER}.zip
+         https://github.com/ADVANTECH-Corp/db-boot-tools/raw/${BL_LINARO_RELEASE}-adv/advantech_bootloader_sd_linux-${BL_BUILD_NUMBER}.zip
     wget --progress=dot -e dotbytes=2M \
          https://github.com/ADVANTECH-Corp/db-boot-tools/raw/${BL_LINARO_RELEASE}-adv/advantech_bootloader_emmc_linux-${BL_BUILD_NUMBER}.zip
 
-    unzip -d out dragonboard410c_bootloader_sd_linux-${BL_BUILD_NUMBER}.zip
+    unzip -d out advantech_bootloader_sd_linux-${BL_BUILD_NUMBER}.zip
 
-    # Get installer boot & rootfs
+    # Get installer rootfs
     wget --progress=dot -e dotbytes=2M \
-         http://advgitlab.eastasia.cloudapp.azure.com/db410c/sd-installer/raw/${INSTALLER_LINARO_RELEASE}/boot-installer-linaro-stretch-qcom-snapdragon-arm64-${INSTALLER_BUILD_VERSION}.img.gz
-    wget --progress=dot -e dotbytes=2M \
-         http://advgitlab.eastasia.cloudapp.azure.com/db410c/sd-installer/raw/${INSTALLER_LINARO_RELEASE}/linaro-stretch-installer-qcom-snapdragon-arm64-${INSTALLER_BUILD_VERSION}.img.gz
+         http://advgitlab.eastasia.cloudapp.azure.com/db410c/sd-installer/raw/${INSTALLER_LINARO_RELEASE}/linaro-${INSTALLER_OS_FLAVOUR}-installer-qcom-snapdragon-arm64-${INSTALLER_BUILD_VERSION}.img.gz
 
-    cp boot-installer-linaro-stretch-qcom-snapdragon-arm64-${INSTALLER_BUILD_VERSION}.img.gz out/boot.img.gz
-    cp linaro-stretch-installer-qcom-snapdragon-arm64-${INSTALLER_BUILD_VERSION}.img.gz out/rootfs.img.gz
-    gunzip out/{boot,rootfs}.img.gz
+    cp linaro-${INSTALLER_OS_FLAVOUR}-installer-qcom-snapdragon-arm64-${INSTALLER_BUILD_VERSION}.img.gz out/rootfs.img.gz
+    gunzip out/rootfs.img.gz
+}
+
+function get_boot_installer_images()
+{
+    # Get installer boot
+    OS_FILE_NAME="${RELEASE_VERSION}_${DATE}_sdboot.tgz"
+    get_ftp_files $OS_FILE_NAME
+
+    cp boot-installer-*.img out/boot.img
 }
 
 # === 2. Prepare Target OS images ===================================================================
@@ -52,23 +77,11 @@ function prepare_target_os()
     # Get target OS images from FTP
 
     OS_FILE_NAME="${RELEASE_VERSION}_${DATE}"
-
-    pftp -v -n 172.22.12.82 <<-EOF
-user "ftpuser" "P@ssw0rd"
-cd "officialbuild/${FTP_DIR}/${DATE}"
-prompt
-binary
-ls
-mget ${OS_FILE_NAME}.tgz
-close
-quit
-EOF
-    tar zxf ${OS_FILE_NAME}.tgz
-    rm ${OS_FILE_NAME}.tgz
+    get_ftp_files ${OS_FILE_NAME}.tgz
 
     case ${TARGET_OS} in
     "Yocto")
-        cp ${OS_FILE_NAME}/boot-Image*.img os/${TARGET_OS}/boot.img
+        cp ${OS_FILE_NAME}/boot-*.img os/${TARGET_OS}/boot.img
         cp ${OS_FILE_NAME}/*rootfs.img.gz os/${TARGET_OS}/rootfs.img.gz
         gunzip os/${TARGET_OS}/rootfs.img.gz
         ;;
@@ -159,6 +172,7 @@ do
         PRODUCT="EPC-R4761"
     fi
 
+    get_boot_installer_images
     prepare_target_os
     make_os_img
 done

@@ -506,6 +506,7 @@ $PARTITION_SIZE_LIMIT
 w
 EOF
 		sudo sync
+		sudo partprobe ${LOOP_DEV}
 		sudo e2fsck -f -y ${LOOP_DEV}p2
 		sudo resize2fs ${LOOP_DEV}p2
 	fi

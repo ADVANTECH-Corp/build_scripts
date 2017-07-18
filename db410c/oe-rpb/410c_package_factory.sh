@@ -1,5 +1,6 @@
 #!/bin/bash  -xe
 
+echo "[ADV] FTP_SITE = ${FTP_SITE}"
 echo "[ADV] FTP_DIR = ${FTP_DIR}"
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] VERSION = ${VERSION}"
@@ -22,18 +23,16 @@ function get_images()
     # Get target OS images from FTP
 
     OS_FILE_NAME="${RELEASE_VERSION}_${DATE}"
-    MISC_FILE_NAME="${OS_FILE_NAME}_misc"
     SDBOOT_NAME="${OS_FILE_NAME}_sdboot"
     SDK_NAME="410c${OS_PREFIX}BV${VERSION_NUM}_${DATE}_sdk"
 
-    pftp -v -n 172.22.12.82 <<-EOF
+    pftp -v -n ${FTP_SITE} <<-EOF
 user "ftpuser" "P@ssw0rd"
 cd "officialbuild/${FTP_DIR}/${DATE}"
 prompt
 binary
 ls
 mget ${OS_FILE_NAME}.tgz
-mget ${MISC_FILE_NAME}.tgz
 mget ${SDBOOT_NAME}.tgz
 mget ${SDK_NAME}.tgz
 close
@@ -41,27 +40,20 @@ quit
 EOF
 
     tar zxf ${OS_FILE_NAME}.tgz
-    #rm ${OS_FILE_NAME}.tgz
-
-    tar zxf ${MISC_FILE_NAME}.tgz
-    #rm ${MISC_FILE_NAME}.tgz    
+    rm ${OS_FILE_NAME}.tgz
 
     mkdir -p ${SDBOOT_NAME}
     tar -C ${SDBOOT_NAME} -zxf ${SDBOOT_NAME}.tgz 
-    #rm ${SDBOOT_NAME}.tgz 
+    rm ${SDBOOT_NAME}.tgz
 
     tar zxf ${SDK_NAME}.tgz
-    #rm ${SDK_NAME}.tgz 
+    rm ${SDK_NAME}.tgz
 
     mv ${OS_FILE_NAME}/*rootfs.img.gz os/${TARGET_OS}/rootfs.img.gz
-    mv ${MISC_FILE_NAME}/Image-*.bin os/${TARGET_OS}/Image.bin
-    mv ${MISC_FILE_NAME}/dt-*.img os/${TARGET_OS}/dt-Image.img
     mv ${SDBOOT_NAME}/boot-sdboot*.img os/${TARGET_OS}/boot.img
 	mv ${SDK_NAME}/*.sh os/${TARGET_OS}/sdk.sh
 
     gunzip os/${TARGET_OS}/rootfs.img.gz
-	
-	echo "This is not an initrd" > os/${TARGET_OS}/initrd.img
 }
 function install_sdk()
 {

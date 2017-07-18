@@ -1,5 +1,6 @@
 #!/bin/bash  -xe
 
+echo "[ADV] FTP_SITE = ${FTP_SITE}"
 echo "[ADV] FTP_DIR = ${FTP_DIR}"
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] VERSION = ${VERSION}"
@@ -24,7 +25,7 @@ function get_debian_images()
 	#wget --progress=dot -e dotbytes=2M -P ./out/ \
 	#	 https://builds.96boards.org/releases/dragonboard410c/linaro/debian/${DEBIAN_LINARO_RELEASE}/${DEBIAN_ROOTFS}.img.gz
 
-    pftp -v -n 172.22.12.82 <<-EOF
+    pftp -v -n ${FTP_SITE} <<-EOF
 user "ftpuser" "P@ssw0rd"
 cd "Image/96boards_debian/"
 prompt
@@ -44,7 +45,7 @@ function get_misc_image()
     # Get misc images from FTP
     MISC_FILE_NAME="${MISC_VERSION}_${DATE}_misc"
 
-    pftp -v -n 172.22.12.82 <<-EOF
+    pftp -v -n ${FTP_SITE} <<-EOF
 user "ftpuser" "P@ssw0rd"
 cd "officialbuild/${FTP_DIR}/${DATE}"
 prompt
@@ -58,9 +59,9 @@ EOF
     tar zxf ${MISC_FILE_NAME}.tgz
     rm ${MISC_FILE_NAME}.tgz
 
-    mv ${MISC_FILE_NAME}/Image*.bin ./out/Image.bin
-    mv ${MISC_FILE_NAME}/dt*.img ./out/dt-Image.img
-    tar zxf ${MISC_FILE_NAME}/modules*.tgz
+    mv ${MISC_FILE_NAME}/Image-*.bin ./out/Image
+    mv ${MISC_FILE_NAME}/dt-*.img ./out/dt.img
+    tar zxf ${MISC_FILE_NAME}/modules-*.tgz
 }
 
 function get_bootimg()
@@ -81,10 +82,10 @@ function make_boot_image()
 {
 	#Generate boot image
 	mkbootimg \
-        --kernel ./out/Image.bin \
+        --kernel ./out/Image \
         --ramdisk ./out/${RAMDISK_IMAGE} \
         --output ${OUT_BOOT_IMAGE}.img \
-        --dt ./out/dt-Image.img \
+        --dt ./out/dt.img \
         --pagesize 2048 \
         --base 0x80000000 \
         --cmdline "root=/dev/disk/by-partlabel/rootfs rw rootwait console=ttyMSM0,115200n8"

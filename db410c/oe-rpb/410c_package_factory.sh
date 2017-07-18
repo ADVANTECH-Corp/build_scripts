@@ -70,7 +70,7 @@ function install_sdk()
 y
 EOF
 	
-	source /opt/poky/oecore-x86_64/environment-setup-aarch64-linaro-linux
+	source /opt/poky/oecore-x86_64/environment-setup-aarch64-oe-linux
 }
 
 function build_susi_3.0()

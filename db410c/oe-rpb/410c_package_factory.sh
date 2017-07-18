@@ -54,8 +54,8 @@ EOF
     #rm ${SDK_NAME}.tgz 
 
     mv ${OS_FILE_NAME}/*rootfs.img.gz os/${TARGET_OS}/rootfs.img.gz
-    mv ${MISC_FILE_NAME}/Image--*.bin os/${TARGET_OS}/Image.bin
-    mv ${MISC_FILE_NAME}/dt--*.img os/${TARGET_OS}/dt-Image.img
+    mv ${MISC_FILE_NAME}/Image-*.bin os/${TARGET_OS}/Image.bin
+    mv ${MISC_FILE_NAME}/dt-*.img os/${TARGET_OS}/dt-Image.img
     mv ${SDBOOT_NAME}/boot-sdboot*.img os/${TARGET_OS}/boot.img
 	mv ${SDK_NAME}/*.sh os/${TARGET_OS}/sdk.sh
 

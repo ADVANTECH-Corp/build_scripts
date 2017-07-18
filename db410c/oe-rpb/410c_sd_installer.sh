@@ -81,7 +81,7 @@ function prepare_target_os()
 
     case ${TARGET_OS} in
     "Yocto")
-        cp ${OS_FILE_NAME}/boot-Image*.img os/${TARGET_OS}/boot.img
+        cp ${OS_FILE_NAME}/boot-*.img os/${TARGET_OS}/boot.img
         cp ${OS_FILE_NAME}/*rootfs.img.gz os/${TARGET_OS}/rootfs.img.gz
         gunzip os/${TARGET_OS}/rootfs.img.gz
         ;;

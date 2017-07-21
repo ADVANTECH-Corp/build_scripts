@@ -86,7 +86,9 @@ function prepare_target_os()
         gunzip os/${TARGET_OS}/rootfs.img.gz
         ;;
     "Debian")
-        # To-Do
+        cp boot-*.img os/${TARGET_OS}/boot.img
+        cp *.img.gz os/${TARGET_OS}/rootfs.img.gz
+        gunzip os/${TARGET_OS}/rootfs.img.gz
         ;;
     "Android")
         # To-Do

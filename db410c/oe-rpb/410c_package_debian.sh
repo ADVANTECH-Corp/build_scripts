@@ -91,6 +91,16 @@ function make_boot_image()
         --cmdline "root=/dev/disk/by-partlabel/rootfs rw rootwait console=ttyMSM0,115200n8"
 }
 
+function generate_md5()
+{
+    FILENAME=$1
+
+    if [ -e $FILENAME ]; then
+        MD5_SUM=`md5sum -b $FILENAME | cut -d ' ' -f 1`
+        echo $MD5_SUM > $FILENAME.md5
+    fi
+}
+
 function package_debian_rootfs()
 {
         MODULE_VERSION=`echo $(ls lib/modules/)`
@@ -120,7 +130,9 @@ EOF
 	gzip -c9 ${OUT_DEBIAN_ROOTFS}.img > ${OUT_DEBIAN_ROOTFS}.img.gz
 	
 	tar zcf "${RELEASE_VERSION}_${DATE}".tgz ${OUT_DEBIAN_ROOTFS}.img.gz ${OUT_BOOT_IMAGE}.img
+	generate_md5 "${RELEASE_VERSION}_${DATE}".tgz
 	mv "${RELEASE_VERSION}_${DATE}".tgz $STORAGE_PATH
+	mv *.md5 $STORAGE_PATH
 	
 	rm rootfs_tmp.raw ${OUT_BOOT_IMAGE}.img ${OUT_DEBIAN_ROOTFS}.img ${OUT_DEBIAN_ROOTFS}.img.gz
 }

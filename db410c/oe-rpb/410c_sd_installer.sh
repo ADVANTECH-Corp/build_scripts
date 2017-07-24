@@ -37,6 +37,16 @@ EOF
     rm ${FILE_NAME}
 }
 
+function generate_md5()
+{
+    FILENAME=$1
+
+    if [ -e $FILENAME ]; then
+        MD5_SUM=`md5sum -b $FILENAME | cut -d ' ' -f 1`
+        echo $MD5_SUM > $FILENAME.md5
+    fi
+}
+
 # === 1. Put the installer images into out/ folder. =================================================
 function get_installer_images()
 {
@@ -126,7 +136,7 @@ EOF
 # === 3. Generate os.img & execute mksdcard script ==================================================
 function make_os_img()
 {
-    SD_INSTALLER_IMG_NAME="${RELEASE_VERSION}_${DATE}_sd_install.img"
+    SD_INSTALLER_IMG_NAME="${RELEASE_VERSION}_${DATE}_sd_installer.img"
 
     # get size of OS partition
     size_os=$(du -sk os | cut -f1)
@@ -151,7 +161,9 @@ function make_os_img()
 
     # create archive for publishing
     gzip -c9 ${SD_INSTALLER_IMG_NAME} > ${SD_INSTALLER_IMG_NAME}.gz
+    generate_md5 ${SD_INSTALLER_IMG_NAME}.gz
     mv ${SD_INSTALLER_IMG_NAME}.gz $STORAGE_PATH
+    mv *.md5 $STORAGE_PATH
 }
 
 # === [Main] List Official Build Version ============================================================

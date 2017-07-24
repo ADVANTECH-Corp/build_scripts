@@ -115,14 +115,24 @@ function package_rootfs()
 	rm rootfs_tmp.raw
 }
 
+function generate_md5()
+{
+    FILENAME=$1
+
+    if [ -e $FILENAME ]; then
+        MD5_SUM=`md5sum -b $FILENAME | cut -d ' ' -f 1`
+        echo $MD5_SUM > $FILENAME.md5
+    fi
+}
+
 function do_mksdcard()
 {
 	FACTORY_IMG_NAME="${RELEASE_VERSION}_${DATE}_sd_factory.img"
 
 	git clone https://github.com/ADVANTECH-Corp/db-boot-tools.git
 	cd db-boot-tools
-    wget --progress=dot -e dotbytes=2M \
-         https://github.com/ADVANTECH-Corp/db-boot-tools/raw/${BL_LINARO_RELEASE}-adv/advantech_bootloader_sd_linux-${BL_BUILD_NUMBER}.zip -P advantech_bootloader_sd_linux
+	wget --progress=dot -e dotbytes=2M \
+            https://github.com/ADVANTECH-Corp/db-boot-tools/raw/${BL_LINARO_RELEASE}-adv/advantech_bootloader_sd_linux-${BL_BUILD_NUMBER}.zip -P advantech_bootloader_sd_linux
 	
 	cd advantech_bootloader_sd_linux
 	unzip advantech_bootloader_sd_linux-${BL_BUILD_NUMBER}.zip
@@ -131,8 +141,10 @@ function do_mksdcard()
 	cd ..
 	sudo ./mksdcard -p dragonboard410c/linux/sdcard.txt -s 3G -i advantech_bootloader_sd_linux -o ${FACTORY_IMG_NAME}
 
-    gzip -c9 ${FACTORY_IMG_NAME} > ${FACTORY_IMG_NAME}.gz
+	gzip -c9 ${FACTORY_IMG_NAME} > ${FACTORY_IMG_NAME}.gz
+	generate_md5 ${FACTORY_IMG_NAME}.gz
 	mv ${FACTORY_IMG_NAME}.gz ${STORAGE_PATH}
+	mv *.md5 ${STORAGE_PATH}
 
 	rm ${FACTORY_IMG_NAME}
 }	

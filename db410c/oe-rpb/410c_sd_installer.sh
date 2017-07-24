@@ -16,6 +16,7 @@ STORAGE_PATH="$CURR_PATH/$STORED"
 function get_ftp_files()
 {
     FILE_NAME="$1"
+    OUTPUT_FOLDER="$2"
 
     pftp -v -n ${FTP_SITE} <<-EOF
 user "ftpuser" "P@ssw0rd"
@@ -27,7 +28,12 @@ mget ${FILE_NAME}
 close
 quit
 EOF
-    tar zxf ${FILE_NAME}
+    if [ "${OUTPUT_FOLDER}" == "" ]; then
+        tar zxf ${FILE_NAME}
+    else
+        mkdir ${OUTPUT_FOLDER}
+        tar zxf ${FILE_NAME} -C ${OUTPUT_FOLDER}
+    fi
     rm ${FILE_NAME}
 }
 
@@ -77,17 +83,18 @@ function prepare_target_os()
     # Get target OS images from FTP
 
     OS_FILE_NAME="${RELEASE_VERSION}_${DATE}"
-    get_ftp_files ${OS_FILE_NAME}.tgz
 
     case ${TARGET_OS} in
     "Yocto")
+        get_ftp_files ${OS_FILE_NAME}.tgz
         cp ${OS_FILE_NAME}/boot-*.img os/${TARGET_OS}/boot.img
         cp ${OS_FILE_NAME}/*rootfs.img.gz os/${TARGET_OS}/rootfs.img.gz
         gunzip os/${TARGET_OS}/rootfs.img.gz
         ;;
     "Debian")
-        cp boot-*.img os/${TARGET_OS}/boot.img
-        cp *.img.gz os/${TARGET_OS}/rootfs.img.gz
+        get_ftp_files ${OS_FILE_NAME}.tgz ${OS_FILE_NAME}
+        cp ${OS_FILE_NAME}/boot-*.img os/${TARGET_OS}/boot.img
+        cp ${OS_FILE_NAME}/*.img.gz os/${TARGET_OS}/rootfs.img.gz
         gunzip os/${TARGET_OS}/rootfs.img.gz
         ;;
     "Android")

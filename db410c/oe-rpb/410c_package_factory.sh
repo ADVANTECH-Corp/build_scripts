@@ -117,7 +117,7 @@ function package_rootfs()
 
 function do_mksdcard()
 {
-	FACTORY_IMG_NAME="${RELEASE_VERSION}_${DATE}_sd_factor.img"
+	FACTORY_IMG_NAME="${RELEASE_VERSION}_${DATE}_sd_factory.img"
 
 	git clone https://github.com/ADVANTECH-Corp/db-boot-tools.git
 	cd db-boot-tools

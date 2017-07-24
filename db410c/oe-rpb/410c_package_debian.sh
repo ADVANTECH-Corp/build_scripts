@@ -27,7 +27,7 @@ function get_debian_images()
 
     pftp -v -n ${FTP_SITE} <<-EOF
 user "ftpuser" "P@ssw0rd"
-cd "Image/96boards_debian/"
+cd "Image/db410c/96boards_debian/"
 prompt
 binary
 ls

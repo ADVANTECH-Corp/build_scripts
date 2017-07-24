@@ -138,7 +138,7 @@ function make_os_img()
     sudo mount -o loop out/os.img mnt
     sudo cp -r os/* mnt/
     sudo umount mnt
-    sudo ./mksdcard -p dragonboard410c/linux/installer.txt -s $size_img -i out -o ${RELEASE_VERSION}_sd_install.img
+    sudo ./mksdcard -p dragonboard410c/linux/installer.txt -s $size_img -i out -o ${RELEASE_VERSION}_${DATE}_sd_install.img
 
     # create archive for publishing
     gzip -c9 ${RELEASE_VERSION}_sd_install.img > ${RELEASE_VERSION}_sd_install.img.gz

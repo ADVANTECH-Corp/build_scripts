@@ -59,7 +59,7 @@ function get_installer_images()
 function get_boot_installer_images()
 {
     # Get installer boot
-    OS_FILE_NAME="${RELEASE_VERSION}_${DATE}_sdboot.tgz"
+    OS_FILE_NAME="${SDBOOT_VERSION}_${DATE}_sdboot.tgz"
     get_ftp_files $OS_FILE_NAME
 
     cp boot-installer-*.img out/boot.img
@@ -119,6 +119,8 @@ EOF
 # === 3. Generate os.img & execute mksdcard script ==================================================
 function make_os_img()
 {
+    SD_INSTALLER_IMG_NAME="${RELEASE_VERSION}_${DATE}_sd_install.img"
+
     # get size of OS partition
     size_os=$(du -sk os | cut -f1)
     size_os=$(((($size_os + 1024 - 1) / 1024) * 1024))
@@ -138,11 +140,11 @@ function make_os_img()
     sudo mount -o loop out/os.img mnt
     sudo cp -r os/* mnt/
     sudo umount mnt
-    sudo ./mksdcard -p dragonboard410c/linux/installer.txt -s $size_img -i out -o ${RELEASE_VERSION}_${DATE}_sd_install.img
+    sudo ./mksdcard -p dragonboard410c/linux/installer.txt -s $size_img -i out -o ${SD_INSTALLER_IMG_NAME}
 
     # create archive for publishing
-    gzip -c9 ${RELEASE_VERSION}_sd_install.img > ${RELEASE_VERSION}_sd_install.img.gz
-    mv ${RELEASE_VERSION}_sd_install.img.gz $STORAGE_PATH
+    gzip -c9 ${SD_INSTALLER_IMG_NAME} > ${SD_INSTALLER_IMG_NAME}.gz
+    mv ${SD_INSTALLER_IMG_NAME}.gz $STORAGE_PATH
 }
 
 # === [Main] List Official Build Version ============================================================
@@ -168,6 +170,7 @@ get_installer_images
 for NEW_MACHINE in $MACHINE_LIST
 do
     RELEASE_VERSION="${NEW_MACHINE}${OS_PREFIX}IV${VERSION_NUM}"
+    SDBOOT_VERSION="${NEW_MACHINE}LIV${VERSION_NUM}"
     if [ $NEW_MACHINE == "4760" ]; then
         PRODUCT="RSB-4760"
     elif [ $NEW_MACHINE == "4761" ]; then

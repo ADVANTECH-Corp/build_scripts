@@ -67,8 +67,8 @@ EOF
 
 function build_susi_3.0()
 {
-	svn export https://172.20.2.44/svn/essrisc/iMX6/Linux/tools_source/susi
-	cd susi
+	git clone http://advgitlab.eastasia.cloudapp.azure.com/db410c/susi_3.0.git
+	cd susi_3.0
 	./configure --host aarch64-oe-linux --prefix /usr
 	make
 	make install DESTDIR=${CURR_PATH}/os/${TARGET_OS}/
@@ -104,6 +104,17 @@ function package_rootfs()
 
     sudo cp -ar ./os/${TARGET_OS}/usr /mnt/
     sudo cp -ar ./os/${TARGET_OS}/tools /mnt/
+
+	# Set up chroot
+	sudo cp /usr/bin/qemu-aarch64-static /mnt/usr/bin/
+
+	# Depmod in chroot mode
+	sudo chroot /mnt << EOF
+systemctl mask serial-getty@ttyMSM0.service
+exit
+EOF
+
+	sudo rm /mnt/usr/bin/qemu-aarch64-static
 
 	sudo umount /mnt
 	sudo losetup -d /dev/loop1

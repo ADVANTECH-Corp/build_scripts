@@ -50,8 +50,9 @@ EOF
     rm ${SDK_NAME}.tgz
 
     mv ${OS_FILE_NAME}/*rootfs.img.gz os/${TARGET_OS}/rootfs.img.gz
+    mv ${OS_FILE_NAME}/recovery*.img os/${TARGET_OS}/recovery.img
     mv ${SDBOOT_NAME}/boot-sdboot*.img os/${TARGET_OS}/boot.img
-	mv ${SDK_NAME}/*.sh os/${TARGET_OS}/sdk.sh
+    mv ${SDK_NAME}/*.sh os/${TARGET_OS}/sdk.sh
 
     gunzip os/${TARGET_OS}/rootfs.img.gz
 }
@@ -149,6 +150,7 @@ function do_mksdcard()
 	unzip advantech_bootloader_sd_linux-${BL_BUILD_NUMBER}.zip
 	cp -ar ${CURR_PATH}/os/${TARGET_OS}/boot.img ./
 	cp -ar ${CURR_PATH}/os/${TARGET_OS}/rootfs.img ./
+	cp -ar ${CURR_PATH}/os/${TARGET_OS}/recovery.img ./
 	cd ..
 	sudo ./mksdcard -p dragonboard410c/linux/sdcard.txt -s 3G -i advantech_bootloader_sd_linux -o ${FACTORY_IMG_NAME}
 

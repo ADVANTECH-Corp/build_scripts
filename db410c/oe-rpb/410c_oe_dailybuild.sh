@@ -166,6 +166,9 @@ function build_yocto_images()
 
     set_environment
 
+    echo "[ADV] Build recovery image!"
+    building initramfs-debug-image
+
     # Build full image
     building $DEPLOY_IMAGE_NAME
 }
@@ -196,6 +199,11 @@ function prepare_images()
     gzip -9 ${rootfs%.ext4.gz}.img
 
     mv ${rootfs%.ext4.gz}.img.gz $IMAGE_DIR
+
+    # Recovery
+    echo "[ADV] copying recovery image ..."
+    FILE_NAME=$(readlink $DEPLOY_IMAGE_PATH/recovery.img)
+    mv $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
 
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR

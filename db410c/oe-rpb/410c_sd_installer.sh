@@ -100,12 +100,14 @@ function prepare_target_os()
         cp ${OS_FILE_NAME}/boot-*.img os/${TARGET_OS}/boot.img
         cp ${OS_FILE_NAME}/*rootfs.img.gz os/${TARGET_OS}/rootfs.img.gz
         gunzip os/${TARGET_OS}/rootfs.img.gz
+        cp ${OS_FILE_NAME}/recovery*.img os/${TARGET_OS}/recovery.img
         ;;
     "Debian")
         get_ftp_files ${OS_FILE_NAME}.tgz ${OS_FILE_NAME}
         cp ${OS_FILE_NAME}/boot-*.img os/${TARGET_OS}/boot.img
         cp ${OS_FILE_NAME}/*.img.gz os/${TARGET_OS}/rootfs.img.gz
         gunzip os/${TARGET_OS}/rootfs.img.gz
+        echo "This is a fake recovery image!" > os/${TARGET_OS}/recovery.img
         ;;
     "Android")
         # To-Do

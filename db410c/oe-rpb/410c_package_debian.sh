@@ -104,6 +104,11 @@ function generate_md5()
 function package_debian_rootfs()
 {
         MODULE_VERSION=`echo $(ls lib/modules/)`
+
+	#WiFi calibration data
+	wget --progress=dot -e dotbytes=2M \
+		https://github.com/ADVANTECH-Corp/meta-advantech/blob/krogoth/meta-qcom-410c/recipes-bsp/firmware/files/WCNSS_qcom_wlan_nv.bin
+
 	simg2img ./out/${DEBIAN_ROOTFS}.img rootfs_tmp.raw
 
         sudo losetup /dev/loop1 rootfs_tmp.raw
@@ -111,6 +116,7 @@ function package_debian_rootfs()
 
         sudo rm -rf /mnt/lib/modules/*
         sudo cp -ar lib/modules/ /mnt/lib/
+        sudo cp -a  WCNSS_qcom_wlan_nv.bin /mnt/lib/firmware/wlan/prima/
 
 	# Set up chroot
 	sudo cp /usr/bin/qemu-aarch64-static /mnt/usr/bin/

@@ -8,6 +8,7 @@ echo "[ADV] DEBIAN_LINARO_RELEASE = ${DEBIAN_LINARO_RELEASE}"
 echo "[ADV] DEBIAN_BUILD_VERSION = ${DEBIAN_BUILD_VERSION}"
 echo "[ADV] DEBIAN_OS_FLAVOUR= ${DEBIAN_OS_FLAVOUR}"
 echo "[ADV] KERNEL_VERSION = ${KERNEL_VERSION}"
+echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
 echo "[ADV] STORED = ${STORED}"
 CURR_PATH="$PWD"
 STORAGE_PATH="$CURR_PATH/$STORED"
@@ -107,7 +108,7 @@ function package_debian_rootfs()
 
 	#WiFi calibration data
 	wget --progress=dot -e dotbytes=2M \
-		https://github.com/ADVANTECH-Corp/meta-advantech/blob/krogoth/meta-qcom-410c/recipes-bsp/firmware/files/WCNSS_qcom_wlan_nv.bin
+		https://github.com/ADVANTECH-Corp/meta-advantech/blob/${BSP_BRANCH}/meta-qcom-410c/recipes-bsp/firmware/files/WCNSS_qcom_wlan_nv.bin
 
 	simg2img ./out/${DEBIAN_ROOTFS}.img rootfs_tmp.raw
 

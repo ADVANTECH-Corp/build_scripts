@@ -180,9 +180,9 @@ function prepare_images()
     echo "[ADV] creating ${IMAGE_DIR}_kernel.zip for OTA package ..."
     ./ota-package.sh -k zImage -d imx*.dtb -o update_${IMAGE_DIR}_kernel.zip 
     echo "[ADV] creating ${IMAGE_DIR}_rootfs.zip for OTA package ..."
-    ./ota-package.sh -r $DEPLOY_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_rootfs.zip 
+    ./ota-package.sh -r $OTA_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_rootfs.zip 
     echo "[ADV] creating ${IMAGE_DIR}_kernel_rootfs.zip for OTA package ..."
-    ./ota-package.sh -k zImage -d imx*.dtb -r $DEPLOY_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_kernel_rootfs.zip
+    ./ota-package.sh -k zImage -d imx*.dtb -r $OTA_IMAGE_NAME-${NEW_MACHINE}.ext4 -o update_${IMAGE_DIR}_kernel_rootfs.zip
     mv update*.zip $CURR_PATH 
     cd $CURR_PATH
     

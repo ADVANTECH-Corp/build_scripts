@@ -108,7 +108,7 @@ function package_debian_rootfs()
 
 	#WiFi calibration data
 	wget --progress=dot -e dotbytes=2M \
-		https://github.com/ADVANTECH-Corp/meta-advantech/blob/${BSP_BRANCH}/meta-qcom-410c/recipes-bsp/firmware/files/WCNSS_qcom_wlan_nv.bin
+		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH}/meta-qcom-410c/recipes-bsp/firmware/files/WCNSS_qcom_wlan_nv.bin
 
 	simg2img ./out/${DEBIAN_ROOTFS}.img rootfs_tmp.raw
 

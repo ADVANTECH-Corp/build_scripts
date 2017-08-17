@@ -10,6 +10,9 @@ VERSION_NUM=$NUM1$NUM2
 if [ $UBC220A1_SOLO == true ]; then
 	./imx6_officialbuild.sh ubc220a1-solo U220A1LIV"$VERSION_NUM" 1G x11 2>&1 |tee U220A1LIV"$VERSION_NUM"_DualLiteSolo_$DATE.log
 fi
+if [ $UBC220A1 == true ]; then
+	./imx6_officialbuild.sh ubc220a1 U220A1LIV"$VERSION_NUM" 1G x11 2>&1 |tee U220A1LIV"$VERSION_NUM"_DualQuad_$DATE.log
+fi
 if [ $UBCDS31A1 == true ]; then
 	./imx6_officialbuild.sh ubcds31a1 DS31A1LIV"$VERSION_NUM" 1G x11 2>&1 |tee DS31A1LIV"$VERSION_NUM"_DualQuad_$DATE.log
 fi

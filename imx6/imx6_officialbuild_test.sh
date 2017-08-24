@@ -649,6 +649,10 @@ function copy_image_to_storage()
 		"normal")
 			mkdir $STORAGE_PATH/modules
 			mv -f modules* $STORAGE_PATH/modules
+			mkdir $STORAGE_PATH/uboot
+			mv -f u-boot_crc* $STORAGE_PATH/uboot
+			mkdir $STORAGE_PATH/zImage
+			mv -f zImage $STORAGE_PATH/zImage
 			generate_csv $IMAGE_DIR.img.gz
 			mv ${IMAGE_DIR}.img.csv $STORAGE_PATH
 			mv -f $IMAGE_DIR.img.gz $STORAGE_PATH

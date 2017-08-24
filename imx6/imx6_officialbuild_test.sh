@@ -558,6 +558,22 @@ function prepare_images()
                 "sdk")
 			cp $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/sdk/* $OUTPUT_DIR
                         ;;
+                "modules")
+                        echo "[ADV]  Copy modules"
+                        FILE_NAME="modules-"${PRODUCT}".tgz"
+                        cp $DEPLOY_MODULES_PATH/$FILE_NAME $OUTPUT_DIR
+                        echo "[ADV]  Copy modules finish"
+                        ;;
+                "firmware")
+                        mkdir $OUTPUT_DIR/firmware_all
+                        mkdir $OUTPUT_DIR/firmware_product
+                        echo "[ADV]  Copy modules"
+                        FILE_NAME="*.rpm"
+                        cp $DEPLOY_FIRMWARE_PATH/$FILE_NAME $OUTPUT_DIR/firmware_all
+                        cp $DEPLOY_FIRMWARE_PATH $OUTPUT_DIR/firmware_all
+                        echo "[ADV]  Copy modules finish"
+                        cp "$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/rpm/${KERNEL_CPU_TYPE}${PRODUCT}" $OUTPUT_DIR/firmware_product
+                        ;;
                 "normal")
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
@@ -645,13 +661,14 @@ function copy_image_to_storage()
 		"eng")
 			mv -f ${ENG_IMAGE_DIR}.img.gz $STORAGE_PATH
 		;;
+		"modules")
+			mv -f modules*.tgz $STORAGE_PATH
+		;;
+		"firmware")
+			mv -f firmware_all $STORAGE_PATH
+			mv -f firmware_product $STORAGE_PATH
+		;;
 		"normal")
-			mkdir $STORAGE_PATH/modules
-			mv -f modules* $STORAGE_PATH/modules
-			mkdir $STORAGE_PATH/uboot
-			mv -f u-boot_crc* $STORAGE_PATH/uboot
-			mkdir $STORAGE_PATH/zImage
-			mv -f zImage $STORAGE_PATH/zImage
 			generate_csv $IMAGE_DIR.img.gz
 			mv ${IMAGE_DIR}.img.csv $STORAGE_PATH
 			mv -f $IMAGE_DIR.img.gz $STORAGE_PATH
@@ -766,6 +783,18 @@ else #"$PRODUCT" != "$VER_PREFIX"
         IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"
         prepare_images normal $IMAGE_DIR
         copy_image_to_storage normal
+
+        echo "[ADV] create module"
+        DEPLOY_MODULES_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
+        MODULES_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_modules
+        prepare_images modules $MODULES_DIR
+        copy_image_to_storage modules
+
+        echo "[ADV] create firmware"
+        DEPLOY_FIRMWARE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/rpm/all"
+        FIRMWARE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_firmware
+        prepare_images firmware $FIRMWARE_DIR
+        copy_image_to_storage firmware
 
         echo "[ADV] generate ota image"
 	OTA_IMAGE_DIR="$IMAGE_DIR"_ota

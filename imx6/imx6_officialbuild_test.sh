@@ -720,17 +720,17 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 	rm $ROOT_DIR/setup-environment $ROOT_DIR/fsl-setup-release.sh
 	cp $ROOT_DIR/.repo/manifests/fsl-setup-release.sh $ROOT_DIR/fsl-setup-release.sh
 	cp $ROOT_DIR/.repo/manifests/setup-environment $ROOT_DIR/setup-environment
-	tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
-        generate_md5 $ROOT_DIR.tgz
+	#tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
+        #generate_md5 $ROOT_DIR.tgz
 
         # Build Yocto SDK
-        echo "[ADV] build yocto sdk"
-        build_yocto_sdk
+        #echo "[ADV] build yocto sdk"
+        #build_yocto_sdk
 
-	echo "[ADV] generate sdk image"
-        SDK_DIR="$ROOT_DIR"_sdk
-        prepare_images sdk $SDK_DIR
-	copy_image_to_storage sdk
+	    #echo "[ADV] generate sdk image"
+        #SDK_DIR="$ROOT_DIR"_sdk
+        #prepare_images sdk $SDK_DIR
+	    #copy_image_to_storage sdk
 
 	# Commit and create meta-advantech branch
 	# create_branch_and_commit $META_ADVANTECH_PATH

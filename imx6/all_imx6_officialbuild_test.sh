@@ -5,7 +5,7 @@ VERSION_NUM=$NUM1$NUM2
 
 #[x11]
 #imx6_BSP
-#./imx6_officialbuild_test.sh imx6 imx6LBV"$VERSION_NUM" 1G x11 2>&1 |tee imx6LBV"$VERSION_NUM"_$DATE.log
+./imx6_officialbuild_test.sh imx6 imx6LBV"$VERSION_NUM" 1G x11 2>&1 |tee imx6LBV"$VERSION_NUM"_$DATE.log
 #imx6_projects
 if [ $UBC220A1_SOLO == true ]; then
 	./imx6_officialbuild_test.sh ubc220a1-solo U220A1LIV"$VERSION_NUM" 1G x11 2>&1 |tee U220A1LIV"$VERSION_NUM"_DualLiteSolo_$DATE.log

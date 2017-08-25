@@ -560,19 +560,19 @@ function prepare_images()
                         ;;
                 "modules")
                         echo "[ADV]  Copy modules"
-                        FILE_NAME="modules-"${PRODUCT}".tgz"
+                        FILE_NAME="modules-imx6*.tgz"
                         cp $DEPLOY_MODULES_PATH/$FILE_NAME $OUTPUT_DIR
                         echo "[ADV]  Copy modules finish"
                         ;;
                 "firmware")
                         mkdir $OUTPUT_DIR/firmware_all
                         mkdir $OUTPUT_DIR/firmware_product
-                        echo "[ADV]  Copy modules"
+                        echo "[ADV]  Copy firmware"
                         FILE_NAME="*.rpm"
-                        cp $DEPLOY_FIRMWARE_PATH/$FILE_NAME $OUTPUT_DIR/firmware_all
-                        cp $DEPLOY_FIRMWARE_PATH $OUTPUT_DIR/firmware_all
-                        echo "[ADV]  Copy modules finish"
-                        cp "$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/rpm/${KERNEL_CPU_TYPE}${PRODUCT}" $OUTPUT_DIR/firmware_product
+                        cp -rf $DEPLOY_FIRMWARE_PATH/$FILE_NAME $OUTPUT_DIR/firmware_all
+                        cp -rf $DEPLOY_FIRMWARE_PATH $OUTPUT_DIR/firmware_all
+                        echo "[ADV]  Copy firmware finish"
+                        cp -rf "$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/rpm/${KERNEL_CPU_TYPE}${PRODUCT}" $OUTPUT_DIR/firmware_product
                         ;;
                 "normal")
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
@@ -619,7 +619,7 @@ function prepare_images()
 
         # Package image file
         case $IMAGE_TYPE in
-                "sdk" | "mfgtools")
+                "sdk" | "mfgtools" | "modules" | "firmware")
                         echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
 			tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
 			generate_md5 ${OUTPUT_DIR}.tgz
@@ -630,7 +630,7 @@ function prepare_images()
                         generate_md5 $OUTPUT_DIR.img.gz
                         ;;
         esac
-        rm -rf $OUTPUT_DIR
+        #rm -rf $OUTPUT_DIR
 }
 
 function generate_OTA_update_package()

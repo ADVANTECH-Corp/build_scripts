@@ -662,11 +662,10 @@ function copy_image_to_storage()
 			mv -f ${ENG_IMAGE_DIR}.img.gz $STORAGE_PATH
 		;;
 		"modules")
-			mv -f modules*.tgz $STORAGE_PATH
+			mv -f ${MODULES_DIR}.tgz $STORAGE_PATH
 		;;
 		"firmware")
-			mv -f firmware_all $STORAGE_PATH
-			mv -f firmware_product $STORAGE_PATH
+			mv -f ${FIRMWARE_DIR}.tgz $STORAGE_PATH
 		;;
 		"normal")
 			generate_csv $IMAGE_DIR.img.gz

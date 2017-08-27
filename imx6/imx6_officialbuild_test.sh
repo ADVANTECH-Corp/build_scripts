@@ -558,6 +558,15 @@ function prepare_images()
                 "sdk")
 			cp $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/sdk/* $OUTPUT_DIR
                         ;;
+                "ubuntu")
+                        echo "[ADV]  Copy Ubuntu"
+                        cp $DEPLOY_UBUNTU_PATH/zImage-${KERNEL_CPU_TYPE}*.dtb $OUTPUT_DIR
+                        cp $DEPLOY_UBUNTU_PATH/zImage $OUTPUT_DIR
+                        cp $DEPLOY_UBUNTU_PATH/u-boot_crc.bin $OUTPUT_DIR
+                        cp $DEPLOY_UBUNTU_PATH/u-boot_crc.bin.crc $OUTPUT_DIR
+                        cp $DEPLOY_UBUNTU_PATH/u-boot.imx $OUTPUT_DIR
+                        echo "[ADV]  Copy Ubuntu finish"
+                        ;;
                 "modules")
                         echo "[ADV]  Copy modules"
                         FILE_NAME="modules-imx6*.tgz"
@@ -619,7 +628,7 @@ function prepare_images()
 
         # Package image file
         case $IMAGE_TYPE in
-                "sdk" | "mfgtools" | "modules" | "firmware")
+                "sdk" | "mfgtools" | "modules" | "firmware" | "ubuntu")
                         echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
 			tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
 			generate_md5 ${OUTPUT_DIR}.tgz
@@ -660,6 +669,9 @@ function copy_image_to_storage()
 		;;
 		"eng")
 			mv -f ${ENG_IMAGE_DIR}.img.gz $STORAGE_PATH
+		;;
+		"ubuntu")
+			mv -f ${UBUNTU_DIR}.tgz $STORAGE_PATH
 		;;
 		"modules")
 			mv -f ${MODULES_DIR}.tgz $STORAGE_PATH
@@ -782,6 +794,12 @@ else #"$PRODUCT" != "$VER_PREFIX"
         IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"
         prepare_images normal $IMAGE_DIR
         copy_image_to_storage normal
+
+        echo "[ADV] create ubuntu"
+        DEPLOY_UBUNTU_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
+        UBUNTU_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_ubuntu
+        prepare_images ubuntu $UBUNTU_DIR
+        copy_image_to_storage ubuntu
 
         echo "[ADV] create module"
         DEPLOY_MODULES_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"

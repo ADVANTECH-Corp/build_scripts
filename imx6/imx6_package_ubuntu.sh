@@ -21,6 +21,7 @@ UBUNTU_ROOTFS="u1404-rootfs-armhf"
 # === 1. Put the debian images into out/ folder. =================================================
 function get_ubuntu_images()
 {
+    echo "[ADV] get_modules linux ftp"
     pftp -v -n 172.22.12.82<<-EOF
 user "ftpuser" "P@ssw0rd"
 cd "Image/imx6/ubuntu/"
@@ -38,10 +39,10 @@ EOF
 
 function get_modules()
 {
-    # Get misc images from FTP
+    
     MODULE_FILE_NAME="${PRODUCT}${VERSION}_DualQuad_firmware.tgz"
     FIRMWARE_FILE_NAME="${PRODUCT}${VERSION}_DualQuad_module.tgz"
-
+    echo "[ADV] get_modules ftp"
 
     pftp -v -n ${FTP_SITE} <<-EOF
 user "ftpuser" "P@ssw0rd"
@@ -77,18 +78,21 @@ VERSION_NUM=$NUM1$NUM2
 # UBUNTU
  OS_PREFIX="U"
 
+echo "[ADV] get_ubuntu_images"
 get_ubuntu_images
+
 
 for NEW_MACHINE in $MACHINE_LIST
 do
-    MISC_VERSION="${NEW_MACHINE}LIV${VERSION_NUM}"
-    RELEASE_VERSION="${NEW_MACHINE}${OS_PREFIX}IV${VERSION_NUM}"
+    #MISC_VERSION="${NEW_MACHINE}LIV${VERSION_NUM}"
+    #RELEASE_VERSION="${NEW_MACHINE}${OS_PREFIX}IV${VERSION_NUM}"
 
-    if [ $NEW_MACHINE == "rsb4410a1" ]; then
+    if [ $NEW_MACHINE == "rsb4411a1" ]; then
         PRODUCT="4411LIV"
-    elif [ $NEW_MACHINE == "rsb4411a1" ]; then
+    elif [ $NEW_MACHINE == "rsb4410a1" ]; then
         PRODUCT="4410LIV"
     fi	
+    echo "[ADV] get_modules"
 	get_modules
 
 done

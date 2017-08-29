@@ -28,7 +28,7 @@ cd "Image/imx6/ubuntu/"
 prompt
 binary
 ls
-mget ${UBUNTU_ROOTFS}.img.gz
+mget ${UBUNTU_ROOTFS}.tgz
 close
 quit
 EOF
@@ -40,8 +40,8 @@ EOF
 function get_modules()
 {
     
-    MODULE_FILE_NAME="${PRODUCT}${VERSION}_DualQuad_firmware.tgz"
-    FIRMWARE_FILE_NAME="${PRODUCT}${VERSION}_DualQuad_module.tgz"
+    MODULE_FILE_NAME="${PRODUCT}${VERSION}_DualQuad_firmware"
+    FIRMWARE_FILE_NAME="${PRODUCT}${VERSION}_DualQuad_module"
     echo "[ADV] get_modules ftp"
 
     pftp -v -n ${FTP_SITE} <<-EOF
@@ -50,7 +50,8 @@ cd "officialbuild/${FTP_DIR}/${DATE}"
 prompt
 binary
 ls
-mget ${MISC_FILE_NAME}.tgz
+mget ${MODULE_FILE_NAME}.tgz
+mget ${FIRMWARE_FILE_NAME}.tgz
 close
 quit
 EOF

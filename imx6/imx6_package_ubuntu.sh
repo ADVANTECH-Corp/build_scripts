@@ -33,8 +33,7 @@ close
 quit
 EOF
 
-	mv ${UBUNTU_ROOTFS}.tgz ./out/
-    tar zxvf out/${UBUNTU_ROOTFS}.tgz
+    tar zxf ${UBUNTU_ROOTFS}.tgz
 }
 
 function get_modules()

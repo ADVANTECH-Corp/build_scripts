@@ -71,9 +71,6 @@ if [ $RSB4411A1  == true ]; then
     MACHINE_LIST="$MACHINE_LIST rsb4411a1"
 fi
 
-NUM1=`expr $VERSION : 'V\([0-9]*\)'`
-NUM2=`expr $VERSION : '.*[.]\([0-9]*\)'`
-VERSION_NUM=$NUM1$NUM2
 
 # UBUNTU
  OS_PREFIX="U"

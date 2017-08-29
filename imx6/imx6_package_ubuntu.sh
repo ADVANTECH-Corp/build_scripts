@@ -33,7 +33,7 @@ close
 quit
 EOF
 
-    tar zxf ${UBUNTU_ROOTFS}.tgz
+    #tar zxf ${UBUNTU_ROOTFS}.tgz
 }
 
 function get_modules()
@@ -55,9 +55,9 @@ close
 quit
 EOF
 
-    tar zxf ${MODULE_FILE_NAME}.tgz
+    #tar zxf ${MODULE_FILE_NAME}.tgz
     #rm ${MODULE_FILE_NAME}.tgz
-    tar zxf ${FIRMWARE_FILE_NAME}.tgz
+    #tar zxf ${FIRMWARE_FILE_NAME}.tgz
     #rm ${FIRMWARE_FILE_NAME}.tgz
 }
 

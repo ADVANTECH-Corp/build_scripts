@@ -33,7 +33,7 @@ close
 quit
 EOF
 
-    #tar zxf ${UBUNTU_ROOTFS}.tgz
+    tar zxf ${UBUNTU_ROOTFS}.tgz
 }
 
 function get_modules()
@@ -61,6 +61,34 @@ EOF
     #rm ${FIRMWARE_FILE_NAME}.tgz
 }
 
+function package_ubuntu_rootfs()
+{
+        MODULE_VERSION=`echo $(ls lib/modules/)`
+
+	# Set up chroot
+	sudo cp /usr/bin/qemu-arm-static /mnt/usr/bin/
+
+	# Depmod in chroot mode
+	sudo chroot /mnt << EOF
+depmod -a ${MODULE_VERSION}
+chown -R root:root /lib/modules/${MODULE_VERSION}/
+exit
+EOF
+
+	sudo rm /mnt/usr/bin/qemu-arm-static
+	sudo umount /mnt
+	sudo losetup -d /dev/loop1
+
+	ext2simg -v rootfs_tmp.raw "${OUT_DEBIAN_ROOTFS}".img
+	gzip -c9 ${OUT_DEBIAN_ROOTFS}.img > ${OUT_DEBIAN_ROOTFS}.img.gz
+	
+	tar zcf "${RELEASE_VERSION}_${DATE}".tgz ${OUT_DEBIAN_ROOTFS}.img.gz ${OUT_BOOT_IMAGE}.img
+	generate_md5 "${RELEASE_VERSION}_${DATE}".tgz
+	mv "${RELEASE_VERSION}_${DATE}".tgz $STORAGE_PATH
+	mv *.md5 $STORAGE_PATH
+	
+	rm rootfs_tmp.raw ${OUT_BOOT_IMAGE}.img ${OUT_DEBIAN_ROOTFS}.img ${OUT_DEBIAN_ROOTFS}.img.gz
+}
 
 
 # === [Main] List Official Build Version ============================================================
@@ -85,11 +113,12 @@ do
     #RELEASE_VERSION="${NEW_MACHINE}${OS_PREFIX}IV${VERSION_NUM}"
 
     if [ $NEW_MACHINE == "rsb4411a1" ]; then
-        PRODUCT="4411LIV"
+        PRODUCT="4411AILIV"
     elif [ $NEW_MACHINE == "rsb4410a1" ]; then
-        PRODUCT="4410LIV"
+        PRODUCT="4410A1LIV"
     fi	
     echo "[ADV] get_modules"
 	get_modules
 
+	#package_ubuntu_rootfs
 done

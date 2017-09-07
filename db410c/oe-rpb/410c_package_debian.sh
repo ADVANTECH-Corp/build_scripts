@@ -117,8 +117,15 @@ function package_debian_rootfs()
 {
     MODULE_VERSION=`echo $(ls lib/modules/)`
 
-	sudo umount /mnt
-	sudo losetup -d /dev/loop1
+	df | grep /mnt
+	if [ $? -eq 0 ] ; then
+		sudo umount /mnt
+	fi
+
+	sudo losetup -a | grep loop1
+	if [ $? -eq 0 ] ; then
+		sudo losetup -d /dev/loop1
+	fi
 
 	#WiFi calibration data
 	wget --progress=dot -e dotbytes=2M \
@@ -151,8 +158,8 @@ EOF
 	ext2simg -v rootfs_new.img "${OUT_DEBIAN_ROOTFS}".img
 	gzip -c9 ${OUT_DEBIAN_ROOTFS}.img > ${OUT_DEBIAN_ROOTFS}.img.gz
 	
-	tar zcf "${RELEASE_VERSION}_${DATE}".tgz ${OUT_DEBIAN_ROOTFS}.img.gz ${OUT_BOOT_IMAGE}.img
-	generate_md5 "${RELEASE_VERSION}_${DATE}".tgz
+	tar zcf "${RELEASE_VERSION}_${DATE}_${DEBIAN_OS_FLAVOUR}".tgz ${OUT_DEBIAN_ROOTFS}.img.gz ${OUT_BOOT_IMAGE}.img
+	generate_md5 "${RELEASE_VERSION}_${DATE}_${DEBIAN_OS_FLAVOUR}".tgz
 	mv "${RELEASE_VERSION}_${DATE}".tgz $STORAGE_PATH
 	mv *.md5 $STORAGE_PATH
 	

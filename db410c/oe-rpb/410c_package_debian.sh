@@ -1,4 +1,4 @@
-#!/bin/bash  -xe
+#!/bin/bash
 
 echo "[ADV] FTP_SITE = ${FTP_SITE}"
 echo "[ADV] FTP_DIR = ${FTP_DIR}"
@@ -117,15 +117,8 @@ function package_debian_rootfs()
 {
     MODULE_VERSION=`echo $(ls lib/modules/)`
 
-	mountpoint /mnt | grep not
-	if [ $? -eq 1 ] ; then
-		sudo umount /mnt
-	fi
-
-	sudo losetup -a | grep loop1
-	if [ $? -eq 0 ] ; then
-		sudo losetup -d /dev/loop1
-	fi
+	sudo umount /mnt
+	sudo losetup -d /dev/loop1
 
 	#WiFi calibration data
 	wget --progress=dot -e dotbytes=2M \

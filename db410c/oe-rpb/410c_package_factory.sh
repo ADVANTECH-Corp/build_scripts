@@ -1,4 +1,4 @@
-#!/bin/bash  -xe
+#!/bin/bash
 
 echo "[ADV] FTP_SITE = ${FTP_SITE}"
 echo "[ADV] FTP_DIR = ${FTP_DIR}"
@@ -98,15 +98,8 @@ function build_diagnostic()
 
 function package_rootfs()
 {
-	mountpoint /mnt | grep not
-	if [ $? -eq 1 ] ; then
-		sudo umount /mnt
-	fi
-
-	sudo losetup -a | grep loop1
-	if [ $? -eq 0 ] ; then
-		sudo losetup -d /dev/loop1
-	fi
+	sudo umount /mnt
+	sudo losetup -d /dev/loop1
 
 	simg2img ./os/${TARGET_OS}/rootfs.img rootfs_tmp.raw
 

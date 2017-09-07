@@ -102,22 +102,37 @@ function generate_md5()
     fi
 }
 
+function resize_image()
+{
+	dd if=/dev/zero of=rootfs_new.img bs=1M count=3000
+
+	sudo losetup /dev/loop1 rootfs_new.img
+
+	sudo dd if=rootfs_tmp.raw of=/dev/loop1
+
+	sudo losetup -d /dev/loop1
+}
+
 function package_debian_rootfs()
 {
-        MODULE_VERSION=`echo $(ls lib/modules/)`
+    MODULE_VERSION=`echo $(ls lib/modules/)`
+
+	sudo umount /mnt
+	sudo losetup -d /dev/loop1
 
 	#WiFi calibration data
 	wget --progress=dot -e dotbytes=2M \
 		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH}/meta-qcom-410c/recipes-bsp/firmware/files/WCNSS_qcom_wlan_nv.bin
 
 	simg2img ./out/${DEBIAN_ROOTFS}.img rootfs_tmp.raw
+	resize_image
 
-        sudo losetup /dev/loop1 rootfs_tmp.raw
-        sudo mount /dev/loop1 /mnt
+    sudo losetup /dev/loop1 rootfs_new.img
+    sudo mount /dev/loop1 /mnt
 
-        sudo rm -rf /mnt/lib/modules/*
-        sudo cp -ar lib/modules/ /mnt/lib/
-        sudo cp -a  WCNSS_qcom_wlan_nv.bin /mnt/lib/firmware/wlan/prima/
+    sudo rm -rf /mnt/lib/modules/*
+    sudo cp -ar lib/modules/ /mnt/lib/
+    sudo cp -a  WCNSS_qcom_wlan_nv.bin /mnt/lib/firmware/wlan/prima/
 
 	# Set up chroot
 	sudo cp /usr/bin/qemu-aarch64-static /mnt/usr/bin/
@@ -133,7 +148,7 @@ EOF
 	sudo umount /mnt
 	sudo losetup -d /dev/loop1
 
-	ext2simg -v rootfs_tmp.raw "${OUT_DEBIAN_ROOTFS}".img
+	ext2simg -v rootfs_new.img "${OUT_DEBIAN_ROOTFS}".img
 	gzip -c9 ${OUT_DEBIAN_ROOTFS}.img > ${OUT_DEBIAN_ROOTFS}.img.gz
 	
 	tar zcf "${RELEASE_VERSION}_${DATE}".tgz ${OUT_DEBIAN_ROOTFS}.img.gz ${OUT_BOOT_IMAGE}.img
@@ -141,7 +156,7 @@ EOF
 	mv "${RELEASE_VERSION}_${DATE}".tgz $STORAGE_PATH
 	mv *.md5 $STORAGE_PATH
 	
-	rm rootfs_tmp.raw ${OUT_BOOT_IMAGE}.img ${OUT_DEBIAN_ROOTFS}.img ${OUT_DEBIAN_ROOTFS}.img.gz
+	rm rootfs_new.img rootfs_tmp.raw ${OUT_BOOT_IMAGE}.img ${OUT_DEBIAN_ROOTFS}.img ${OUT_DEBIAN_ROOTFS}.img.gz
 }
 
 

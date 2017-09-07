@@ -98,6 +98,9 @@ function build_diagnostic()
 
 function package_rootfs()
 {
+	sudo umount /mnt
+	sudo losetup -d /dev/loop1
+
 	simg2img ./os/${TARGET_OS}/rootfs.img rootfs_tmp.raw
 
     sudo losetup /dev/loop1 rootfs_tmp.raw

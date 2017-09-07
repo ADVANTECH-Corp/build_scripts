@@ -109,8 +109,6 @@ function resize_image()
 	sudo losetup /dev/loop1 rootfs_new.img
 
 	sudo dd if=rootfs_tmp.raw of=/dev/loop1
-
-	sudo losetup -d /dev/loop1
 }
 
 function package_debian_rootfs()
@@ -127,7 +125,6 @@ function package_debian_rootfs()
 	simg2img ./out/${DEBIAN_ROOTFS}.img rootfs_tmp.raw
 	resize_image
 
-    sudo losetup /dev/loop1 rootfs_new.img
     sudo mount /dev/loop1 /mnt
 
     sudo rm -rf /mnt/lib/modules/*

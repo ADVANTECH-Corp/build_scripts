@@ -109,6 +109,9 @@ function resize_image()
 	sudo losetup /dev/loop1 rootfs_new.img
 
 	sudo dd if=rootfs_tmp.raw of=/dev/loop1
+
+	sudo e2fsck -f -y /dev/loop1
+	sudo resize2fs /dev/loop1
 }
 
 function package_debian_rootfs()

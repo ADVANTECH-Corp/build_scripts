@@ -117,8 +117,8 @@ function package_debian_rootfs()
 {
     MODULE_VERSION=`echo $(ls lib/modules/)`
 
-	df | grep /mnt
-	if [ $? -eq 0 ] ; then
+	mountpoint /mnt | grep not
+	if [ $? -eq 1 ] ; then
 		sudo umount /mnt
 	fi
 
@@ -160,7 +160,7 @@ EOF
 	
 	tar zcf "${RELEASE_VERSION}_${DATE}_${DEBIAN_OS_FLAVOUR}".tgz ${OUT_DEBIAN_ROOTFS}.img.gz ${OUT_BOOT_IMAGE}.img
 	generate_md5 "${RELEASE_VERSION}_${DATE}_${DEBIAN_OS_FLAVOUR}".tgz
-	mv "${RELEASE_VERSION}_${DATE}".tgz $STORAGE_PATH
+	mv "${RELEASE_VERSION}_${DATE}_${DEBIAN_OS_FLAVOUR}".tgz $STORAGE_PATH
 	mv *.md5 $STORAGE_PATH
 	
 	rm rootfs_new.img rootfs_tmp.raw ${OUT_BOOT_IMAGE}.img ${OUT_DEBIAN_ROOTFS}.img ${OUT_DEBIAN_ROOTFS}.img.gz

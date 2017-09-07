@@ -98,8 +98,8 @@ function build_diagnostic()
 
 function package_rootfs()
 {
-	df | grep /mnt
-	if [ $? -eq 0 ] ; then
+	mountpoint /mnt | grep not
+	if [ $? -eq 1 ] ; then
 		sudo umount /mnt
 	fi
 

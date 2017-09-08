@@ -142,7 +142,7 @@ function package_debian_rootfs()
 				fi
 			done
 		}
-	}200>dev_loop.lock
+	} 200>dev_loop.lock
 
 	rm dev_loop.lock
 

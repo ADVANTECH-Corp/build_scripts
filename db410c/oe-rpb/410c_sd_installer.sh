@@ -103,6 +103,7 @@ function prepare_target_os()
         cp ${OS_FILE_NAME}/recovery*.img os/${TARGET_OS}/recovery.img
         ;;
     "Debian")
+        OS_FILE_NAME="${OS_FILE_NAME}_${DEBIAN_OS_FLAVOUR}"
         get_ftp_files ${OS_FILE_NAME}.tgz ${OS_FILE_NAME}
         cp ${OS_FILE_NAME}/boot-*.img os/${TARGET_OS}/boot.img
         cp ${OS_FILE_NAME}/*.img.gz os/${TARGET_OS}/rootfs.img.gz

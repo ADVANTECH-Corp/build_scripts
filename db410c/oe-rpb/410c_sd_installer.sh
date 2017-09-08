@@ -138,7 +138,11 @@ EOF
 # === 3. Generate os.img & execute mksdcard script ==================================================
 function make_os_img()
 {
-    SD_INSTALLER_IMG_NAME="${RELEASE_VERSION}_${DATE}_sd_installer.img"
+    if [ $TARGET_OS == "Yocto" ]; then
+        SD_INSTALLER_IMG_NAME="${RELEASE_VERSION}_${DATE}_sd_installer.img"
+    elif [ $TARGET_OS == "Debian" ]; then
+        SD_INSTALLER_IMG_NAME="${RELEASE_VERSION}_${DATE}_sd_installer_${DEBIAN_OS_FLAVOUR}.img"
+    fi
 
     # get size of OS partition
     size_os=$(du -sk os | cut -f1)

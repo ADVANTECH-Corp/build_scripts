@@ -120,6 +120,10 @@ function package_debian_rootfs()
 {
     MODULE_VERSION=`echo $(ls lib/modules/)`
 
+	#WiFi calibration data
+	wget --progress=dot -e dotbytes=2M \
+		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH}/meta-qcom-410c/recipes-bsp/firmware/files/WCNSS_qcom_wlan_nv.bin
+
 	sudo umount /mnt
 
 	for ((i=1;i<=7;i++))
@@ -134,10 +138,6 @@ function package_debian_rootfs()
 		    break
 		fi
 	done
-
-	#WiFi calibration data
-	wget --progress=dot -e dotbytes=2M \
-		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH}/meta-qcom-410c/recipes-bsp/firmware/files/WCNSS_qcom_wlan_nv.bin
 
 	simg2img ./out/${DEBIAN_ROOTFS}.img rootfs_tmp.raw
 	resize_image $LOOP_DEV

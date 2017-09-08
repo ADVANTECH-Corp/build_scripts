@@ -104,14 +104,16 @@ function generate_md5()
 
 function resize_image()
 {
+	LOOP_DEV=$1
+
 	dd if=/dev/zero of=rootfs_new.img bs=1M count=3000
 
-	sudo losetup /dev/loop1 rootfs_new.img
+	sudo losetup $LOOP_DEV rootfs_new.img
 
-	sudo dd if=rootfs_tmp.raw of=/dev/loop1
+	sudo dd if=rootfs_tmp.raw of=$LOOP_DEV
 
-	sudo e2fsck -f -y /dev/loop1
-	sudo resize2fs /dev/loop1
+	sudo e2fsck -f -y $LOOP_DEV
+	sudo resize2fs $LOOP_DEV
 }
 
 function package_debian_rootfs()
@@ -119,16 +121,28 @@ function package_debian_rootfs()
     MODULE_VERSION=`echo $(ls lib/modules/)`
 
 	sudo umount /mnt
-	sudo losetup -d /dev/loop1
+
+	for ((i=1;i<=7;i++))
+	do
+		LOOP_DEV="/dev/loop${i}"
+		sudo losetup -a | grep $LOOP_DEV
+		if [ $? -eq 0 ]
+		then
+		    echo "$LOOP_DEV busy"
+		else
+		    echo "$LOOP_DEV free"
+		    break
+		fi
+	done
 
 	#WiFi calibration data
 	wget --progress=dot -e dotbytes=2M \
 		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH}/meta-qcom-410c/recipes-bsp/firmware/files/WCNSS_qcom_wlan_nv.bin
 
 	simg2img ./out/${DEBIAN_ROOTFS}.img rootfs_tmp.raw
-	resize_image
+	resize_image $LOOP_DEV
 
-    sudo mount /dev/loop1 /mnt
+    sudo mount $LOOP_DEV /mnt
 
     sudo rm -rf /mnt/lib/modules/*
     sudo cp -ar lib/modules/ /mnt/lib/
@@ -146,7 +160,7 @@ EOF
 
 	sudo rm /mnt/usr/bin/qemu-aarch64-static
 	sudo umount /mnt
-	sudo losetup -d /dev/loop1
+	sudo losetup -d $LOOP_DEV
 
 	ext2simg -v rootfs_new.img "${OUT_DEBIAN_ROOTFS}".img
 	gzip -c9 ${OUT_DEBIAN_ROOTFS}.img > ${OUT_DEBIAN_ROOTFS}.img.gz

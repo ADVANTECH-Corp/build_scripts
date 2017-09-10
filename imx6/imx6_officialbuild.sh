@@ -558,6 +558,31 @@ function prepare_images()
                 "sdk")
 			cp $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/sdk/* $OUTPUT_DIR
                         ;;
+                "ubuntu")
+                        echo "[ADV]  Copy Ubuntu"
+                        cp $DEPLOY_UBUNTU_PATH/zImage-${KERNEL_CPU_TYPE}*.dtb $OUTPUT_DIR
+                        cp $DEPLOY_UBUNTU_PATH/zImage $OUTPUT_DIR
+                        cp $DEPLOY_UBUNTU_PATH/u-boot_crc.bin $OUTPUT_DIR
+                        cp $DEPLOY_UBUNTU_PATH/u-boot_crc.bin.crc $OUTPUT_DIR
+                        cp $DEPLOY_UBUNTU_PATH/u-boot.imx $OUTPUT_DIR
+                        echo "[ADV]  Copy Ubuntu finish"
+                        ;;
+                "modules")
+                        echo "[ADV]  Copy modules"
+                        FILE_NAME="modules-imx6*.tgz"
+                        cp $DEPLOY_MODULES_PATH/$FILE_NAME $OUTPUT_DIR
+                        echo "[ADV]  Copy modules finish"
+                        ;;
+                "firmware")
+                        mkdir $OUTPUT_DIR/firmware_all
+                        mkdir $OUTPUT_DIR/firmware_product
+                        echo "[ADV]  Copy firmware"
+                        FILE_NAME="*.rpm"
+                        cp -rf $DEPLOY_FIRMWARE_PATH/$FILE_NAME $OUTPUT_DIR/firmware_all
+                        cp -rf $DEPLOY_FIRMWARE_PATH $OUTPUT_DIR/firmware_all
+                        echo "[ADV]  Copy firmware finish"
+                        cp -rf "$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/rpm/${KERNEL_CPU_TYPE}${PRODUCT}" $OUTPUT_DIR/firmware_product
+                        ;;
                 "normal")
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
@@ -603,7 +628,7 @@ function prepare_images()
 
         # Package image file
         case $IMAGE_TYPE in
-                "sdk" | "mfgtools")
+                "sdk" | "mfgtools" | "modules" | "firmware" | "ubuntu")
                         echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
 			tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
 			generate_md5 ${OUTPUT_DIR}.tgz
@@ -644,6 +669,15 @@ function copy_image_to_storage()
 		;;
 		"eng")
 			mv -f ${ENG_IMAGE_DIR}.img.gz $STORAGE_PATH
+		;;
+		"ubuntu")
+			mv -f ${UBUNTU_DIR}.tgz $STORAGE_PATH
+		;;
+		"modules")
+			mv -f ${MODULES_DIR}.tgz $STORAGE_PATH
+		;;
+		"firmware")
+			mv -f ${FIRMWARE_DIR}.tgz $STORAGE_PATH
 		;;
 		"normal")
 			generate_csv $IMAGE_DIR.img.gz
@@ -760,6 +794,24 @@ else #"$PRODUCT" != "$VER_PREFIX"
         IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"
         prepare_images normal $IMAGE_DIR
         copy_image_to_storage normal
+
+        echo "[ADV] create ubuntu"
+        DEPLOY_UBUNTU_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
+        UBUNTU_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_ubuntu
+        prepare_images ubuntu $UBUNTU_DIR
+        copy_image_to_storage ubuntu
+
+        echo "[ADV] create module"
+        DEPLOY_MODULES_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
+        MODULES_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_modules
+        prepare_images modules $MODULES_DIR
+        copy_image_to_storage modules
+
+        echo "[ADV] create firmware"
+        DEPLOY_FIRMWARE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/rpm/all"
+        FIRMWARE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_firmware
+        prepare_images firmware $FIRMWARE_DIR
+        copy_image_to_storage firmware
 
         echo "[ADV] generate ota image"
 	OTA_IMAGE_DIR="$IMAGE_DIR"_ota

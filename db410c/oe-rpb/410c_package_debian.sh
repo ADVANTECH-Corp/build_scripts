@@ -126,25 +126,18 @@ function package_debian_rootfs()
 
 	sudo umount /mnt
 
-	{
-		flock -x -w 10 200  || echo "Waiting for lock to release..."
-		{
-			for ((i=1;i<=7;i++))
-			do
-				LOOP_DEV="/dev/loop${i}"
-				sudo losetup -a | grep $LOOP_DEV
-				if [ $? -eq 0 ]
-				then
-				    echo "$LOOP_DEV busy"
-				else
-				    echo "$LOOP_DEV free"
-				    break
-				fi
-			done
-		}
-	} 200>dev_loop.lock
-
-	rm dev_loop.lock
+	for ((i=1;i<=7;i++))
+	do
+		LOOP_DEV="/dev/loop${i}"
+		sudo losetup -a | grep $LOOP_DEV
+		if [ $? -eq 0 ]
+		then
+		    echo "$LOOP_DEV busy"
+		else
+		    echo "$LOOP_DEV free"
+		    break
+		fi
+	done
 
 	simg2img ./out/${DEBIAN_ROOTFS}.img rootfs_tmp.raw
 	resize_image $LOOP_DEV

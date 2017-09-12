@@ -9,7 +9,7 @@ echo "[ADV] BL_BUILD_NUMBER = ${BL_BUILD_NUMBER}"
 echo "[ADV] INSTALLER_LINARO_RELEASE = ${INSTALLER_LINARO_RELEASE}"
 echo "[ADV] INSTALLER_BUILD_VERSION = ${INSTALLER_BUILD_VERSION}"
 echo "[ADV] TARGET_OS = ${TARGET_OS}"
-echo "[ADV] DEBIAN_OS_FLAVOUR = ${DEBIAN_OS_FLAVOUR}"
+echo "[ADV] DEBIAN_VER = ${DEBIAN_VER}"
 echo "[ADV] STORED = ${STORED}"
 CURR_PATH="$PWD"
 STORAGE_PATH="$CURR_PATH/$STORED"
@@ -86,9 +86,6 @@ function get_boot_installer_images()
 function prepare_target_os()
 {
 # --- [Advantech] ---
-    if [ -e os ] ; then
-        sudo rm -rf os
-    fi
     mkdir -p os/${TARGET_OS}
 
     # Get target OS images from FTP
@@ -103,7 +100,7 @@ function prepare_target_os()
         gunzip os/${TARGET_OS}/rootfs.img.gz
         cp ${OS_FILE_NAME}/recovery*.img os/${TARGET_OS}/recovery.img
         ;;
-    "Debian")
+    "Debian8"|"Debian9")
         OS_FILE_NAME="${OS_FILE_NAME}_${DEBIAN_OS_FLAVOUR}"
         get_ftp_files ${OS_FILE_NAME}.tgz ${OS_FILE_NAME}
         cp ${OS_FILE_NAME}/boot-*.img os/${TARGET_OS}/boot.img
@@ -127,8 +124,6 @@ function prepare_target_os()
 }
 EOF
 
-    cp mksdcard flash os/
-
     if [ ${TARGET_OS} == "Android" ]; then
         //To-Do
     else
@@ -140,11 +135,9 @@ EOF
 # === 3. Generate os.img & execute mksdcard script ==================================================
 function make_os_img()
 {
-    if [ $TARGET_OS == "Yocto" ]; then
-        SD_INSTALLER_IMG_NAME="${RELEASE_VERSION}_${DATE}_sd_installer.img"
-    elif [ $TARGET_OS == "Debian" ]; then
-        SD_INSTALLER_IMG_NAME="${RELEASE_VERSION}_${DATE}_sd_installer_${DEBIAN_OS_FLAVOUR}.img"
-    fi
+    SD_INSTALLER_IMG_NAME="${RELEASE_VERSION}_${DATE}_sd_installer.img"
+
+    cp mksdcard flash os/
 
     # get size of OS partition
     size_os=$(du -sk os | cut -f1)
@@ -205,6 +198,24 @@ do
     fi
 
     get_boot_installer_images
-    prepare_target_os
+
+    if [ -e os ] ; then
+        sudo rm -rf os
+    fi
+
+    if [ $OS_PREFIX == "D" ]; then
+        for TARGET_OS in $DEBIAN_VER    #redefined TARGET_OS
+        do
+            echo "NOW ${TARGET_OS}"
+            if [ $TARGET_OS == "Debian8" ]; then
+                DEBIAN_OS_FLAVOUR="jessie"
+            elif [ $TARGET_OS == "Debian9" ]; then
+                DEBIAN_OS_FLAVOUR="stretch"
+            fi
+            prepare_target_os
+        done
+    else
+        prepare_target_os
+    fi
     make_os_img
 done

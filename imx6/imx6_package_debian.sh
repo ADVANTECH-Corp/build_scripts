@@ -12,7 +12,7 @@ VERSION_TAG=$(echo $VERSION | sed 's/[.]//')
 
 CURR_PATH="$PWD"
 STORAGE_PATH="$CURR_PATH/$STORED"
-UBUNTU_ROOTFS="u1404-rootfs-armhf"
+UBUNTU_ROOTFS="rootfs.tar.bz2"
 
 # === 1. Put the debian images into out/ folder. =================================================
 function get_ubuntu_images()
@@ -21,21 +21,21 @@ function get_ubuntu_images()
     echo "[ADV] get_modules linux ftp"
     pftp -v -n 172.22.12.82<<-EOF
 user "ftpuser" "P@ssw0rd"
-cd "Image/imx6/ubuntu/"
+cd "Image/imx6/debian/"
 prompt
 binary
 ls
-mget ${UBUNTU_ROOTFS}.tgz
+mget ${UBUNTU_ROOTFS}
 close
 quit
 EOF
 
  
-    mv ${UBUNTU_ROOTFS}.tgz out/
+    mv ${UBUNTU_ROOTFS} out/
     cd out/
-    sudo tar zxf ${UBUNTU_ROOTFS}.tgz
+    sudo tar jxf ${UBUNTU_ROOTFS}
     #sudo chown adv:adv -R *
-    sudo rm -rf ${UBUNTU_ROOTFS}.tgz
+    sudo rm -rf ${UBUNTU_ROOTFS}
     cd ..
 }
 
@@ -86,10 +86,12 @@ function package_ubuntu_rootfs()
 	sudo chroot $UBUNTU_ROOTFS_PATH << EOF
 depmod -a ${MODULE_VERSION}
 chown -R root:root /lib/modules/${MODULE_VERSION}/
+
+#apt-get install -y alien
 #chown -R root:root *
 #alien -i /firmware_product/${CPU_TYPE_Module}${NEW_MACHINE}/*.rpm
-alien -i /firmware_all/linux-firmware*.rpm
-#------------------------------------------------------------------#
+#alien -i /firmware_all/linux-firmware*.rpm
+#------------------------------------------------------------------
 exit
 EOF
 		echo "[ADV] finish chroot"
@@ -146,7 +148,7 @@ function insert_image_file()
 			;;
 	esac
 
-	#sudo chown -R 0.0 $MOUNT_POINT/image
+	sudo chmod o+x $MOUNT_POINT/usr/lib/dbus-1.0/dbus-daemon-launch-helper
     echo "[ADV] umount $MOUNT_POINT"
 	sudo umount $MOUNT_POINT/
     echo "[ADV] losetup -d $LOOP_DEV"
@@ -214,9 +216,7 @@ fi
 if [ $RSB4411A1  == true ]; then
 	MACHINE_LIST="$MACHINE_LIST rsb4411a1"
 fi
-if [ $UBC220A1_SOLO == true ]; then
-	MACHINE_LIST="$MACHINE_LIST ubc220a1-solo"
-fi
+
 if [ $UBC220A1 == true ]; then
 	MACHINE_LIST="$MACHINE_LIST ubc220a1"
 fi
@@ -259,47 +259,47 @@ do
 
     if [ $NEW_MACHINE == "rsb4411a1" ]; then
         PRODUCT="4411A1LI"
-        UBUNTU_PRODUCT="4411A1UI"
+        UBUNTU_PRODUCT="4411A1DI"
 		CPU_TYPE="DualQuad"
 		CPU_TYPE_Module="imx6q"
     elif [ $NEW_MACHINE == "rsb4410a1" ]; then
         PRODUCT="4410A1LI"
-		UBUNTU_PRODUCT="4410A1UI"
+		UBUNTU_PRODUCT="4410A1DI"
 		CPU_TYPE="DualQuad"
 		CPU_TYPE_Module="imx6q"
     elif [ $NEW_MACHINE == "ubc220a1-solo" ]; then
         PRODUCT="220A1LI"
-		UBUNTU_PRODUCT="220A1UI"
+		UBUNTU_PRODUCT="220A1DI"
 		CPU_TYPE="DualLiteSolo"
 		CPU_TYPE_Module="imx6dl"
     elif [ $NEW_MACHINE == "ubc220a1" ]; then
         PRODUCT="220A1LI"
-		UBUNTU_PRODUCT="220A1UI"
+		UBUNTU_PRODUCT="220A1DI"
 		CPU_TYPE="DualQuad"
 		CPU_TYPE_Module="imx6q"
     elif [ $NEW_MACHINE == "rom5420a1" ]; then
         PRODUCT="5420A1LI"
-		UBUNTU_PRODUCT="5420A1UI"
+		UBUNTU_PRODUCT="5420A1DI"
 		CPU_TYPE="DualQuad"
 		CPU_TYPE_Module="imx6q"
     elif [ $NEW_MACHINE == "rom5420b1" ]; then
         PRODUCT="5420B1LI"
-		UBUNTU_PRODUCT="5420B1UI"
+		UBUNTU_PRODUCT="5420B1DI"
 		CPU_TYPE="DualQuad"
 		CPU_TYPE_Module="imx6q"
     elif [ $NEW_MACHINE == "rom7420a1" ]; then
         PRODUCT="7420A1LI"
-		UBUNTU_PRODUCT="7420A1UI"
+		UBUNTU_PRODUCT="7420A1DI"
 		CPU_TYPE="DualQuad"
 		CPU_TYPE_Module="imx6q"
     elif [ $NEW_MACHINE == "rom3420a1" ]; then
         PRODUCT="3420A1LI"
-		UBUNTU_PRODUCT="3420A1UI"
+		UBUNTU_PRODUCT="3420A1DI"
 		CPU_TYPE="DualQuad"
 		CPU_TYPE_Module="imx6q"
     elif [ $NEW_MACHINE == "rom7421a1-plus" ]; then
         PRODUCT="7421A1LI"
-		UBUNTU_PRODUCT="7421A1UI"
+		UBUNTU_PRODUCT="7421A1DI"
 		CPU_TYPE="DualQuadPlus"
 		CPU_TYPE_Module="imx6qp"
     fi	

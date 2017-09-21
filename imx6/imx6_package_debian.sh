@@ -216,7 +216,9 @@ fi
 if [ $RSB4411A1  == true ]; then
 	MACHINE_LIST="$MACHINE_LIST rsb4411a1"
 fi
-
+if [ $UBC220A1_SOLO == true ]; then
+	MACHINE_LIST="$MACHINE_LIST ubc220a1-solo"
+fi
 if [ $UBC220A1 == true ]; then
 	MACHINE_LIST="$MACHINE_LIST ubc220a1"
 fi

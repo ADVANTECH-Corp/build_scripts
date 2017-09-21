@@ -268,13 +268,13 @@ do
 		CPU_TYPE="DualQuad"
 		CPU_TYPE_Module="imx6q"
     elif [ $NEW_MACHINE == "ubc220a1-solo" ]; then
-        PRODUCT="220A1LI"
-		UBUNTU_PRODUCT="220A1UI"
+        PRODUCT="U220A1LI"
+		UBUNTU_PRODUCT="U220A1UI"
 		CPU_TYPE="DualLiteSolo"
 		CPU_TYPE_Module="imx6dl"
     elif [ $NEW_MACHINE == "ubc220a1" ]; then
-        PRODUCT="220A1LI"
-		UBUNTU_PRODUCT="220A1UI"
+        PRODUCT="U220A1LI"
+		UBUNTU_PRODUCT="U220A1UI"
 		CPU_TYPE="DualQuad"
 		CPU_TYPE_Module="imx6q"
     elif [ $NEW_MACHINE == "rom5420a1" ]; then

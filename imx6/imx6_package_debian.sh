@@ -84,9 +84,8 @@ function package_ubuntu_rootfs()
 
 	# Depmod in chroot mode
 	sudo chroot $UBUNTU_ROOTFS_PATH << EOF
+chown -R root:root /lib/modules
 depmod -a ${MODULE_VERSION}
-chown -R root:root /lib/modules/${MODULE_VERSION}/
-
 #apt-get install -y alien
 #chown -R root:root *
 #alien -i /firmware_product/${CPU_TYPE_Module}${NEW_MACHINE}/*.rpm

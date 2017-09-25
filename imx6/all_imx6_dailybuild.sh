@@ -4,6 +4,9 @@ MACHINE_LIST=""
 if [ $UBC220A1_SOLO == true ]; then
 	MACHINE_LIST="$MACHINE_LIST imx6dlubc220a1"
 fi
+if [ $UBC220A1 == true ]; then
+	MACHINE_LIST="$MACHINE_LIST imx6qubc220a1"
+fi
 if [ $UBCDS31A1 == true ]; then
 	MACHINE_LIST="$MACHINE_LIST imx6qubcds31a1"
 fi

@@ -192,19 +192,46 @@ function create_branch_and_commit()
         fi
 }
 
+function update_revision_for_xml()
+{
+        FILE_PATH=$1
+        PROJECT_LIST=`grep "path=" $FILE_PATH`
+        XML_PATH="$PWD"
 
+        # Delete old revision
+        for PROJECT in $PROJECT_LIST
+        do
+                REV=`expr ${PROJECT} : 'revision="\([a-zA-Z0-9_.]*\)"'`
+                if [ "$REV" != "" ]; then
+                        echo "[ADV] delete revision : $REV"
+                        sed -i "s/ revision=\"${REV}\"//g" $FILE_PATH
+                fi
+        done
 
+        # Add new revision
+        for PROJECT in $PROJECT_LIST
+        do
+                LAYER=`expr ${PROJECT} : 'path="\([a-zA-Z0-9/-]*\)"'`
+                if [ "$LAYER" != "" ]; then
+                        echo "[ADV] add revision for $LAYER"
+                        cd ../../$LAYER
+                        HASH_ID=`git rev-parse HEAD`
+                        cd $XML_PATH
+                        sed -i "s:path=\"${LAYER}\":path=\"${LAYER}\" revision=\"${HASH_ID}\":g" $FILE_PATH
+                fi
+        done
+}
 
 function create_xml_and_commit()
 {
         if [ -d "$ROOT_DIR/.repo/manifests" ];then
                 echo "[ADV] Create XML file"
-                cd $ROOT_DIR
-                # add revision into xml
-                repo manifest -o $VER_TAG.xml -r
-                mv $VER_TAG.xml .repo/manifests
-                cd .repo/manifests
+                cd $ROOT_DIR/.repo
+                cp manifest.xml manifests/$VER_TAG.xml
+                cd manifests
 		git checkout $BSP_BRANCH
+                # add revision into xml
+                update_revision_for_xml $VER_TAG.xml
 
                 # push to github
                 REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
@@ -612,7 +639,7 @@ function prepare_images()
                         generate_md5 $OUTPUT_DIR.img.gz
                         ;;
         esac
-        rm -rf $OUTPUT_DIR
+        #rm -rf $OUTPUT_DIR
 }
 
 function generate_OTA_update_package()
@@ -731,21 +758,21 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
         echo "[ADV] build yocto sdk"
         build_yocto_sdk
 
-	echo "[ADV] generate sdk image"
+	    echo "[ADV] generate sdk image"
         SDK_DIR="$ROOT_DIR"_sdk
         prepare_images sdk $SDK_DIR
-	copy_image_to_storage sdk
+	    copy_image_to_storage sdk
 
 	# Commit and create meta-advantech branch
-	create_branch_and_commit $META_ADVANTECH_PATH
+	# create_branch_and_commit $META_ADVANTECH_PATH
 
 	# Add git tag
-        echo "[ADV] Add tag"
-        auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/u-boot-imx $U_BOOT_URL
-        auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/linux-imx $KERNEL_URL
+        # echo "[ADV] Add tag"
+        # auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/u-boot-imx $U_BOOT_URL
+        # auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/linux-imx $KERNEL_URL
 
         # Create manifests xml and commit
-        create_xml_and_commit
+        # create_xml_and_commit
 
         # Remove pre-built image & backup generic rpm packages
         rm $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/$DEFAULT_DEVICE/*

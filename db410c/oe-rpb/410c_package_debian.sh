@@ -1,4 +1,4 @@
-#!/bin/bash  -xe
+#!/bin/bash
 
 echo "[ADV] FTP_SITE = ${FTP_SITE}"
 echo "[ADV] FTP_DIR = ${FTP_DIR}"
@@ -102,22 +102,51 @@ function generate_md5()
     fi
 }
 
+function resize_image()
+{
+	LOOP_DEV=$1
+
+	dd if=/dev/zero of=rootfs_new.img bs=1M count=3000
+
+	sudo losetup $LOOP_DEV rootfs_new.img
+
+	sudo dd if=rootfs_tmp.raw of=$LOOP_DEV
+
+	sudo e2fsck -f -y $LOOP_DEV
+	sudo resize2fs $LOOP_DEV
+}
+
 function package_debian_rootfs()
 {
-        MODULE_VERSION=`echo $(ls lib/modules/)`
+    MODULE_VERSION=`echo $(ls lib/modules/)`
 
 	#WiFi calibration data
 	wget --progress=dot -e dotbytes=2M \
 		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH}/meta-qcom-410c/recipes-bsp/firmware/files/WCNSS_qcom_wlan_nv.bin
 
+	sudo umount /mnt
+
+	for ((i=1;i<=7;i++))
+	do
+		LOOP_DEV="/dev/loop${i}"
+		sudo losetup -a | grep $LOOP_DEV
+		if [ $? -eq 0 ]
+		then
+		    echo "$LOOP_DEV busy"
+		else
+		    echo "$LOOP_DEV free"
+		    break
+		fi
+	done
+
 	simg2img ./out/${DEBIAN_ROOTFS}.img rootfs_tmp.raw
+	resize_image $LOOP_DEV
 
-        sudo losetup /dev/loop1 rootfs_tmp.raw
-        sudo mount /dev/loop1 /mnt
+    sudo mount $LOOP_DEV /mnt
 
-        sudo rm -rf /mnt/lib/modules/*
-        sudo cp -ar lib/modules/ /mnt/lib/
-        sudo cp -a  WCNSS_qcom_wlan_nv.bin /mnt/lib/firmware/wlan/prima/
+    sudo rm -rf /mnt/lib/modules/*
+    sudo cp -ar lib/modules/ /mnt/lib/
+    sudo cp -a  WCNSS_qcom_wlan_nv.bin /mnt/lib/firmware/wlan/prima/
 
 	# Set up chroot
 	sudo cp /usr/bin/qemu-aarch64-static /mnt/usr/bin/
@@ -131,17 +160,17 @@ EOF
 
 	sudo rm /mnt/usr/bin/qemu-aarch64-static
 	sudo umount /mnt
-	sudo losetup -d /dev/loop1
+	sudo losetup -d $LOOP_DEV
 
-	ext2simg -v rootfs_tmp.raw "${OUT_DEBIAN_ROOTFS}".img
+	ext2simg -v rootfs_new.img "${OUT_DEBIAN_ROOTFS}".img
 	gzip -c9 ${OUT_DEBIAN_ROOTFS}.img > ${OUT_DEBIAN_ROOTFS}.img.gz
 	
-	tar zcf "${RELEASE_VERSION}_${DATE}".tgz ${OUT_DEBIAN_ROOTFS}.img.gz ${OUT_BOOT_IMAGE}.img
-	generate_md5 "${RELEASE_VERSION}_${DATE}".tgz
-	mv "${RELEASE_VERSION}_${DATE}".tgz $STORAGE_PATH
+	tar zcf "${RELEASE_VERSION}_${DATE}_${DEBIAN_OS_FLAVOUR}".tgz ${OUT_DEBIAN_ROOTFS}.img.gz ${OUT_BOOT_IMAGE}.img
+	generate_md5 "${RELEASE_VERSION}_${DATE}_${DEBIAN_OS_FLAVOUR}".tgz
+	mv "${RELEASE_VERSION}_${DATE}_${DEBIAN_OS_FLAVOUR}".tgz $STORAGE_PATH
 	mv *.md5 $STORAGE_PATH
 	
-	rm rootfs_tmp.raw ${OUT_BOOT_IMAGE}.img ${OUT_DEBIAN_ROOTFS}.img ${OUT_DEBIAN_ROOTFS}.img.gz
+	rm rootfs_new.img rootfs_tmp.raw ${OUT_BOOT_IMAGE}.img ${OUT_DEBIAN_ROOTFS}.img ${OUT_DEBIAN_ROOTFS}.img.gz
 }
 
 

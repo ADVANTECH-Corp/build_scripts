@@ -559,6 +559,7 @@ function prepare_images()
                 "normal")
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
+			cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
                         if [ -e $OUTPUT_DIR/$FILE_NAME ]; then
                                 FILE_NAME=`ls $OUTPUT_DIR | grep rootfs.sdcard | grep $DEPLOY_IMAGE_NAME`
 
@@ -569,6 +570,7 @@ function prepare_images()
 		"ota")
                         FILE_NAME=${OTA_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
+			cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
                         if [ -e $OUTPUT_DIR/$FILE_NAME ]; then
                                 FILE_NAME=`ls $OUTPUT_DIR | grep rootfs.sdcard | grep $OTA_IMAGE_NAME`
 

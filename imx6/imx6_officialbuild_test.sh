@@ -733,21 +733,21 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
         echo "[ADV] build yocto sdk"
         build_yocto_sdk
 
-	    echo "[ADV] generate sdk image"
+	echo "[ADV] generate sdk image"
         SDK_DIR="$ROOT_DIR"_sdk
         prepare_images sdk $SDK_DIR
-	    copy_image_to_storage sdk
+	copy_image_to_storage sdk
 
 	# Commit and create meta-advantech branch
-	# create_branch_and_commit $META_ADVANTECH_PATH
+	create_branch_and_commit $META_ADVANTECH_PATH
 
 	# Add git tag
-        # echo "[ADV] Add tag"
-        # auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/u-boot-imx $U_BOOT_URL
-        # auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/linux-imx $KERNEL_URL
+        echo "[ADV] Add tag"
+        auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/u-boot-imx $U_BOOT_URL
+        auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/linux-imx $KERNEL_URL
 
         # Create manifests xml and commit
-        # create_xml_and_commit
+        create_xml_and_commit
 
         # Remove pre-built image & backup generic rpm packages
         rm $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/$DEFAULT_DEVICE/*

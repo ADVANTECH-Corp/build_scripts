@@ -46,5 +46,8 @@ fi
 if [ $ROM7421A1_SOLO == true ]; then
 	./imx6_officialbuild.sh rom7421a1-solo 7421A1LIV"$VERSION_NUM" 1G x11 2>&1 |tee 7421A1LIV"$VERSION_NUM"_DualLiteSolo_$DATE.log
 fi
+if [ $EBCRB01A1 == true ]; then
+	./imx6_officialbuild.sh ebcrb01a1 RB01A1LIV"$VERSION_NUM" 1G x11 2>&1 |tee RB01A1LIV"$VERSION_NUM"_DualQuad_$DATE.log
+fi
 
 mv *.log $STORED/$DATE/

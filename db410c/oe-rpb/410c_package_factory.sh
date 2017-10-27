@@ -78,12 +78,12 @@ function build_susi_3.0()
 
 function build_susi_4.0()
 {
-	svn co https://172.20.2.44/svn/ess/SUSI/SUSI_4.0/SUSI/SourceCode
-	cd SourceCode
-	source risc-env qualcomm dragon yocto
-	make
-	cp -ar ./OtherOs/risc/Driver/libSUSI-4.00.so* ${CURR_PATH}/os/${TARGET_OS}/usr/lib/
-	cp -ar ./OtherOs/risc/Susi4Demo/*.h ${CURR_PATH}/os/${TARGET_OS}/usr/include/
+	git clone http://advgitlab.eastasia.cloudapp.azure.com/db410c/SUSI4.0_BIN_FILE.git
+	cd SUSI4.0_BIN_FILE
+	tar zxvf SUSI4.0.bin.tgz
+
+	cp -ar ./Driver/libSUSI-4.00.so* ${CURR_PATH}/os/${TARGET_OS}/usr/lib/
+	cp -ar ./Susi4Demo/*.h ${CURR_PATH}/os/${TARGET_OS}/usr/include/
 	cd ..
 }
 

@@ -37,6 +37,9 @@ fi
 if [ $ROM7421A1_PLUS == true ]; then
 	MACHINE_LIST="$MACHINE_LIST imx6qprom7421a1"
 fi
+if [ $ROM7421A1 == true ]; then
+	MACHINE_LIST="$MACHINE_LIST imx6qrom7421a1"
+fi
 if [ $ROM7421A1_SOLO == true ]; then
 	MACHINE_LIST="$MACHINE_LIST imx6dlrom7421a1"
 fi

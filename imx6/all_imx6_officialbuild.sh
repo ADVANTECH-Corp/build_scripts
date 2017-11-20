@@ -41,10 +41,13 @@ if [ $ROM3420A1 == true ]; then
 	./imx6_officialbuild.sh rom3420a1 3420A1LIV"$VERSION_NUM" 1G-2G x11 2>&1 |tee 3420A1LIV"$VERSION_NUM"_DualQuad_$DATE.log
 fi
 if [ $ROM7421A1_PLUS == true ]; then
-	./imx6_officialbuild.sh rom7421a1-plus 7421A1LIV"$VERSION_NUM" 1G-2G x11 2>&1 |tee 7421A1LIV"$VERSION_NUM"_DualQuad_$DATE.log
+	./imx6_officialbuild.sh rom7421a1-plus 7421A1LIV"$VERSION_NUM" 1G-2G x11 2>&1 |tee 7421A1LIV"$VERSION_NUM"_DualQuadPlus_$DATE.log
+fi
+if [ $ROM7421A1 == true ]; then
+	./imx6_officialbuild.sh rom7421a1 7421A1LIV"$VERSION_NUM" 1G-2G x11 2>&1 |tee 7421A1LIV"$VERSION_NUM"_DualQuad_$DATE.log
 fi
 if [ $ROM7421A1_SOLO == true ]; then
-	./imx6_officialbuild.sh rom7421a1-solo 7421A1LIV"$VERSION_NUM" 1G x11 2>&1 |tee 7421A1LIV"$VERSION_NUM"_DualLiteSolo_$DATE.log
+	./imx6_officialbuild.sh rom7421a1-solo 7421A1LIV"$VERSION_NUM" 1G-512M x11 2>&1 |tee 7421A1LIV"$VERSION_NUM"_DualLiteSolo_$DATE.log
 fi
 if [ $EBCRB01A1 == true ]; then
 	./imx6_officialbuild.sh ebcrb01a1 RB01A1LIV"$VERSION_NUM" 1G x11 2>&1 |tee RB01A1LIV"$VERSION_NUM"_DualQuad_$DATE.log

@@ -52,6 +52,12 @@ fi
 if [ $EBCRB01A1 == true ]; then
 	./imx6_officialbuild.sh ebcrb01a1 RB01A1LIV"$VERSION_NUM" 1G x11 2>&1 |tee RB01A1LIV"$VERSION_NUM"_DualQuad_$DATE.log
 fi
+if [ $EBCRS03A1 == true ]; then
+	./imx6_officialbuild.sh ebcrs03a1 RS03A1LIV"$VERSION_NUM" 2G x11 2>&1 |tee RS03A1LIV"$VERSION_NUM"_DualQuad_$DATE.log
+fi
+if [ $EBCRS03A1_SOLO == true ]; then
+	./imx6_officialbuild.sh ebcrs03a1-solo RS03A1LIV"$VERSION_NUM" 1G x11 2>&1 |tee RS03A1LIV"$VERSION_NUM"_DualLiteSolo__$DATE.log
+fi
 if [ $RSB6410A2 == true ]; then
         ./imx6_officialbuild.sh rsb6410a2 6410A2LIV"$VERSION_NUM" 1G-2G x11 2>&1 |tee 6410A2LIV"$VERSION_NUM"_DualQuad_$DATE.log
 fi

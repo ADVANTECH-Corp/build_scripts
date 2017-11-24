@@ -54,6 +54,11 @@ fi
 
 # Get OTA script
 sudo apt-get install zip
+EDGE_BRANCH=`echo ${BSP_BRANCH} | cut -d '-' -f 1`
+EDGE_PATTEN=`echo ${BSP_BRANCH} | cut -d '-' -f 2`
+if [ "${EDGE_PATTEN}" == "EdgeSense" ]; then
+    BSP_BRANCH="${EDGE_BRANCH}"
+fi
 wget https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH}/meta-WISE-PaaS/recipes-ota/ota-script/files/ota-package.sh
 chmod +x ota-package.sh
 

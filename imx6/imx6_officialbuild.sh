@@ -414,7 +414,7 @@ function rebuild_u-boot()
 {
         #rebuild u-boot because of different memory
         echo "[ADV] rebuild u-boot for DDR $MEMORY"
-        sed -i "s/${PRODUCT}_.*_config/${PRODUCT}_${MEMORY}_config/g" $ROOT_DIR/$META_ADVANTECH_PATH/meta-fsl-imx6/conf/machine/${KERNEL_CPU_TYPE}${PRODUCT}.conf
+        sed -i "s/${PRE_MEMORY}/${MEMORY}/g" $ROOT_DIR/$META_ADVANTECH_PATH/meta-fsl-imx6/conf/machine/${KERNEL_CPU_TYPE}${PRODUCT}.conf
         cd  $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR
         building u-boot-imx cleansstate
         building u-boot-imx

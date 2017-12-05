@@ -415,10 +415,11 @@ function rebuild_u-boot()
         #rebuild u-boot because of different memory
         echo "[ADV] rebuild u-boot for DDR $MEMORY"
 	echo "[ADV] rebuild u-boot PRE_MEMORY $PRE_MEMORY"
-        sed -i "s/${PRE_MEMORY}/${MEMORY}/g" $ROOT_DIR/$META_ADVANTECH_PATH/meta-fsl-imx6/conf/machine/${KERNEL_CPU_TYPE}${PRODUCT}.conf
+	#sed -i "s/${PRE_MEMORY}/${MEMORY}/g" $ROOT_DIR/$META_ADVANTECH_PATH/meta-fsl-imx6/conf/machine/${KERNEL_CPU_TYPE}${PRODUCT}.conf
         cd  $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR
         building u-boot-imx cleansstate
         building u-boot-imx
+	ln -sf ${DEPLOY_IMAGE_PATH}/u-boot-${MEMORY}-*.imx ${DEPLOY_IMAGE_PATH}/u-boot-${KERNEL_CPU_TYPE}${PRODUCT}.imx
         bitbake $DEPLOY_IMAGE_NAME -c rootfs -f
         cd  $CURR_PATH
 }
@@ -797,7 +798,7 @@ else #"$PRODUCT" != "$VER_PREFIX"
         while [ "$MEMORY" != "$PRE_MEMORY" ]
         do
                 if [ "$PRE_MEMORY" != "" ]; then
-                        rebuild_u-boot
+			rebuild_u-boot
                 fi
 
                 #ENG image

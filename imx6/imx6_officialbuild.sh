@@ -421,6 +421,7 @@ function rebuild_u-boot()
         building u-boot-imx
 	ln -sf ${DEPLOY_IMAGE_PATH}/u-boot-${MEMORY}-*.imx ${DEPLOY_IMAGE_PATH}/u-boot-${KERNEL_CPU_TYPE}${PRODUCT}.imx
         bitbake $DEPLOY_IMAGE_NAME -c rootfs -f
+        bitbake $DEPLOY_IMAGE_NAME -c image_sdcard -f
         cd  $CURR_PATH
 }
 

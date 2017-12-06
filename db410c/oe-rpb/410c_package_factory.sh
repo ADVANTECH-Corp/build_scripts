@@ -174,7 +174,7 @@ if [ $EPC_R4761 == true ]; then
 fi
 
 NUM1=`expr $VERSION : 'V\([0-9]*\)'`
-NUM2=`expr $VERSION : '.*[.]\([0-9]*\)'`
+NUM2=`expr $VERSION : '.*[.]\([0-9A-Z]*\)'`
 VERSION_NUM=$NUM1$NUM2
 
 if [ $TARGET_OS == "Yocto" ]; then

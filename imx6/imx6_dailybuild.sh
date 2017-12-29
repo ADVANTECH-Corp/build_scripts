@@ -158,7 +158,7 @@ function prepare_images()
     rm $IMAGE_DIR/$FILE_NAME
 
     # U-Boot & SPL
-    echo "[ADV] creating ${IMAGE_DIR}.tgz for u-boot & SPL images ..."
+    echo "[ADV] creating ${IMAGE_DIR}_spl.tgz for u-boot & SPL images ..."
     mv $DEPLOY_IMAGE_PATH/SPL* $IMAGE_DIR
     mv $DEPLOY_IMAGE_PATH/u-boot* $IMAGE_DIR
     tar czf ${IMAGE_DIR}_spl.tgz $IMAGE_DIR

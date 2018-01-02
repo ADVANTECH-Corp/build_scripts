@@ -594,7 +594,7 @@ function prepare_images()
 			git clone $MFGTOOLS_URL -b $MFGTOOLS_BRANCH
                         cp -rf Mfgtools/* $OUTPUT_DIR/
                         rm -rf Mfgtools
-                        cp $DEPLOY_IMAGE_PATH/u-boot.imx $OUTPUT_DIR/Profiles/Linux/OS\ Firmware/firmware/
+                        cp $DEPLOY_IMAGE_PATH/u-boot-${KERNEL_CPU_TYPE}${PRODUCT}.imx $OUTPUT_DIR/Profiles/Linux/OS\ Firmware/firmware/u-boot.imx
                         cp $DEPLOY_IMAGE_PATH/zImage-${KERNEL_CPU_TYPE}*.dtb $OUTPUT_DIR/Profiles/Linux/OS\ Firmware/firmware/
                         sed -i "s/dtb =.*/dtb = `ls $DEPLOY_IMAGE_PATH/zImage-${KERNEL_CPU_TYPE}*.dtb | xargs -n1 basename| cut -d '.' -f 1 | sed s/zImage\-//g`/g" $OUTPUT_DIR/cfg.ini
                         ;;

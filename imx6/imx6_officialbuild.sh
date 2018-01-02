@@ -94,18 +94,37 @@ function define_cpu_type()
         esac
 }
 
+function do_repo_init()
+{
+    REPO_OPT="-u $BSP_URL"
+
+    if [ ! -z "$BSP_BRANCH" ] ; then
+        REPO_OPT="$REPO_OPT -b $BSP_BRANCH"
+    fi
+    if [ ! -z "$BSP_XML" ] ; then
+        REPO_OPT="$REPO_OPT -m $BSP_XML"
+    fi
+
+    repo init $REPO_OPT
+}
+
 function get_source_code()
 {
     echo "[ADV] get yocto source code"
     cd $ROOT_DIR
 
-    if [ "$BSP_BRANCH" == "" ] ; then
-        repo init -u $BSP_URL
-    elif [ "$BSP_XML" == "" ] ; then
-        repo init -u $BSP_URL -b $BSP_BRANCH
+    do_repo_init
+
+    EXISTED_VERSION=`find .repo/manifests -name ${VER_TAG}.xml`
+    if [ -z "$EXISTED_VERSION" ] ; then
+        echo "[ADV] This is a new VERSION"
     else
-        repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
+        echo "[ADV] $RELEASE_VERSION already exists!"
+        rm -rf .repo
+        BSP_XML="$VER_TAG.xml"
+        do_repo_init
     fi
+
     repo sync
 
     cd $CURR_PATH
@@ -721,13 +740,14 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 	mkdir $ROOT_DIR
         get_source_code
 
-	# Check meta-advantech tag exist or not, and checkout to tag version
-	check_tag_and_checkout $META_ADVANTECH_PATH
+	if [ -z "$EXISTED_VERSION" ] ; then
+	        # Check meta-advantech tag exist or not, and checkout to tag version
+        	check_tag_and_checkout $META_ADVANTECH_PATH
 
-	# Check tag exist or not, and replace bbappend file SRCREV
-	check_tag_and_replace $U_BOOT_PATH $U_BOOT_URL $U_BOOT_BRANCH
-	check_tag_and_replace $KERNEL_PATH $KERNEL_URL $KERNEL_BRANCH
-
+		# Check tag exist or not, and replace bbappend file SRCREV
+		check_tag_and_replace $U_BOOT_PATH $U_BOOT_URL $U_BOOT_BRANCH
+		check_tag_and_replace $KERNEL_PATH $KERNEL_URL $KERNEL_BRANCH
+	fi
         # BSP source code
         echo "[ADV] tar $ROOT_DIR.tgz file"
 	rm $ROOT_DIR/setup-environment $ROOT_DIR/fsl-setup-release.sh
@@ -745,16 +765,18 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
         prepare_images sdk $SDK_DIR
 	copy_image_to_storage sdk
 
-	# Commit and create meta-advantech branch
-	create_branch_and_commit $META_ADVANTECH_PATH
+	if [ -z "$EXISTED_VERSION" ] ; then
+		# Commit and create meta-advantech branch
+		create_branch_and_commit $META_ADVANTECH_PATH
 
-	# Add git tag
-        echo "[ADV] Add tag"
-        auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/u-boot-imx $U_BOOT_URL
-        auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/linux-imx $KERNEL_URL
+		# Add git tag
+		echo "[ADV] Add tag"
+		auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/u-boot-imx $U_BOOT_URL
+		auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/linux-imx $KERNEL_URL
 
-        # Create manifests xml and commit
-        create_xml_and_commit
+		# Create manifests xml and commit
+		create_xml_and_commit
+	fi
 
         # Remove pre-built image & backup generic rpm packages
         rm $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/$DEFAULT_DEVICE/*

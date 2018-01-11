@@ -61,7 +61,7 @@ END_OF_HELP
 [[ $# < 3 || $# > 4 ]] && USAGE "invalid parameters" 1
 [ ! -e ${SCRIPT_DIR}/${CALLEE} ] && ERROR "missing \"${CALLEE}\"" 1
 
-[[ ! $1 =~ ^([lL][iIbB])?[vV]([0-9][.]?){4}$ ]] && USAGE "!!! invalid version !!!" 1
+[[ ! $1 =~ ^([lL][iIbB])?[vV]([0-9][.]?){3}[0-9A-Za-z]$ ]] && USAGE "!!! invalid version !!!" 1
 
 VERSION=${1^^}
 VERSION=${VERSION//./}

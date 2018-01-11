@@ -96,7 +96,7 @@ MINOR=${VER:1}
 if ! [[ ${MAJOR} =~ ^[0-9]{1}$ ]] ; then
 	USAGE "!!! Invalid MAJOR !!!" 1
 fi
-if ! [[ ${MINOR} =~ ^[0-9]{3}$ ]] ; then
+if ! [[ ${MINOR} =~ ^[0-9]{2}[0-9A-Z]$ ]] ; then
 	USAGE "!!! Invalid MINOR !!!" 1
 fi
 
@@ -455,7 +455,8 @@ function move_to_stored_directory()
 REVISION_BUILT_CHECK=${REVISION_BUILT_CHECK:-1}
 REPACK_BSP=${REPACK_BSP:-1}
 PACK_IMAGE=${PACK_IMAGE:-1}
-BUILD_ITEMS=${BUILD_ITEMS-"full sdk spi dev eng"}
+#BUILD_ITEMS=${BUILD_ITEMS-"full sdk spi dev eng"}
+BUILD_ITEMS=${BUILD_ITEMS-"full sdk spi"}
 
 echo "REVISION_BUILT_CHECK=${REVISION_BUILT_CHECK}"
 echo "REPACK_BSP=${REPACK_BSP}"

@@ -18,3 +18,6 @@ if [ $EPC_R4761 == true ]; then
 	[ "$?" -ne 0 ] && exit 1
 fi
 
+# Push commit
+./410c_oe_officialbuild.sh push_commit
+[ "$?" -ne 0 ] && exit 1

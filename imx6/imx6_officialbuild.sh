@@ -756,6 +756,10 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 	tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
         generate_md5 $ROOT_DIR.tgz
 
+        # Package kernel & u-boot
+        wrap_source_code $KERNEL_URL $VER_TAG linux-imx6
+        wrap_source_code $U_BOOT_URL $VER_TAG uboot-imx6
+
         # Build Yocto SDK
         echo "[ADV] build yocto sdk"
         build_yocto_sdk
@@ -765,21 +769,24 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
         prepare_images sdk $SDK_DIR
 	copy_image_to_storage sdk
 
-	if [ -z "$EXISTED_VERSION" ] ; then
-		# Commit and create meta-advantech branch
-		create_branch_and_commit $META_ADVANTECH_PATH
-
-		# Add git tag
-		echo "[ADV] Add tag"
-		auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/u-boot-imx $U_BOOT_URL
-		auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/linux-imx $KERNEL_URL
-
-		# Create manifests xml and commit
-		create_xml_and_commit
-	fi
-
         # Remove pre-built image & backup generic rpm packages
         rm $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/$DEFAULT_DEVICE/*
+
+elif [ "$PRODUCT" == "push_commit" ]; then
+        EXISTED_VERSION=`find $ROOT_DIR/.repo/manifests -name ${VER_TAG}.xml`
+
+        if [ -z "$EXISTED_VERSION" ] ; then
+                # Commit and create meta-advantech branch
+                create_branch_and_commit $META_ADVANTECH_PATH
+
+                # Add git tag
+                echo "[ADV] Add tag"
+                auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/u-boot-imx $U_BOOT_URL
+                auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/linux-imx $KERNEL_URL
+
+                # Create manifests xml and commit
+                create_xml_and_commit
+        fi
 
 else #"$PRODUCT" != "$VER_PREFIX"
         if [ ! -e $ROOT_DIR ]; then
@@ -856,9 +863,6 @@ if [ ! -e $CURR_PATH/downloads ] ; then
     echo "[ADV] backup 'downloads' directory"
     cp -a $CURR_PATH/$ROOT_DIR/downloads $CURR_PATH
 fi
-
-wrap_source_code $KERNEL_URL $VER_TAG linux-imx6
-wrap_source_code $U_BOOT_URL $VER_TAG uboot-imx6
 
 cd $CURR_PATH
 #rm -rf $ROOT_DIR

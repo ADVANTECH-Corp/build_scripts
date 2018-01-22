@@ -472,19 +472,22 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
     prepare_images sdk $SDK_DIR
     copy_image_to_storage sdk
 
-    if [ -z "$EXISTED_VERSION" ] ; then
-        # Commit and create meta-advantech branch
-        create_branch_and_commit $META_ADVANTECH_PATH
-
-        # Add git tag
-        auto_add_tag $KERNEL_SOURCE_DIR $KERNEL_URL
-
-        # Create manifests xml and commit
-        create_xml_and_commit
-    fi
-
     # Remove pre-built image
     rm $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/$DEFAULT_DEVICE/*
+
+elif [ "$PRODUCT" == "push_commit" ]; then
+        EXISTED_VERSION=`find $ROOT_DIR/.repo/manifests -name ${VER_TAG}.xml`
+
+        if [ -z "$EXISTED_VERSION" ] ; then
+                # Commit and create meta-advantech branch
+                create_branch_and_commit $META_ADVANTECH_PATH
+
+                # Add git tag
+                auto_add_tag $KERNEL_SOURCE_DIR $KERNEL_URL
+
+                # Create manifests xml and commit
+                create_xml_and_commit
+        fi
 
 else #"$PRODUCT" != "$VER_PREFIX"
     if [ ! -e $ROOT_DIR ]; then

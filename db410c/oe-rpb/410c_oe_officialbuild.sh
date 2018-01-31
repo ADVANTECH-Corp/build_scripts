@@ -484,7 +484,7 @@ elif [ "$PRODUCT" == "push_commit" ]; then
                 create_branch_and_commit $META_ADVANTECH_PATH
 
                 # Add git tag
-                auto_add_tag $KERNEL_SOURCE_DIR $KERNEL_URL
+                auto_add_tag $KERNEL_SOURCE_DIR
 
                 # Create manifests xml and commit
                 create_xml_and_commit

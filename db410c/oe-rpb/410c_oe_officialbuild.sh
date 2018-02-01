@@ -480,6 +480,12 @@ elif [ "$PRODUCT" == "push_commit" ]; then
         EXISTED_VERSION=`find $ROOT_DIR/.repo/manifests -name ${VER_TAG}.xml`
 
         if [ -z "$EXISTED_VERSION" ] ; then
+		#Define for $KERNEL_SOURCE_DIR
+		PRODUCT=$2
+		NEW_MACHINE=$PRODUCT
+		set_environment
+		cd $CURR_PATH
+
                 # Commit and create meta-advantech branch
                 create_branch_and_commit $META_ADVANTECH_PATH
 

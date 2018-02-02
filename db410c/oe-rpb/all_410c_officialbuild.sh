@@ -17,7 +17,7 @@ if [ $RSB_4760 == true ]; then
 fi
 if [ $EPC_R4761 == true ]; then
 	PRODUCT="epc-r4761"
-	./410c_oe_officialbuild.sh "epc-r4761" 4761LIV"$VERSION_NUM" 2>&1
+	./410c_oe_officialbuild.sh epc-r4761 4761LIV"$VERSION_NUM" 2>&1
 	[ "$?" -ne 0 ] && exit 1
 fi
 
@@ -26,3 +26,5 @@ if [ -n $PRODUCT ]; then
 	./410c_oe_officialbuild.sh push_commit $PRODUCT
 	[ "$?" -ne 0 ] && exit 1
 fi
+
+echo "[ADV] All done!"

@@ -776,13 +776,18 @@ elif [ "$PRODUCT" == "push_commit" ]; then
         EXISTED_VERSION=`find $ROOT_DIR/.repo/manifests -name ${VER_TAG}.xml`
 
         if [ -z "$EXISTED_VERSION" ] ; then
+                #Define for $KERNEL_CPU_TYPE
+                PRODUCT=$2
+                define_cpu_type $PRODUCT
+                cd $CURR_PATH
+
                 # Commit and create meta-advantech branch
                 create_branch_and_commit $META_ADVANTECH_PATH
 
                 # Add git tag
                 echo "[ADV] Add tag"
-                auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/u-boot-imx $U_BOOT_URL
-                auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/$DEFAULT_DEVICE-poky-linux-gnueabi/linux-imx $KERNEL_URL
+                auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux-gnueabi/u-boot-imx
+                auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux-gnueabi/linux-imx
 
                 # Create manifests xml and commit
                 create_xml_and_commit

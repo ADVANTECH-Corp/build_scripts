@@ -331,9 +331,6 @@ function build_yocto_sdk()
 {
     set_environment sdk
 
-    echo "[ADV] Build recovery image!"
-    building initramfs-debug-image
-
     # Build kernel image first
     building linux-linaro-qcomlt
 
@@ -344,6 +341,9 @@ function build_yocto_sdk()
 function build_yocto_images()
 {
     set_environment
+
+    echo "[ADV] Build recovery image!"
+    building initramfs-debug-image
 
     # Build full image
     building $DEPLOY_IMAGE_NAME
@@ -366,11 +366,6 @@ function prepare_images()
     case $IMAGE_TYPE in
     "sdk")
         cp $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/sdk/* $OUTPUT_DIR
-
-        # Recovery
-        echo "[ADV] copying recovery image ..."
-        FILE_NAME=$(readlink $DEPLOY_IMAGE_PATH/recovery.img)
-        mv $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
         ;;
     "normal")
         # Boot image
@@ -388,6 +383,11 @@ function prepare_images()
         gzip -9 ${rootfs%.ext4.gz}.img
 
         mv ${rootfs%.ext4.gz}.img.gz $OUTPUT_DIR
+
+        # Recovery
+        echo "[ADV] copying recovery image ..."
+        FILE_NAME=$(readlink $DEPLOY_IMAGE_PATH/recovery.img)
+        mv $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
         ;;
     "misc")
         # Kernel, DTS, Modules for Debian
@@ -469,7 +469,6 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 
     echo "[ADV] generate sdk image"
     SDK_DIR="$ROOT_DIR"_sdk
-    DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${DEFAULT_DEVICE}"
     prepare_images sdk $SDK_DIR
     copy_image_to_storage sdk
 

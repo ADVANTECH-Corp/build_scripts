@@ -118,12 +118,30 @@ function resize_image()
 
 function package_debian_rootfs()
 {
-    MODULE_VERSION=`echo $(ls lib/modules/)`
+	MODULE_VERSION=`echo $(ls lib/modules/)`
 
-	#WiFi calibration data
+	# WiFi calibration data
 	wget --progress=dot -e dotbytes=2M \
-		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH}/meta-qcom-410c/recipes-bsp/firmware/files/WCNSS_qcom_wlan_nv.bin
+		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-qcom-410c/recipes-bsp/firmware/files/WCNSS_qcom_wlan_nv.bin
 
+	# Mbed
+	wget --progress=dot -e dotbytes=2M \
+		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-cloud-client/files/dragonboard-410c/mbedCloudClientExample.elf
+	wget --progress=dot -e dotbytes=2M \
+		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-cloud-client/files/dragonboard-410c/mbedCloudClientExample-dev.elf
+	wget --progress=dot -e dotbytes=2M \
+		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/factory-configurator-client/files/dragonboard-410c/factory-configurator-client-example.elf
+
+	wget --progress=dot -e dotbytes=2M \
+		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-edge/files/dragonboard-410c/edge-core
+	wget --progress=dot -e dotbytes=2M \
+		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-edge/files/dragonboard-410c/edge-core-dev
+	wget --progress=dot -e dotbytes=2M \
+		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-edge/files/dragonboard-410c/lorapt-example
+	wget --progress=dot -e dotbytes=2M \
+		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-edge/files/dragonboard-410c/pt-example
+
+	# Resize rootfs image
 	sudo umount /mnt
 
 	for ((i=1;i<=7;i++))
@@ -142,11 +160,22 @@ function package_debian_rootfs()
 	simg2img ./out/${DEBIAN_ROOTFS}.img rootfs_tmp.raw
 	resize_image $LOOP_DEV
 
-    sudo mount $LOOP_DEV /mnt
+	sudo mount $LOOP_DEV /mnt
 
-    sudo rm -rf /mnt/lib/modules/*
-    sudo cp -ar lib/modules/ /mnt/lib/
-    sudo cp -a  WCNSS_qcom_wlan_nv.bin /mnt/lib/firmware/wlan/prima/
+	# Copy files
+	sudo rm -rf /mnt/lib/modules/*
+	sudo cp -ar lib/modules/ /mnt/lib/
+	sudo cp -a  WCNSS_qcom_wlan_nv.bin /mnt/lib/firmware/wlan/prima/
+
+	sudo mkdir /mnt/tools
+	sudo chmod 755 *
+	sudo cp -a  mbedCloudClientExample.elf /mnt/usr/bin/
+	sudo cp -a  mbedCloudClientExample-dev.elf /mnt/tools/
+	sudo cp -a  factory-configurator-client-example.elf /mnt/usr/bin/
+	sudo cp -a  edge-core /mnt/usr/bin/
+	sudo cp -a  edge-core-dev /mnt/tools/
+	sudo cp -a  lorapt-example /mnt/usr/bin/
+	sudo cp -a  pt-example /mnt/usr/bin/
 
 	# Set up chroot
 	sudo cp /usr/bin/qemu-aarch64-static /mnt/usr/bin/

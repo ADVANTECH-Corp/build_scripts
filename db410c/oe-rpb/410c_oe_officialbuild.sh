@@ -72,6 +72,7 @@ function get_source_code()
     else
         echo "[ADV] $RELEASE_VERSION already exists!"
         rm -rf .repo
+        BSP_BRANCH="refs/tags/$VER_TAG"
         BSP_XML="$VER_TAG.xml"
         do_repo_init
     fi

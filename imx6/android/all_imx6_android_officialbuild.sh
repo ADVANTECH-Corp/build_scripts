@@ -23,6 +23,9 @@ fi
 if [ $RSB_6410_A2 == true ]; then
         MACHINE_LIST="$MACHINE_LIST rsb_6410_a2"
 fi
+if [ $ROM_5420_B1 == true ]; then
+        MACHINE_LIST="$MACHINE_LIST rom_5420_b1"
+fi
 
 export MACHINE_LIST
 ./imx6_android_officialbuild.sh

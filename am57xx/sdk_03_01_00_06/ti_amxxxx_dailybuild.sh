@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VER_PREFIX="am57xx"
+VER_PREFIX="amxxxx"
 
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
@@ -14,13 +14,14 @@ echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
 echo "[ADV] BUILD_TMP_DIR = ${BUILD_TMP_DIR}"
 echo "[ADV] SDK_IMAGE_NAME = ${SDK_IMAGE_NAME}"
 echo "[ADV] FIRST_BUILD = ${FIRST_BUILD}"
-echo "[ADV] CURR_PATH = ${CURR_PATH}"
-echo "[ADV] ROOT_DIR = ${ROOT_DIR}"
-echo "[ADV] OUTPUT_DIR = ${OUTPUT_DIR}"
 
 CURR_PATH="$PWD"
 ROOT_DIR="${VER_PREFIX}LB${RELEASE_VERSION}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
+
+echo "[ADV] CURR_PATH = ${CURR_PATH}"
+echo "[ADV] ROOT_DIR = ${ROOT_DIR}"
+echo "[ADV] OUTPUT_DIR = ${OUTPUT_DIR}"
 
 # Make storage folder
 if [ -e $OUTPUT_DIR ] ; then
@@ -187,30 +188,18 @@ function copy_image_to_storage()
 echo "[ADV] get yocto source code"
 mkdir $ROOT_DIR
 cd $ROOT_DIR
-
-# 2. new: TI method
-git clone $BSP_URL $TI_DIR
-cd $TI_DIR
-git checkout $BSP_BRANCH
-
-# 1. old: repo method
-#if [ "$BSP_BRANCH" == "" ] ; then
-#    repo init -u $BSP_URL
-#elif [ "$BSP_XML" == "" ] ; then
-#    repo init -u $BSP_URL -b $BSP_BRANCH
-#else
-#    repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
-#fi
-#repo sync
+if [ "$BSP_BRANCH" == "" ] ; then
+    repo init -u $BSP_URL
+elif [ "$BSP_XML" == "" ] ; then
+    repo init -u $BSP_URL -b $BSP_BRANCH
+else
+    repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
+fi
+repo sync
 
 #Create build folder
 echo "[ADV] Create build folder"
-
-# 2. new method
-./ti-oe-layertool-setup.sh -f configs/processor-sdk/processor-sdk-03.01.00.06-adv-config.txt
-
-# 1. old method
-#./oe-layertool-setup.sh
+./oe-layertool-setup.sh
 
 # Link downloads directory from backup
 if [ -e $CURR_PATH/downloads ] ; then

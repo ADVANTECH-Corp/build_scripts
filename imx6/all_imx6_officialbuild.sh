@@ -77,7 +77,7 @@ if [ $ROM7421A1 == true ]; then
 fi
 if [ $ROM7421A1_SOLO == true ]; then
 	PRODUCT="rom7421a1-solo"
-	./imx6_officialbuild.sh rom7421a1-solo 7421A1LIV"$VERSION_NUM" 1G-512M x11 2>&1 |tee 7421A1LIV"$VERSION_NUM"_DualLiteSolo_$DATE.log
+	./imx6_officialbuild.sh rom7421a1-solo 7421A1LIV"$VERSION_NUM" 512M-1G x11 2>&1 |tee 7421A1LIV"$VERSION_NUM"_DualLiteSolo_$DATE.log
 	[ "$?" -ne 0 ] && exit 1
 fi
 if [ $EBCRB01A1 == true ]; then

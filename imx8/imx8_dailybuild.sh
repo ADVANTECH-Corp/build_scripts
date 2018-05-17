@@ -8,7 +8,6 @@ echo "[ADV] BSP_URL = ${BSP_URL}"
 echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
 echo "[ADV] BUILDALL_DIR = ${BUILDALL_DIR}"
 echo "[ADV] DEPLOY_IMAGE_NAME = ${DEPLOY_IMAGE_NAME}"
-echo "[ADV] OTA_IMAGE_NAME = ${OTA_IMAGE_NAME}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] MACHINE_LIST = ${MACHINE_LIST}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
@@ -150,7 +149,7 @@ if [ -e $CURR_PATH/downloads ] ; then
     ln -s $CURR_PATH/downloads downloads
 fi
 
-EULA=1 source fsl-setup-release.sh -b $BUILDALL_DIR -e x11
+EULA=1 DISTRO=fsl-imx-X11 source fsl-setup-release.sh -b $BUILDALL_DIR
 
 echo "[ADV] build images"
 for NEW_MACHINE in $MACHINE_LIST

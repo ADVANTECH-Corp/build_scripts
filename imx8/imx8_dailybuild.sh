@@ -85,13 +85,6 @@ function build_yocto_images()
 
     EULA=1 source setup-environment $BUILDALL_DIR
 
-    # Re-build U-Boot & kernel
-    building u-boot-imx cleansstate
-    building u-boot-imx
-
-    building linux-imx cleansstate
-    building linux-imx
-
     echo "[ADV] Build full image!"
     building $DEPLOY_IMAGE_NAME
 }
@@ -149,7 +142,7 @@ if [ -e $CURR_PATH/downloads ] ; then
     ln -s $CURR_PATH/downloads downloads
 fi
 
-EULA=1 DISTRO=fsl-imx-X11 source fsl-setup-release.sh -b $BUILDALL_DIR
+EULA=1 DISTRO=fsl-imx-x11 source fsl-setup-release.sh -b $BUILDALL_DIR
 
 echo "[ADV] build images"
 for NEW_MACHINE in $MACHINE_LIST

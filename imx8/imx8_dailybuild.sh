@@ -101,7 +101,7 @@ function prepare_images()
     DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/tmp/deploy/images/${NEW_MACHINE}"
 
     # Normal image
-    FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${NEW_MACHINE}"*.rootfs.sdcard"
+    FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${NEW_MACHINE}"*.sdcard"
     bunzip2 -f $FILE_NAME.bz2
     mv $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
 

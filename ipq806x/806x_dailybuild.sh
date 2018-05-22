@@ -95,7 +95,7 @@ function prepare_images()
 
     # Single image
     FILE_NAME="nand-ipq40xx-single.img"
-    cp $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
+    mv $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
     
     echo "[ADV] creating ${IMAGE_DIR}_single.img.gz ..."    
   	gzip -c9 $IMAGE_DIR/$FILE_NAME > ${IMAGE_DIR}_single.img.gz
@@ -104,7 +104,7 @@ function prepare_images()
     
 		# Inital image
 		FILE_NAME="nand-ipq40xx-initial.img"
-		cp $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
+		mv $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
     
     echo "[ADV] creating ${IMAGE_DIR}_initial.img.gz ..."
     gzip -c9 $IMAGE_DIR/$FILE_NAME > ${IMAGE_DIR}_initial.img.gz
@@ -113,7 +113,7 @@ function prepare_images()
     
 		# Rootfs image
 		FILE_NAME="openwrt-ipq806x-ipq40xx-ubi-root.img"
-		cp $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
+		mv $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
 		
     echo "[ADV] creating ${IMAGE_DIR}_root.img.gz ..."
     gzip -c9 $IMAGE_DIR/$FILE_NAME > ${IMAGE_DIR}_root.img.gz
@@ -170,7 +170,6 @@ done
 #fi
 
 cd $CURR_PATH
-rm -rf $ROOT_DIR
 
 echo "[ADV] build script done!"
 

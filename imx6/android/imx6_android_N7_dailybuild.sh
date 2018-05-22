@@ -151,11 +151,11 @@ LOG3_FILE="$NEW_MACHINE"_Build3.log
 
 function patches_android_code()
 {
-	echo "[ADV] patches_android_Uboot_code -STEP1"
+	echo "[ADV] patches_android_Uboot_code [STEP1]"
     cd $CURR_PATH/$ROOT_DIR/bootable/bootloader/uboot-imx
 	patch -p1 <../../../patches_android_7.1.1/7001-Uboot_Yocto_4.1.15_1.2.0-to-Android_N7.1.1_1.0.0.patch
 
-    echo "[ADV] patches_android_Uboot_code -STEP2"
+    echo "[ADV] patches_android_Uboot_code [STEP2]"
     cd $CURR_PATH/$ROOT_DIR/bootable/bootloader/uboot-imx/board/freescale/mx6advantech/
     patch -p1 <../../../../../../patches_android_7.1.1/7002-Uboot_Yocto_4.1.15_1.2.0-to-Android_N7.1.1_1.0.0.patch
 
@@ -265,9 +265,14 @@ echo "[ADV] build images"
 
 for NEW_MACHINE in $MACHINE_LIST
 do
+
+	echo "[ADV] build android images"
 	build_android_images
+	echo "[ADV] perpare_image"
     prepare_images
+	echo "[ADV] copy_image_to_storage"
     copy_image_to_storage
+	echo "[ADV] save_temp_log"
     save_temp_log
 done
 

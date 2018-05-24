@@ -126,10 +126,6 @@ function package_debian_rootfs()
 
 	# Mbed
 	wget --progress=dot -e dotbytes=2M \
-		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-cloud-client/files/dragonboard-410c/mbedCloudClientExample.elf
-	wget --progress=dot -e dotbytes=2M \
-		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-cloud-client/files/dragonboard-410c/mbedCloudClientExample-dev.elf
-	wget --progress=dot -e dotbytes=2M \
 		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/factory-configurator-client/files/dragonboard-410c/factory-configurator-client-example.elf
 
 	wget --progress=dot -e dotbytes=2M \
@@ -140,6 +136,8 @@ function package_debian_rootfs()
 		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-edge/files/dragonboard-410c/lorapt-example
 	wget --progress=dot -e dotbytes=2M \
 		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-edge/files/dragonboard-410c/pt-example
+	wget --progress=dot -e dotbytes=2M \
+		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-edge/files/dragonboard-410c/pt-example_1520
 
 	# Resize rootfs image
 	sudo umount /mnt
@@ -169,13 +167,15 @@ function package_debian_rootfs()
 
 	sudo mkdir /mnt/tools
 	sudo chmod 755 *
-	sudo cp -a  mbedCloudClientExample.elf /mnt/usr/bin/
-	sudo cp -a  mbedCloudClientExample-dev.elf /mnt/tools/
 	sudo cp -a  factory-configurator-client-example.elf /mnt/usr/bin/
 	sudo cp -a  edge-core /mnt/usr/bin/
 	sudo cp -a  edge-core-dev /mnt/tools/
 	sudo cp -a  lorapt-example /mnt/usr/bin/
 	sudo cp -a  pt-example /mnt/usr/bin/
+	sudo cp -a  pt-example_1520 /mnt/usr/bin/
+
+	# Set network interface to eth0
+	sudo mv /mnt/lib/udev/rules.d/73-usb-net-by-mac.rules /mnt/lib/udev/rules.d/73-usb-net-by-mac.rules.xxx
 
 	# Set up chroot
 	sudo cp /usr/bin/qemu-aarch64-static /mnt/usr/bin/

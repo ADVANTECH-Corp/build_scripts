@@ -5,7 +5,7 @@ VERSION_NUM=$NUM1$NUM2
 PRODUCT=""
 
 #amxxxx_BSP
-./amxxx_officialbuild.sh am57xx am57xxLBV"$VERSION_NUM" 2>&1 |tee am57xxLBV"$VERSION_NUM"_$DATE.log
+./amxxxx_officialbuild.sh am57xx am57xxLBV"$VERSION_NUM" 2>&1 |tee am57xxLBV"$VERSION_NUM"_$DATE.log
 [ "$?" -ne 0 ] && exit 1
 
 #amxxxx_projects

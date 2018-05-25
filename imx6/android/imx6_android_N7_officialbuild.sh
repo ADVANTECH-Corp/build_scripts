@@ -465,7 +465,7 @@ function copy_image_to_storage()
 
 
 #echo "[ADV] patches android source code"
-#   patches_android_code
+   patches_android_code
 
 echo "[ADV] build images"
 
@@ -473,13 +473,13 @@ for NEW_MACHINE in $MACHINE_LIST
 do
 
 	echo "[ADV] build android images"
-#    build_android_images
+    build_android_images
 	echo "[ADV] prepare_image"
-#    prepare_images
+    prepare_images
 	echo "[ADV] copy_image_to_storage"
-#    copy_image_to_storage
+    copy_image_to_storage
 	echo "[ADV] copy_image_to_storage"
-#    save_temp_log
+    save_temp_log
 done
 
 

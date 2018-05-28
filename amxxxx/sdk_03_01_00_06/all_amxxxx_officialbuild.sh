@@ -11,11 +11,6 @@ if [ $ROM7510A2 == true ]; then
 	[ "$?" -ne 0 ] && exit 1
 fi
 #exit 0
-# Push commit
-if [ -n $PRODUCT ]; then
-	./amxxxx_officialbuild.sh push_commit $PRODUCT $VERSION_NUM
-	[ "$?" -ne 0 ] && exit 1
-fi
 
 mv *.log $STORED/$DATE/
 

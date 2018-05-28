@@ -482,28 +482,6 @@ function wrap_source_code()
 #  Main procedure
 # ================
 
-if [ "$PRODUCT" == "push_commit" ]; then
-        EXISTED_VERSION=`find $ROOT_DIR/.repo/manifests -name ${VER_TAG}.xml`
-
-        if [ -z "$EXISTED_VERSION" ] ; then
-                #Define for $KERNEL_CPU_TYPE
-                PRODUCT=$2
-                cd $CURR_PATH
-
-                # Commit and create meta-advantech branch
-                create_branch_and_commit $META_ADVANTECH_PATH
-
-                # Add git tag
-                echo "[ADV] Add tag"
-                auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$BUILD_TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-linux-gnueabi/u-boot-ti-staging
-                auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$BUILD_TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-linux-gnueabi/linux-processor-sdk
-
-                # Create manifests xml and commit
-                create_xml_and_commit
-        fi
-	
-	PUSH_COMMIT_FINISH=true
-else #"$PRODUCT" != "$VER_PREFIX"
 	mkdir $ROOT_DIR
         get_source_code
 
@@ -560,7 +538,24 @@ else #"$PRODUCT" != "$VER_PREFIX"
         copy_image_to_storage firmware
 
 	save_temp_log
-fi
+
+	EXISTED_VERSION=`find $ROOT_DIR/.repo/manifests -name ${VER_TAG}.xml`
+
+        if [ -z "$EXISTED_VERSION" ] ; then
+                #Define for $KERNEL_CPU_TYPE
+                cd $CURR_PATH
+
+                # Commit and create meta-advantech branch
+                create_branch_and_commit $META_ADVANTECH_PATH
+
+                # Add git tag
+                echo "[ADV] Add tag"
+                auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$BUILD_TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-linux-gnueabi/u-boot-ti-staging
+                auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$BUILD_TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-linux-gnueabi/linux-processor-sdk
+
+                # Create manifests xml and commit
+                create_xml_and_commit
+        fi
 
 # Copy downloads to backup
 if [ ! -e $CURR_PATH/downloads ] ; then
@@ -568,11 +563,9 @@ if [ ! -e $CURR_PATH/downloads ] ; then
     cp -a $CURR_PATH/$ROOT_DIR/downloads $CURR_PATH
 fi
 
-if [ "x$PUSH_COMMIT_FINISH" == "xtrue" ];then
-    cd $CURR_PATH
-    echo "[ADV] remove $ROOT_DIR"
-    rm -rf $ROOT_DIR
-fi
+cd $CURR_PATH
+echo "[ADV] remove $ROOT_DIR"
+rm -rf $ROOT_DIR
 
 echo "[ADV] build script done!"
 

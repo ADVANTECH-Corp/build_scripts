@@ -327,6 +327,11 @@ function building()
         MACHINE=$MACHINE_OPT bitbake $1
     fi
 
+    if [ "$?" -ne 0 ]; then
+        echo "[ADV] Build failure! Check details in ${LOG_DIR}.tgz"
+        save_temp_log
+        exit 1
+    fi
     # Remove build folder
 #    [ "$?" -ne 0 ] && echo "[ADV] Build failure! Check details in ${LOG_DIR}.tgz" && save_temp_log && rm -rf $CURR_PATH/$ROOT_DIR && exit 1
 }
@@ -496,7 +501,8 @@ if [ "$PRODUCT" == "push_commit" ]; then
                 # Create manifests xml and commit
                 create_xml_and_commit
         fi
-
+	
+	PUSH_COMMIT_FINISH=true
 else #"$PRODUCT" != "$VER_PREFIX"
 	mkdir $ROOT_DIR
         get_source_code
@@ -562,9 +568,11 @@ if [ ! -e $CURR_PATH/downloads ] ; then
     cp -a $CURR_PATH/$ROOT_DIR/downloads $CURR_PATH
 fi
 
-cd $CURR_PATH
-echo "[ADV] remove $ROOT_DIR"
-rm -rf $ROOT_DIR
+if [ "x$PUSH_COMMIT_FINISH" == "xtrue" ];then
+    cd $CURR_PATH
+    echo "[ADV] remove $ROOT_DIR"
+    rm -rf $ROOT_DIR
+fi
 
 echo "[ADV] build script done!"
 

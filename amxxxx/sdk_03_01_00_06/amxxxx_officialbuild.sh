@@ -522,7 +522,7 @@ function wrap_source_code()
         add_version
 
 	# Link downloads directory from backup
-	cd $CURR_PATH
+	cd $CURR_PATH/$ROOT_DIR
 	if [ -e $CURR_PATH/downloads ] ; then
    		 echo "[ADV] link downloads directory"
    		 ln -s $CURR_PATH/downloads downloads

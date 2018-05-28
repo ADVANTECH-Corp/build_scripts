@@ -483,7 +483,11 @@ function wrap_source_code()
 # ================
 
 	mkdir $ROOT_DIR
-        get_source_code
+	echo "[ADV] ls ../"
+	ls ../
+	echo "[ADV] ls ../../"
+	ls ../../
+	get_source_code
 
         
 	if [ -z "$EXISTED_VERSION" ] ; then

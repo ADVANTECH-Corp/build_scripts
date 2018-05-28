@@ -499,7 +499,7 @@ if [ "$PRODUCT" == "push_commit" ]; then
 
 else #"$PRODUCT" != "$VER_PREFIX"
 	mkdir $ROOT_DIR
-#        get_source_code
+        get_source_code
 
         
 	if [ -z "$EXISTED_VERSION" ] ; then
@@ -516,7 +516,7 @@ else #"$PRODUCT" != "$VER_PREFIX"
 	cp -r $ROOT_DIR/.repo/manifests/configs $ROOT_DIR/configs
 	cp -r $ROOT_DIR/.repo/manifests/sample-files $ROOT_DIR/sample-files
 	cp $ROOT_DIR/.repo/manifests/oe-layertool-setup.sh $ROOT_DIR/oe-layertool-setup.sh
-#	tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
+	tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
         generate_md5 $ROOT_DIR.tgz
 
         # Package kernel & u-boot
@@ -564,7 +564,7 @@ fi
 
 cd $CURR_PATH
 echo "[ADV] remove $ROOT_DIR"
-#rm -rf $ROOT_DIR
+rm -rf $ROOT_DIR
 
 echo "[ADV] build script done!"
 

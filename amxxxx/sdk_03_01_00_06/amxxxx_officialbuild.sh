@@ -483,6 +483,8 @@ function wrap_source_code()
 # ================
 
 	mkdir $ROOT_DIR
+        echo "[ADV] ls ./"
+	ls ./
 	echo "[ADV] ls ../"
 	ls ../
 	echo "[ADV] ls ../../"
@@ -519,6 +521,13 @@ function wrap_source_code()
         echo "[ADV] add version"
         add_version
 
+	# Link downloads directory from backup
+	cd $CURR_PATH
+	if [ -e $CURR_PATH/downloads ] ; then
+   		 echo "[ADV] link downloads directory"
+   		 ln -s $CURR_PATH/downloads downloads
+	fi
+		
 	echo "[ADV] build images"
         build_yocto_images
 

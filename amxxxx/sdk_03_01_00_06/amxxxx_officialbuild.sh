@@ -2,13 +2,18 @@
 
 PRODUCT=$1
 OFFICIAL_VER=$2
-
+if [ "$1" == "push_commit" ]; then
+RELEASE_VERSION=V"$3"
+else
+RELEASE_VERSION=${2#*I}
+fi
+echo RELEASE_VERSION=$RELEASE_VERSION
 #--- [platform specific] ---
-if [ "$1" == "rsb4220a1" ] || [ "$1" == "rsb4221a1" ] || [ "$1" == "rom3310a1" ] || [ "$1" == "am335x" ]; then
+if [ "$1" == "rsb4220a1" ] || [ "$1" == "rsb4221a1" ] || [ "$1" == "rom3310a1" ]; then
     VER_PREFIX="am335x"
     UBOOT_CPU_TYPE="am335x"
     KERNEL_CPU_TYPE="am335x"
-elif [ "$1" == "rom7510a1" ] || [ "$1" == "rom7510a2" ] || [ "$1" == "am57xx" ];then
+elif [ "$1" == "rom7510a1" ] || [ "$1" == "rom7510a2" ];then
     VER_PREFIX="am57xx"
     UBOOT_CPU_TYPE="am57xx"
     KERNEL_CPU_TYPE="am57xx"
@@ -48,6 +53,7 @@ echo "[ADV] KERNEL_BRANCH = ${KERNEL_BRANCH}"
 echo "[ADV] KERNEL_PATH = ${KERNEL_PATH}"
 
 VER_TAG="${VER_PREFIX}LB"$(echo $RELEASE_VERSION | sed 's/[.]//')
+echo "[ADV] VER_TAG=$VER_TAG"
 
 CURR_PATH="$PWD"
 ROOT_DIR="${VER_TAG}"_"$DATE"
@@ -322,7 +328,7 @@ function building()
     fi
 
     # Remove build folder
-    [ "$?" -ne 0 ] && echo "[ADV] Build failure! Check details in ${LOG_DIR}.tgz" && save_temp_log && rm -rf $CURR_PATH/$ROOT_DIR && exit 1
+#    [ "$?" -ne 0 ] && echo "[ADV] Build failure! Check details in ${LOG_DIR}.tgz" && save_temp_log && rm -rf $CURR_PATH/$ROOT_DIR && exit 1
 }
 
 function set_environment()
@@ -330,14 +336,9 @@ function set_environment()
         cd $CURR_PATH/$ROOT_DIR
 	echo "[ADV] set environment"
 
-        if [ "$1" == "sdk" ]; then
-        	./oe-layertool-setup.sh
-                cd build
-                source conf/setenv
-        else
-                cd build
-                source conf/setenv
-        fi
+        ./oe-layertool-setup.sh
+        cd build
+        source conf/setenv
 }
 function build_yocto_sdk()
 {
@@ -476,44 +477,7 @@ function wrap_source_code()
 #  Main procedure
 # ================
 
-if [ "$PRODUCT" == "$VER_PREFIX" ]; then
-	mkdir $ROOT_DIR
-        get_source_code
-
-	if [ -z "$EXISTED_VERSION" ] ; then
-	        # Check meta-advantech tag exist or not, and checkout to tag version
-        	check_tag_and_checkout $META_ADVANTECH_PATH
-
-		# Check tag exist or not, and replace bbappend file SRCREV
-		check_tag_and_replace $U_BOOT_PATH $U_BOOT_URL $U_BOOT_BRANCH
-		check_tag_and_replace $KERNEL_PATH $KERNEL_URL $KERNEL_BRANCH
-	fi
-        # BSP source code
-        echo "[ADV] tar $ROOT_DIR.tgz file"
-	rm -r $ROOT_DIR/configs $ROOT_DIR/oe-layertool-setup.sh $ROOT_DIR/sample-files
-	cp -r $ROOT_DIR/.repo/manifests/configs $ROOT_DIR/configs
-	cp -r $ROOT_DIR/.repo/manifests/sample-files $ROOT_DIR/sample-files
-	cp $ROOT_DIR/.repo/manifests/oe-layertool-setup.sh $ROOT_DIR/oe-layertool-setup.sh
-	tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
-        generate_md5 $ROOT_DIR.tgz
-
-        # Package kernel & u-boot
-        wrap_source_code $KERNEL_URL $KERNEL_BRANCH linux-ti
-        wrap_source_code $U_BOOT_URL $U_BOOT_BRANCH uboot-ti
-
-        # Build Yocto SDK
-        echo "[ADV] build yocto sdk"
-        build_yocto_sdk
-
-	echo "[ADV] generate sdk image"
-        SDK_DIR="$ROOT_DIR"_sdk
-        prepare_images sdk $SDK_DIR
-	copy_image_to_storage sdk
-
-        # Remove pre-built image & backup generic rpm packages
-#        rm $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$BUILD_TMP_DIR/deploy/images/$DEFAULT_MACHINE/*
-
-elif [ "$PRODUCT" == "push_commit" ]; then
+if [ "$PRODUCT" == "push_commit" ]; then
         EXISTED_VERSION=`find $ROOT_DIR/.repo/manifests -name ${VER_TAG}.xml`
 
         if [ -z "$EXISTED_VERSION" ] ; then
@@ -534,9 +498,34 @@ elif [ "$PRODUCT" == "push_commit" ]; then
         fi
 
 else #"$PRODUCT" != "$VER_PREFIX"
-        if [ ! -e $ROOT_DIR ]; then
-                echo -e "No BSP is found!\nStop building." && exit 1
-        fi
+	mkdir $ROOT_DIR
+#        get_source_code
+
+        
+	if [ -z "$EXISTED_VERSION" ] ; then
+	        # Check meta-advantech tag exist or not, and checkout to tag version
+        	check_tag_and_checkout $META_ADVANTECH_PATH
+
+		# Check tag exist or not, and replace bbappend file SRCREV
+		check_tag_and_replace $U_BOOT_PATH $U_BOOT_URL $U_BOOT_BRANCH
+		check_tag_and_replace $KERNEL_PATH $KERNEL_URL $KERNEL_BRANCH
+	fi
+        # BSP source code
+        echo "[ADV] tar $ROOT_DIR.tgz file"
+	rm -r $ROOT_DIR/configs $ROOT_DIR/oe-layertool-setup.sh $ROOT_DIR/sample-files
+	cp -r $ROOT_DIR/.repo/manifests/configs $ROOT_DIR/configs
+	cp -r $ROOT_DIR/.repo/manifests/sample-files $ROOT_DIR/sample-files
+	cp $ROOT_DIR/.repo/manifests/oe-layertool-setup.sh $ROOT_DIR/oe-layertool-setup.sh
+#	tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
+        generate_md5 $ROOT_DIR.tgz
+
+        # Package kernel & u-boot
+	echo KERNEL_URL=$KERNEL_URL
+	echo KERNEL_BRANCH=$KERNEL_BRANCH
+	echo U_BOOT_URL=$U_BOOT_URL
+	echo U_BOOT_BRANCH=$U_BOOT_BRANCH
+        wrap_source_code $KERNEL_URL $KERNEL_BRANCH linux-ti
+        wrap_source_code $U_BOOT_URL $U_BOOT_BRANCH uboot-ti
 
         NEW_MACHINE=${VER_PREFIX}"$1"          
         echo "[ADV] add version"
@@ -575,7 +564,7 @@ fi
 
 cd $CURR_PATH
 echo "[ADV] remove $ROOT_DIR"
-rm -rf $ROOT_DIR
+#rm -rf $ROOT_DIR
 
 echo "[ADV] build script done!"
 

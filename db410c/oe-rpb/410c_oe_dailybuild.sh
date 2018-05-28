@@ -126,8 +126,11 @@ function building()
         bitbake $1
     fi
 
-    [ "$?" -ne 0 ] && echo "[ADV] Build failure! Check details in ${LOG_DIR}.tgz" && save_temp_log && exit 1
-    #rm -rf $CURR_PATH/$ROOT_DIR
+    if [ "$?" -ne 0 ]; then
+        echo "[ADV] Build failure! Check details in ${LOG_DIR}.tgz"
+        save_temp_log
+        exit 1
+    fi
 }
 
 function set_environment()

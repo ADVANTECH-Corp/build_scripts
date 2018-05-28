@@ -70,14 +70,19 @@ function build_yocto_images()
 {
     cd $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR
     LOG_DIR="LI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
-		echo "[ADV] build_yocto_image"
+    echo "[ADV] build_yocto_image"
 		
     set_environment
 
     # Build full image
-		make -j8 V=s 2>&1 | tee make.log
+    make -j8 V=s 2>&1 | tee make.log
 		
-		[ "$?" -ne 0 ] && echo "[ADV] Build failure! Check details in ${LOG_DIR}.tgz" && save_temp_log && rm -rf $CURR_PATH/$ROOT_DIR && exit 1
+    if [ "$?" -ne 0 ]; then
+        echo "[ADV] Build failure! Check details in ${LOG_DIR}.tgz"
+        save_temp_log
+        rm -rf $CURR_PATH/$ROOT_DIR
+        exit 1
+    fi
 }
 
 function prepare_images()

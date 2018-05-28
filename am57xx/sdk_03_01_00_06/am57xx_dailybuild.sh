@@ -81,7 +81,12 @@ function building()
     fi
 
     # Remove build folder
-    [ "$?" -ne 0 ] && echo "[ADV] Build failure! Check details in ${LOG_DIR}.tgz" && save_temp_log && rm -rf $CURR_PATH/$ROOT_DIR && exit 1
+    if [ "$?" -ne 0 ]; then
+        echo "[ADV] Build failure! Check details in ${LOG_DIR}.tgz"
+        save_temp_log
+        rm -rf $CURR_PATH/$ROOT_DIR
+        exit 1
+    fi
 }
 
 function build_yocto_images()

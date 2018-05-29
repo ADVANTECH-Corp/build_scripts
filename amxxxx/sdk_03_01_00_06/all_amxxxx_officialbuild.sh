@@ -26,4 +26,4 @@ if [ "$ROM3310A1" == "true" ]; then
 fi
 
 export MACHINE_LIST
-./ti_amxxxx_officialbuild.sh $VERSION_NUM
+./amxxxx_officialbuild.sh $VERSION_NUM

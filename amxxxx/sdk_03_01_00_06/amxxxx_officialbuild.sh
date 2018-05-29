@@ -339,6 +339,7 @@ repo sync
 
 EXISTED_VERSION=`find .repo/manifests -name ${VER_TAG}.xml`
 if [ -z "$EXISTED_VERSION" ] ; then
+    cd $CURR_PATH
     # Check meta-advantech tag exist or not, and checkout to tag version
     check_tag_and_checkout $META_ADVANTECH_PATH
 
@@ -352,7 +353,6 @@ add_version
 
 # BSP source code
 echo "[ADV] tar $ROOT_DIR.tgz file"
-cd $CURR_PATH
 rm -r $ROOT_DIR/configs $ROOT_DIR/oe-layertool-setup.sh $ROOT_DIR/sample-files
 cp -r $ROOT_DIR/.repo/manifests/configs $ROOT_DIR/configs
 cp -r $ROOT_DIR/.repo/manifests/sample-files $ROOT_DIR/sample-files

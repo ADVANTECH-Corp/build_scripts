@@ -111,10 +111,15 @@ function add_version()
 
 function auto_add_tag()
 {
-        FILE_PATH=$1
-	DIR=`ls $FILE_PATH`
-        if [ -d "$FILE_PATH/$DIR/git" ];then
-                cd $FILE_PATH/$DIR/git
+        REMOTE_URL=$1
+        REMOTE_BRANCH=$2
+        FILE_PATH=$3
+        
+        git clone $REMOTE_URL
+        git checkout $REMOTE_BRANCH
+        
+        if [ -d "$FILE_PATH" ];then
+                cd $FILE_PATH
                 HEAD_HASH_ID=`git rev-parse HEAD`
                 TAG_HASH_ID=`git tag -v $VER_TAG | grep object | cut -d ' ' -f 2`
                 if [ "$HEAD_HASH_ID" == "$TAG_HASH_ID" ]; then
@@ -126,6 +131,7 @@ function auto_add_tag()
                         git push $REMOTE_SERVER $VER_TAG
                 fi
                 cd $CURR_PATH
+                rm -rf $FILE_PATH
         else
                 echo "[ADV] Directory $FILE_PATH doesn't exist"
                 exit 1
@@ -339,7 +345,6 @@ repo sync
 
 EXISTED_VERSION=`find .repo/manifests -name ${VER_TAG}.xml`
 if [ -z "$EXISTED_VERSION" ] ; then
-    cd $CURR_PATH
     # Check meta-advantech tag exist or not, and checkout to tag version
     check_tag_and_checkout $META_ADVANTECH_PATH
 
@@ -353,6 +358,7 @@ add_version
 
 # BSP source code
 echo "[ADV] tar $ROOT_DIR.tgz file"
+cd $CURR_PATH
 rm -r $ROOT_DIR/configs $ROOT_DIR/oe-layertool-setup.sh $ROOT_DIR/sample-files
 cp -r $ROOT_DIR/.repo/manifests/configs $ROOT_DIR/configs
 cp -r $ROOT_DIR/.repo/manifests/sample-files $ROOT_DIR/sample-files
@@ -388,8 +394,8 @@ if [ -z "$EXISTED_VERSION" ] ; then
 
     # Add git tag
     echo "[ADV] Add tag"
-    auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$BUILD_TMP_DIR/work/${NEW_MACHINE}-linux-gnueabi/u-boot-ti-staging
-    auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$BUILD_TMP_DIR/work/${NEW_MACHINE}-linux-gnueabi/linux-processor-sdk
+    auto_add_tag $U_BOOT_URL $U_BOOT_BRANCH uboot-ti
+    auto_add_tag $KERNEL_URL $KERNEL_BRANCH  linux-ti
 
     # Create manifests xml and commit
     create_xml_and_commit

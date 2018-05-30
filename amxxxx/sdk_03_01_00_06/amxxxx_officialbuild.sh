@@ -62,7 +62,7 @@ function generate_md5()
 function check_tag_and_checkout()
 {
         FILE_PATH=$1
-
+	cd $CURR_PATH
         if [ -d "$ROOT_DIR/$FILE_PATH" ];then
                 cd $ROOT_DIR/$FILE_PATH
                 META_TAG=`git tag | grep $VER_TAG`
@@ -88,6 +88,7 @@ function check_tag_and_replace()
         REMOTE_URL=$2
         REMOTE_BRANCH=$3
 
+	cd $CURR_PATH
         HASH_ID=`git ls-remote $REMOTE_URL $VER_TAG | awk '{print $1}'`
         if [ "$HASH_ID" != "" ]; then
                 echo "[ADV] $REMOTE_URL has been tagged ,ID is $HASH_ID"

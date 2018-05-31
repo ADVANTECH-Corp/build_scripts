@@ -345,7 +345,7 @@ function copy_image_to_storage()
     auto_add_tag $RK_PACKAGES_URL $BRANCH android_rk_packages
     auto_add_tag $RK_BUILD_URL $BRANCH android_rk_build
     auto_add_tag $RK_FRAMEWORKS_URL $BRANCH android_rk_frameworks
-    auto_add_tag $RK_MANIFEST_URL $BRANCH android-rk-manifest
+#    auto_add_tag $RK_MANIFEST_URL $BRANCH android-rk-manifest
     auto_add_tag $RK_BOOTABLE_URL $BRANCH android_rk_bootable
     auto_add_tag $RK_SYSTEM_URL $BRANCH android_rk_system
     auto_add_tag $RK_EXTERNAL_URL $BRANCH android_rk_external

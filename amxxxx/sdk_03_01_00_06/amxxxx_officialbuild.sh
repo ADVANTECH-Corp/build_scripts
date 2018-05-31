@@ -265,7 +265,7 @@ function prepare_images()
 {
     cd $CURR_PATH
 
-    IMAGE_DIR="LI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
+    IMAGE_DIR="LIV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
 

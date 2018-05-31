@@ -101,11 +101,11 @@ function auto_add_tag()
         FILE_PATH=$3
         
         git clone $REMOTE_URL
-        git checkout $REMOTE_BRANCH
         
         if [ -d "$FILE_PATH" ];then
                 cd $FILE_PATH
-                HEAD_HASH_ID=`git rev-parse HEAD`
+                git checkout $REMOTE_BRANCH
+		HEAD_HASH_ID=`git rev-parse HEAD`
                 TAG_HASH_ID=`git tag -v $VER_TAG | grep object | cut -d ' ' -f 2`
                 if [ "$HEAD_HASH_ID" == "$TAG_HASH_ID" ]; then
                         echo "[ADV] tag exists! There is no need to add tag"

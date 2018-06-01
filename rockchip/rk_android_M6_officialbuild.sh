@@ -305,7 +305,7 @@ function prepare_images()
 {
     cd $CURR_PATH
 
-    IMAGE_DIR="AI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
+    IMAGE_DIR="AIV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
 	mkdir $IMAGE_DIR/image

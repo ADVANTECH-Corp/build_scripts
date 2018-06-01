@@ -314,11 +314,13 @@ function prepare_images()
 
 
 	cp -a $CURR_PATH/$ROOT_DIR/rockdev/* $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/u-boot/RK3288UbootLoader_V2.30.10.bin $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/kernel/*.img $IMAGE_DIR/image
 
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}.tgz
-    #rm -rf $IMAGE_DIR
+    rm -rf $IMAGE_DIR
 }
 
 function copy_image_to_storage()

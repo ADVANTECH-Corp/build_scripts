@@ -214,7 +214,7 @@ function save_temp_log()
 function building()
 {
     echo "[ADV] building $OLD_MACHINE $NEW_MACHINE $1 $2..."
-    LOG_DIR="LI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
+    LOG_DIR="LIV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
 
     if [ "x" != "x$2" ]; then
         MACHINE=$OLD_MACHINE bitbake $1 -c $2 -f

@@ -23,6 +23,9 @@ CURR_PATH="$PWD"
 ROOT_DIR="${VER_PREFIX}ABV${RELEASE_VERSION}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
 
+echo "$Release_Note" > Release_Note
+REALEASE_NOTE="Release_Note"
+
 #--------------------------------------------------
 #======================
 AND_BSP="android"

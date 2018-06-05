@@ -2,7 +2,10 @@
 
 VER_PREFIX="rk"
 
-NEW_MACHINE=$MACHINE_LIST
+for i in $MACHINE_LIST
+do
+        NEW_MACHINE=$i
+done
 
 RELEASE_VERSION=$1
 echo "[ADV] DATE = ${DATE}"

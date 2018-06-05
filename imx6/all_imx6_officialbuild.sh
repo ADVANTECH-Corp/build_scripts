@@ -32,7 +32,7 @@ if [ $ROM5420A1 == true ]; then
 fi
 if [ $ROM5420B1_SOLO == true ]; then
 	PRODUCT="rom5420b1-solo"
-	./imx6_officialbuild.sh rom5420b1-solo 5420B1LIV"$VERSION_NUM" 512M x11 2>&1 |tee 5420B1LIV"$VERSION_NUM"_DualLiteSolo_$DATE.log
+	./imx6_officialbuild.sh rom5420b1-solo 5420B1LIV"$VERSION_NUM" 512M-1G-2G x11 2>&1 |tee 5420B1LIV"$VERSION_NUM"_DualLiteSolo_$DATE.log
 	[ "$?" -ne 0 ] && exit 1
 fi
 if [ $ROM5420B1 == true ]; then

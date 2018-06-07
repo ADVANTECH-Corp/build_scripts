@@ -31,8 +31,6 @@ echo "[ADV] KERNEL_VERSION = ${KERNEL_VERSION}"
 echo "[ADV] KERNEL_URL = ${KERNEL_URL}"
 echo "[ADV] KERNEL_BRANCH = ${KERNEL_BRANCH}"
 echo "[ADV] KERNEL_PATH = ${KERNEL_PATH}"
-echo "[ADV] MFGTOOLS_URL = $MFGTOOLS_URL"
-echo "[ADV] MFGTOOLS_BRANCH = $MFGTOOLS_BRANCH"
 
 SDCARD_SIZE=6200
 
@@ -618,14 +616,6 @@ function prepare_images()
                                 insert_image_file "eng" $OUTPUT_DIR $FILE_NAME
                         fi
                         ;;
-               "mfgtools")
-			git clone $MFGTOOLS_URL -b $MFGTOOLS_BRANCH
-                        cp -rf Mfgtools/* $OUTPUT_DIR/
-                        rm -rf Mfgtools
-                        cp $DEPLOY_IMAGE_PATH/u-boot-${KERNEL_CPU_TYPE}${PRODUCT}.imx $OUTPUT_DIR/Profiles/Linux/OS\ Firmware/firmware/u-boot.imx
-                        cp $DEPLOY_IMAGE_PATH/zImage-${KERNEL_CPU_TYPE}*.dtb $OUTPUT_DIR/Profiles/Linux/OS\ Firmware/firmware/
-                        sed -i "s/dtb =.*/dtb = `ls $DEPLOY_IMAGE_PATH/zImage-${KERNEL_CPU_TYPE}*.dtb | xargs -n1 basename| cut -d '.' -f 1 | sed s/zImage\-//g`/g" $OUTPUT_DIR/cfg.ini
-                        ;;
                 *)
                         echo "[ADV] prepare_images: invalid parameter #1!"
                         exit 1;
@@ -634,7 +624,7 @@ function prepare_images()
 
         # Package image file
         case $IMAGE_TYPE in
-                "sdk" | "mfgtools" | "modules" | "firmware" | "ubuntu")
+                "sdk" | "modules" | "firmware" | "ubuntu")
                         echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
 			tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
 			generate_md5 ${OUTPUT_DIR}.tgz
@@ -695,9 +685,6 @@ function copy_image_to_storage()
 			mv ${OTA_IMAGE_DIR}.img.csv $STORAGE_PATH
 			mv -f $OTA_IMAGE_DIR.img.gz $STORAGE_PATH
 			mv -f update*.zip $STORAGE_PATH
-		;;
-		"mfgtools")
-			mv -f $MFG_IMAGE_DIR.tgz $STORAGE_PATH
 		;;
 		*)
 		echo "[ADV] copy_image_to_storage: invalid parameter #1!"
@@ -850,12 +837,6 @@ else #"$PRODUCT" != "$VER_PREFIX"
                 ENG_IMAGE_DIR="$IMAGE_DIR"_"$MEMORY"_eng
                 prepare_images eng $ENG_IMAGE_DIR
                 copy_image_to_storage eng
-
-                #MfgTools
-                echo "[ADV] generate Mfgtools $MEMORY image"
-                MFG_IMAGE_DIR="$IMAGE_DIR"_"$MEMORY"_mfgtools
-                prepare_images mfgtools $MFG_IMAGE_DIR
-                copy_image_to_storage mfgtools
 
                 PRE_MEMORY=$MEMORY
                 MEMORY_COUT=$(($MEMORY_COUT+1))

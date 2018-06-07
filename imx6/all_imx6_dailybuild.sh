@@ -28,6 +28,9 @@ fi
 if [ $RSB4411A1 == true ]; then
 	MACHINE_LIST="$MACHINE_LIST imx6qrsb4411a1"
 fi
+if [ $EPCRS200A1 == true ]; then
+	MACHINE_LIST="$MACHINE_LIST imx6qepcrs200a1"
+fi
 if [ $ROM7420A1 == true ]; then
 	MACHINE_LIST="$MACHINE_LIST imx6qrom7420a1"
 fi

@@ -107,7 +107,7 @@ function prepare_images()
 
     # Normal image
     FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${NEW_MACHINE}"*.sdcard"
-    bunzip2 -f $FILE_NAME.bz2
+    bunzip2 -f $DEPLOY_IMAGE_PATH/$FILE_NAME.bz2
     mv $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
 
     echo "[ADV] creating ${IMAGE_DIR}.img.gz ..."

@@ -12,7 +12,8 @@ echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] MACHINE_LIST= ${MACHINE_LIST}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
 #echo "[ADV] SCRIPT_XML = ${SCRIPT_XML}"
-
+echo "[ADV] KERNEL_CONFIG = ${KERNEL_CONFIG}"
+echo "[ADV] KERNEL_DTB = ${KERNEL_DTB}"
 CURR_PATH="$PWD"
 ROOT_DIR="${VER_PREFIX}AB${RELEASE_VERSION}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
@@ -21,7 +22,7 @@ OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
 #======================
 AND_BSP="android"
 AND_BSP_VER="7.1"
-AND_VERSION="android_N7.1.1_1.0.0"
+AND_VERSION="android_N7.1.2"
 
 #======================
 
@@ -180,8 +181,8 @@ function building()
 		make ARCHV=aarch64 -j12 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 	elif [ "$1" == "kernel" ]; then
 		cd $CURR_PATH/$ROOT_DIR/kernel
-		make ARCH=arm64 rockchip_defconfig 
-		make ARCH=arm64 rk3399-ds100.img -j16 >> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
+		make ARCH=arm64 $KERNEL_CONFIG 
+		make ARCH=arm64 $KERNEL_DTB -j16 >> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
     elif [ "$1" == "android" ]; then
 		cd $CURR_PATH/$ROOT_DIR
 		source build/envsetup.sh
@@ -222,13 +223,12 @@ function prepare_images()
     IMAGE_DIR="AI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
-	mkdir $IMAGE_DIR/image
+	#mkdir $IMAGE_DIR/image
 
     # Copy image files to image directory
 
 
-	cp -a $CURR_PATH/$ROOT_DIR/rockdev/* $IMAGE_DIR/image
-	mkdir $IMAGE_DIR/scripts
+	cp -a $CURR_PATH/$ROOT_DIR/rockdev/* $IMAGE_DIR
 
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
@@ -271,10 +271,13 @@ repo sync
 
 echo "[ADV] build images"
 
+for NEW_MACHINE in $MACHINE_LIST
+do
 	 build_android_images
      prepare_images
      copy_image_to_storage
      save_temp_log
+done
 
 cd $CURR_PATH
 #rm -rf $ROOT_DIR

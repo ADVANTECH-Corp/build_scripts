@@ -268,7 +268,7 @@ else
 	 echo "[ADV] BSP BRANCH AND URL is not null"
     repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
 fi
-#repo sync
+repo sync
 
 
 #echo "[ADV] patches android source code"

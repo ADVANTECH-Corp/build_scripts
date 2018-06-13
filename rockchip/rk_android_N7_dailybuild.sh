@@ -177,16 +177,19 @@ function building()
 
     if [ "$1" == "uboot" ]; then
 		cd $CURR_PATH/$ROOT_DIR/u-boot
+		make distclean 
 		make rk3399_box_defconfig
 		make ARCHV=aarch64 -j12 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 	elif [ "$1" == "kernel" ]; then
 		cd $CURR_PATH/$ROOT_DIR/kernel
-		make ARCH=arm64 $KERNEL_CONFIG 
+		make distclean
+		make ARCH=arm64 $KERNEL_CONFIG
 		make ARCH=arm64 $KERNEL_DTB -j16 >> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
     elif [ "$1" == "android" ]; then
 		cd $CURR_PATH/$ROOT_DIR
 		source build/envsetup.sh
 		lunch rk3399_box-userdebug
+		make clean
 		make -j4 2>> $CURR_PATH/$ROOT_DIR/$LOG3_FILE
 	else
     echo "[ADV] pass building..."
@@ -257,13 +260,13 @@ mkdir $ROOT_DIR
 cd $ROOT_DIR
 if [ "$BSP_BRANCH" == "" ] ; then
 	 echo "[ADV] BSP_BRANCH is null"
-#    repo init -u $BSP_URL
+    repo init -u $BSP_URL
 elif [ "$BSP_XML" == "" ] ; then
 	 echo "[ADV] BSP_XML is null"
-#    repo init -u $BSP_URL -b $BSP_BRANCH
+    repo init -u $BSP_URL -b $BSP_BRANCH
 else
 	 echo "[ADV] BSP BRANCH AND URL is not null"
-#    repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
+    repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
 fi
 #repo sync
 
@@ -278,10 +281,10 @@ for NEW_MACHINE in $MACHINE_LIST
 do
 
 echo "[ADV] NEW_MACHINE = $NEW_MACHINE"
-#	 build_android_images
-#     prepare_images
-#     copy_image_to_storage
-#     save_temp_log
+	build_android_images
+	prepare_images
+	copy_image_to_storage
+	save_temp_log
 done
 
 cd $CURR_PATH

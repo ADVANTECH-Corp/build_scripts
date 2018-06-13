@@ -256,11 +256,14 @@ echo "[ADV] get android source code"
 mkdir $ROOT_DIR
 cd $ROOT_DIR
 if [ "$BSP_BRANCH" == "" ] ; then
+	 echo "[ADV] BSP_BRANCH is null"
 #    repo init -u $BSP_URL
 elif [ "$BSP_XML" == "" ] ; then
+	 echo "[ADV] BSP_XML is null"
 #    repo init -u $BSP_URL -b $BSP_BRANCH
 else
-#    repo init -u $BSP_URL -b $BSP_BRANCH
+	 echo "[ADV] BSP BRANCH AND URL is not null"
+#    repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
 fi
 #repo sync
 

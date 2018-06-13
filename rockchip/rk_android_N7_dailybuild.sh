@@ -177,7 +177,7 @@ function building()
 
     if [ "$1" == "uboot" ]; then
 		cd $CURR_PATH/$ROOT_DIR/u-boot
-		make distclean 
+		make clean
 		make rk3399_box_defconfig
 		make ARCHV=aarch64 -j12 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 	elif [ "$1" == "kernel" ]; then

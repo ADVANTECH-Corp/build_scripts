@@ -256,13 +256,13 @@ echo "[ADV] get android source code"
 mkdir $ROOT_DIR
 cd $ROOT_DIR
 if [ "$BSP_BRANCH" == "" ] ; then
-    repo init -u $BSP_URL
+#    repo init -u $BSP_URL
 elif [ "$BSP_XML" == "" ] ; then
-    repo init -u $BSP_URL -b $BSP_BRANCH
+#    repo init -u $BSP_URL -b $BSP_BRANCH
 else
-    repo init -u $BSP_URL -b $BSP_BRANCH
+#    repo init -u $BSP_URL -b $BSP_BRANCH
 fi
-repo sync
+#repo sync
 
 
 #echo "[ADV] patches android source code"
@@ -273,10 +273,12 @@ echo "[ADV] build images"
 
 for NEW_MACHINE in $MACHINE_LIST
 do
-	 build_android_images
-     prepare_images
-     copy_image_to_storage
-     save_temp_log
+
+echo "[ADV] NEW_MACHINE = $NEW_MACHINE"
+#	 build_android_images
+#     prepare_images
+#     copy_image_to_storage
+#     save_temp_log
 done
 
 cd $CURR_PATH

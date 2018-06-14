@@ -62,7 +62,10 @@ EOF
 
     mv ${MISC_FILE_NAME}/Image-*.bin ./out/Image
     mv ${MISC_FILE_NAME}/dt-*.img ./out/dt.img
-    tar zxf ${MISC_FILE_NAME}/modules-*.tgz
+    for MODULE_TARBALL in ${MISC_FILE_NAME}/modules-*.tgz
+    do
+        tar zxf ${MODULE_TARBALL}
+    done
 }
 
 function get_bootimg()

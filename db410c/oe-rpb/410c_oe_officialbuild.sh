@@ -404,8 +404,11 @@ function prepare_images()
         mv $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
 
         echo "[ADV] copying kernel modules ..."
-        FILE_NAME=$(readlink $DEPLOY_IMAGE_PATH/modules-${NEW_MACHINE}.tgz)
-        mv $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
+        FILE_NAME=$(readlink $DEPLOY_IMAGE_PATH/modules*-${NEW_MACHINE}.tgz)
+        for MODULE_TARBALL in $FILE_NAME
+        do
+            mv $DEPLOY_IMAGE_PATH/$MODULE_TARBALL $OUTPUT_DIR
+        done
         ;;
     *)
         echo "[ADV] prepare_images: invalid parameter #1!"

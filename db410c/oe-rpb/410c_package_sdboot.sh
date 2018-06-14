@@ -49,7 +49,6 @@ EOF
 
     mv ${MISC_FILE_NAME}/Image-*.bin ./out/Image
     mv ${MISC_FILE_NAME}/dt-*.img ./out/dt.img
-    tar zxf ${MISC_FILE_NAME}/modules-*.tgz
 }
 
 function get_bootimg()

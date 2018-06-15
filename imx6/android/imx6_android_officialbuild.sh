@@ -455,7 +455,6 @@ function copy_image_to_storage()
 	echo "[ADV] create_xml_and_commit"
     create_xml_and_commit
 
-
 #echo "[ADV] patches android source code"
    patches_android_code
 
@@ -475,6 +474,7 @@ do
 done
 
 # ------------------------------------------- #
+
 
 cd $CURR_PATH
 #rm -rf $ROOT_DIR

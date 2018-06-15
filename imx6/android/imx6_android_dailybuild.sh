@@ -204,7 +204,7 @@ function prepare_images()
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/boot.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/recovery.img $IMAGE_DIR/image
 #	mv -f $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/system2.img $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/system.img 
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/system.img $IMAGE_DIR/image 
+	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/system.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/u-boot_crc.bin $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/u-boot_crc.bin.crc $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/update.zip $IMAGE_DIR/image
@@ -216,7 +216,6 @@ function prepare_images()
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}.tgz
-
     #rm -rf $IMAGE_DIR
 }
 
@@ -249,25 +248,26 @@ fi
 repo sync
 
 
-echo "[ADV] patches android source code"
-
-patches_android_code
-
-echo "[ADV] build images"
+#echo "[ADV] patches android source code"
+   patches_android_code
 
 for NEW_MACHINE in $MACHINE_LIST
 do
-	build_android_images
-    prepare_images
-    copy_image_to_storage
-    save_temp_log
+#echo "[ADV] build images"
+   build_android_images
+
+#echo "[ADV] prepare_images"
+   prepare_images
+
+#echo "[ADV] copy_image_to_storage"
+   copy_image_to_storage
+
+#echo "[ADV] copy_image_to_storage"
+   save_temp_log
 done
 
-# Copy downloads to backup
-#if [ ! -e $CURR_PATH/downloads ] ; then
-#    echo "[ADV] backup 'downloads' directory"
-#    cp -a $CURR_PATH/$ROOT_DIR/downloads $CURR_PATH
-#fi
+# ------------------------------------------- #
+
 
 cd $CURR_PATH
 #rm -rf $ROOT_DIR

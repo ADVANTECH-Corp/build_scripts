@@ -17,6 +17,5 @@ fi
 export KERNEL_DTB
 export KERNEL_CONFIG
 export MACHINE_LIST
-
 ./rk_android_N7_officialbuild.sh $VERSION_NUM
 

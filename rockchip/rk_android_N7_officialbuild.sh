@@ -353,16 +353,19 @@ function building()
 
     if [ "$1" == "uboot" ]; then
 		cd $CURR_PATH/$ROOT_DIR/u-boot
+		make clean
 		make rk3399_box_defconfig
 		make ARCHV=aarch64 -j12 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 	elif [ "$1" == "kernel" ]; then
 		cd $CURR_PATH/$ROOT_DIR/kernel
-		make ARCH=arm64 $KERNEL_CONFIG 
+		make distclean
+		make ARCH=arm64 $KERNEL_CONFIG
 		make ARCH=arm64 $KERNEL_DTB -j16 >> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
     elif [ "$1" == "android" ]; then
 		cd $CURR_PATH/$ROOT_DIR
 		source build/envsetup.sh
 		lunch rk3399_box-userdebug
+		make clean
 		make -j4 2>> $CURR_PATH/$ROOT_DIR/$LOG3_FILE
 	else
     echo "[ADV] pass building..."
@@ -507,12 +510,13 @@ echo "[ADV] build images"
 
 for NEW_MACHINE in $MACHINE_LIST
 do
-	 build_android_images
+echo "[ADV] NEW_MACHINE = $NEW_MACHINE"
+	build_android_images
 #echo "[ADV] prepare_images"
-     prepare_images
+	prepare_images
 #echo "[ADV] copy_image_to_storage"
-     copy_image_to_storage
-     save_temp_log
+	copy_image_to_storage
+	save_temp_log
 done
 
 cd $CURR_PATH

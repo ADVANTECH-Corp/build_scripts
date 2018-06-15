@@ -226,7 +226,6 @@ function prepare_images()
     IMAGE_DIR="AI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
-	#mkdir $IMAGE_DIR/image
 
     # Copy image files to image directory
 
@@ -249,9 +248,7 @@ function copy_image_to_storage()
     mv -f ${IMAGE_DIR}.tgz $OUTPUT_DIR
     mv -f *.md5 $OUTPUT_DIR
 
-
 }
-
 # ================
 #  Main procedure 
 # ================
@@ -271,18 +268,15 @@ fi
 repo sync
 
 
-#echo "[ADV] patches android source code"
-
-#patches_android_code
-
 echo "[ADV] build images"
 
 for NEW_MACHINE in $MACHINE_LIST
 do
-
 echo "[ADV] NEW_MACHINE = $NEW_MACHINE"
 	build_android_images
+#echo "[ADV] prepare_images"
 	prepare_images
+#echo "[ADV] copy_image_to_storage"
 	copy_image_to_storage
 	save_temp_log
 done

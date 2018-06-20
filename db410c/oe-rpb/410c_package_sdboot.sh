@@ -21,9 +21,18 @@ SDBOOT_BOOT_IMAGE="boot-sdboot-linaro-${DEBIAN_OS_FLAVOUR}-qcom-snapdragon-arm64
 function get_initrd_images()
 {
     # Get sd-installer ramdisk image
-    wget --progress=dot -e dotbytes=2M -P ./out/ \
-        https://builds.96boards.org/releases/dragonboard410c/linaro/debian/${DEBIAN_LINARO_RELEASE}/${INSTALLER_RAMDISK_IMAGE}
-
+    pftp -v -n ${FTP_SITE} <<-EOF
+user "ftpuser" "P@ssw0rd"
+cd "Image/db410c/96boards/${DEBIAN_LINARO_RELEASE}"
+prompt
+binary
+ls
+mget ${INSTALLER_RAMDISK_IMAGE}
+close
+quit
+EOF
+    mkdir ./out
+    mv ${INSTALLER_RAMDISK_IMAGE} ./out/
     # Get sd-boot ramdisk image
     echo "This is not an initrd" > out/${SDBOOT_RAMDISK_IMAGE}
 }

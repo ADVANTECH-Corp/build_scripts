@@ -19,25 +19,21 @@ DEBIAN_ROOTFS="linaro-${DEBIAN_OS_FLAVOUR}-alip-qcom-snapdragon-arm64-${DEBIAN_B
 # === 1. Put the debian images into out/ folder. =================================================
 function get_debian_images()
 {
-    # Get Debian ramdisk image
-	wget --progress=dot -e dotbytes=2M -P ./out/ \
-		 https://builds.96boards.org/releases/dragonboard410c/linaro/debian/${DEBIAN_LINARO_RELEASE}/${RAMDISK_IMAGE}
-	# Get Debian rootfs image
-	#wget --progress=dot -e dotbytes=2M -P ./out/ \
-	#	 https://builds.96boards.org/releases/dragonboard410c/linaro/debian/${DEBIAN_LINARO_RELEASE}/${DEBIAN_ROOTFS}.img.gz
-
+    # Get Debian ramdisk & rootfs images
     pftp -v -n ${FTP_SITE} <<-EOF
 user "ftpuser" "P@ssw0rd"
-cd "Image/db410c/96boards_debian/"
+cd "Image/db410c/96boards/${DEBIAN_LINARO_RELEASE}"
 prompt
 binary
 ls
+mget ${RAMDISK_IMAGE}
 mget ${DEBIAN_ROOTFS}.img.gz
 close
 quit
 EOF
-
-	mv ${DEBIAN_ROOTFS}.img.gz ./out/
+    mkdir ./out
+    mv ${RAMDISK_IMAGE} ./out/
+    mv ${DEBIAN_ROOTFS}.img.gz ./out/
     gunzip out/${DEBIAN_ROOTFS}.img.gz
 }
 

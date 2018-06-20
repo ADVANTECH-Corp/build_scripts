@@ -66,8 +66,16 @@ function get_installer_images()
     unzip -d out advantech_bootloader_sd_linux-${BL_BUILD_NUMBER}.zip
 
     # Get installer rootfs
-    wget --progress=dot -e dotbytes=2M \
-         http://advgitlab.eastasia.cloudapp.azure.com/db410c/sd-installer/raw/${INSTALLER_LINARO_RELEASE}/linaro-${INSTALLER_OS_FLAVOUR}-installer-qcom-snapdragon-arm64-${INSTALLER_BUILD_VERSION}.img.gz
+    pftp -v -n ${FTP_SITE} <<-EOF
+user "ftpuser" "P@ssw0rd"
+cd "Image/db410c/96boards/${INSTALLER_LINARO_RELEASE}"
+prompt
+binary
+ls
+mget linaro-${INSTALLER_OS_FLAVOUR}-installer-qcom-snapdragon-arm64-${INSTALLER_BUILD_VERSION}.img.gz
+close
+quit
+EOF
 
     cp linaro-${INSTALLER_OS_FLAVOUR}-installer-qcom-snapdragon-arm64-${INSTALLER_BUILD_VERSION}.img.gz out/rootfs.img.gz
     gunzip out/rootfs.img.gz

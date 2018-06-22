@@ -202,7 +202,7 @@ function generate_csv()
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV
 ESSD Software/OS Update News
-OS,Android 7.1.1
+OS,Android 6.0.1
 Part Number,N/A
 Author,
 Date,${DATE}
@@ -240,7 +240,7 @@ function save_temp_log()
     LOG_PATH="$CURR_PATH/$ROOT_DIR"
     cd $LOG_PATH
 
-    LOG_DIR="AI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
+    LOG_DIR="AIV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
     echo "[ADV] mkdir $LOG_DIR"
     mkdir $LOG_DIR
 

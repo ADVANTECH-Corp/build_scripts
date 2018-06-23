@@ -349,19 +349,19 @@ function copy_image_to_storage()
     echo "[ADV] add tag"
     auto_add_tag $RK_UBOOT_URL $BRANCH uboot-rk
     auto_add_tag $RK_KERNEL_URL $BRANCH kernel-rk
-    auto_add_tag $RK_DEVICE_URL $BRANCH android_rk_device
-    auto_add_tag $RK_VENDOR_URL $BRANCH android_rk_vendor
-    auto_add_tag $RK_HARDWARE_URL $BRANCH android_rk_hardware
-    auto_add_tag $RK_PACKAGES_URL $BRANCH android_rk_packages
-    auto_add_tag $RK_BUILD_URL $BRANCH android_rk_build
-    auto_add_tag $RK_FRAMEWORKS_URL $BRANCH android_rk_frameworks
+    auto_add_tag $RK_DEVICE_URL $ANDROID_BRANCH android_rk_device
+    auto_add_tag $RK_VENDOR_URL $ANDROID_BRANCH android_rk_vendor
+    auto_add_tag $RK_HARDWARE_URL $ANDROID_BRANCH android_rk_hardware
+    auto_add_tag $RK_PACKAGES_URL $ANDROID_BRANCH android_rk_packages
+    auto_add_tag $RK_BUILD_URL $ANDROID_BRANCH android_rk_build
+    auto_add_tag $RK_FRAMEWORKS_URL $ANDROID_BRANCH android_rk_frameworks
 #    auto_add_tag $RK_MANIFEST_URL $BRANCH android-rk-manifest
-    auto_add_tag $RK_BOOTABLE_URL $BRANCH android_rk_bootable
-    auto_add_tag $RK_SYSTEM_URL $BRANCH android_rk_system
-    auto_add_tag $RK_EXTERNAL_URL $BRANCH android_rk_external
-    auto_add_tag $RK_PREBUILTS_URL $BRANCH android_rk_prebuilts
-    auto_add_tag $RK_RKST_URL $BRANCH android_rk_rkst
-    auto_add_tag $RK_BIONIC_URL $BRANCH android_rk_bionic
+    auto_add_tag $RK_BOOTABLE_URL $ANDROID_BRANCH android_rk_bootable
+    auto_add_tag $RK_SYSTEM_URL $ANDROID_BRANCH android_rk_system
+    auto_add_tag $RK_EXTERNAL_URL $ANDROID_BRANCH android_rk_external
+    auto_add_tag $RK_PREBUILTS_URL $ANDROID_BRANCH android_rk_prebuilts
+    auto_add_tag $RK_RKST_URL $ANDROID_BRANCH android_rk_rkst
+    auto_add_tag $RK_BIONIC_URL $ANDROID_BRANCH android_rk_bionic
     
 
    # Create manifests xml and commit

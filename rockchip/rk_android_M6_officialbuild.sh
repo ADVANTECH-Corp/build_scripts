@@ -311,17 +311,29 @@ function prepare_images()
 {
     cd $CURR_PATH
 
+    echo "[ADV] clone rk3288 tools"
+    git clone https://github.com/ADVANTECH-Rockchip/rk3288_tools.git
+    cd rk3288_tools/Linux_rockdev
+    
+    chmod -x afptool mkupdate.sh rkImageMaker unpack.sh
+    cp -a $CURR_PATH/$ROOT_DIR/rockdev/*/*.img ./Image
+    cp -a $CURR_PATH/$ROOT_DIR/kernel/*.img ./Image
+    cp -a $CURR_PATH/$ROOT_DIR/u-boot/RK3288UbootLoader_V2.30.10.bin ./
+    echo "[ADV] make update.img"
+    ./mkupdate.sh
+    
+    cd $CURR_PATH
+
     IMAGE_DIR="AIV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
-	mkdir $IMAGE_DIR/image
+	mkdir -p $IMAGE_DIR/rockdev/image
 
     # Copy image files to image directory
-
-
-	cp -a $CURR_PATH/$ROOT_DIR/rockdev/* $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/u-boot/RK3288UbootLoader_V2.30.10.bin $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/kernel/*.img $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/rockdev/*/*.img $IMAGE_DIR/rockdev/image
+	cp -a $CURR_PATH/$ROOT_DIR/kernel/*.img $IMAGE_DIR/rockdev/image	
+	cp -a $CURR_PATH/$ROOT_DIR/u-boot/RK3288UbootLoader_V2.30.10.bin $IMAGE_DIR/rockdev
+	cp -a $CURR_PATH/rk3288_tools/Linux_rockdev/*.img $IMAGE_DIR/rockdev
 
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR

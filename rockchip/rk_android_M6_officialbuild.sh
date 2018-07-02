@@ -315,7 +315,7 @@ function prepare_images()
     git clone https://github.com/ADVANTECH-Rockchip/rk3288_tools.git
     cd rk3288_tools/Linux_rockdev
     
-    chmod -x afptool mkupdate.sh rkImageMaker unpack.sh
+    chmod 777 afptool mkupdate.sh rkImageMaker unpack.sh
     cp -a $CURR_PATH/$ROOT_DIR/rockdev/*/*.img ./Image
     cp -a $CURR_PATH/$ROOT_DIR/kernel/*.img ./Image
     cp -a $CURR_PATH/$ROOT_DIR/u-boot/RK3288UbootLoader_V2.30.10.bin ./

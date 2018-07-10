@@ -388,8 +388,8 @@ echo "[ADV] copy_image_to_storage"
      copy_image_to_storage
      save_temp_log
 
-#cd $CURR_PATH
-#rm -rf $ROOT_DIR
+cd $CURR_PATH
+rm -rf $ROOT_DIR
 
 echo "[ADV] build script done!"
 

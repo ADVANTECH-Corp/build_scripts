@@ -1,6 +1,8 @@
 #!/bin/bash
 
 RELEASE_VERSION=$1
+VER_PREFIX="amxx"
+
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
 echo "[ADV] BSP_URL = ${BSP_URL}"
@@ -15,12 +17,6 @@ echo "[ADV] SDK_IMAGE_NAME = ${SDK_IMAGE_NAME}"
 echo "[ADV] FIRST_BUILD = ${FIRST_BUILD}"
 
 CURR_PATH="$PWD"
-
-for NEW_MACHINE in $MACHINE_LIST
-do
-    VER_PREFIX=${NEW_MACHINE:0:6}
-    CPU_TYPE=${NEW_MACHINE:0:6}
-done
 
 ROOT_DIR="${VER_PREFIX}LBV${RELEASE_VERSION}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
@@ -37,10 +33,6 @@ else
     mkdir -p $OUTPUT_DIR
 fi
 
-typeset -u OFFICIAL_VER
-OFFICIAL_VER=${NEW_MACHINE:6}
-OFFICIAL_VER="${OFFICIAL_VER}LIV"$1
-
 VER_TAG="${VER_PREFIX}LBV"$1
 
 echo "$Release_Note" > Release_Note
@@ -49,6 +41,43 @@ REALEASE_NOTE="Release_Note"
 # ===========
 #  Functions
 # ===========
+function do_repo_init()
+{
+    REPO_OPT="-u $BSP_URL"
+
+    if [ ! -z "$BSP_BRANCH" ] ; then
+        REPO_OPT="$REPO_OPT -b $BSP_BRANCH"
+    fi
+    if [ ! -z "$BSP_XML" ] ; then
+        REPO_OPT="$REPO_OPT -m $BSP_XML"
+    fi
+
+    repo init $REPO_OPT
+}
+
+function get_source_code()
+{
+    echo "[ADV] get yocto source code"
+    cd $ROOT_DIR
+
+    do_repo_init
+
+    EXISTED_VERSION=`find .repo/manifests -name ${VER_TAG}.xml`
+    if [ -z "$EXISTED_VERSION" ] ; then
+        echo "[ADV] This is a new VERSION"
+    else
+        echo "[ADV] $RELEASE_VERSION already exists!"
+        rm -rf .repo
+        BSP_BRANCH="refs/tags/$VER_TAG"
+        BSP_XML="$VER_TAG.xml"
+        do_repo_init
+    fi
+
+    repo sync
+
+    cd $CURR_PATH
+}
+
 function generate_md5()
 {
     FILENAME=$1
@@ -62,7 +91,7 @@ function generate_md5()
 function check_tag_and_checkout()
 {
         FILE_PATH=$1
-	cd $CURR_PATH
+
         if [ -d "$ROOT_DIR/$FILE_PATH" ];then
                 cd $ROOT_DIR/$FILE_PATH
                 META_TAG=`git tag | grep $VER_TAG`
@@ -88,7 +117,6 @@ function check_tag_and_replace()
         REMOTE_URL=$2
         REMOTE_BRANCH=$3
 
-	cd $CURR_PATH
         HASH_ID=`git ls-remote $REMOTE_URL $VER_TAG | awk '{print $1}'`
         if [ "$HASH_ID" != "" ]; then
                 echo "[ADV] $REMOTE_URL has been tagged ,ID is $HASH_ID"
@@ -101,6 +129,8 @@ function check_tag_and_replace()
 
 function add_version()
 {
+	echo "[ADV] add version"
+
 	# Set U-boot version
 	sed -i "/UBOOT_LOCALVERSION/d" $ROOT_DIR/$U_BOOT_PATH
 	echo "UBOOT_LOCALVERSION = \"-$OFFICIAL_VER\"" >> $ROOT_DIR/$U_BOOT_PATH
@@ -112,16 +142,11 @@ function add_version()
 
 function auto_add_tag()
 {
-        REMOTE_URL=$1
-        REMOTE_BRANCH=$2
-        FILE_PATH=$3
-        
-        git clone $REMOTE_URL
-        
-        if [ -d "$FILE_PATH" ];then
-                cd $FILE_PATH
-                git checkout $REMOTE_BRANCH
-		HEAD_HASH_ID=`git rev-parse HEAD`
+        FILE_PATH=$1
+        DIR=`ls $FILE_PATH`
+        if [ -d "$FILE_PATH/$DIR/git" ];then
+                cd $FILE_PATH/$DIR/git
+                HEAD_HASH_ID=`git rev-parse HEAD`
                 TAG_HASH_ID=`git tag -v $VER_TAG | grep object | cut -d ' ' -f 2`
                 if [ "$HEAD_HASH_ID" == "$TAG_HASH_ID" ]; then
                         echo "[ADV] tag exists! There is no need to add tag"
@@ -132,7 +157,6 @@ function auto_add_tag()
                         git push $REMOTE_SERVER $VER_TAG
                 fi
                 cd $CURR_PATH
-                rm -rf $FILE_PATH
         else
                 echo "[ADV] Directory $FILE_PATH doesn't exist"
                 exit 1
@@ -158,9 +182,6 @@ function create_branch_and_commit()
         fi
 }
 
-
-
-
 function create_xml_and_commit()
 {
         if [ -d "$ROOT_DIR/.repo/manifests" ];then
@@ -168,6 +189,7 @@ function create_xml_and_commit()
                 cd $ROOT_DIR
                 # add revision into xml
                 repo manifest -o $VER_TAG.xml -r
+
                 mv $VER_TAG.xml .repo/manifests
                 cd .repo/manifests
 		git checkout $BSP_BRANCH
@@ -214,7 +236,7 @@ function save_temp_log()
 function building()
 {
     echo "[ADV] building $OLD_MACHINE $NEW_MACHINE $1 $2..."
-    LOG_DIR="LIV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
+    LOG_DIR="${OFFICIAL_VER}"_"${CPU_TYPE}"_"$DATE"_log
 
     if [ "x" != "x$2" ]; then
         MACHINE=$OLD_MACHINE bitbake $1 -c $2 -f
@@ -265,7 +287,7 @@ function prepare_images()
 {
     cd $CURR_PATH
 
-    IMAGE_DIR="LIV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
+    IMAGE_DIR="${OFFICIAL_VER}"_"${CPU_TYPE}"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
 
@@ -311,10 +333,26 @@ function prepare_images()
     tar czf ${IMAGE_DIR}_zimage.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}_zimage.tgz
     rm -rf $IMAGE_DIR
+
+    # modules
+    echo "[ADV] creating ${IMAGE_DIR}_modules.tgz for kernel modules ..."
+    mv $DEPLOY_IMAGE_PATH/modules* $IMAGE_DIR
+
+    echo "List all module files in $IMAGE_DIR:"
+    for entry in "$IMAGE_DIR"/* ; do
+        echo $entry
+    done
+
+    tar czf ${IMAGE_DIR}_modules.tgz $IMAGE_DIR
+    generate_md5 ${IMAGE_DIR}_modules.tgz
+    rm -rf $IMAGE_DIR
 }
 
 function copy_image_to_storage()
 {
+    echo "[ADV] copy BSP to $OUTPUT_DIR"
+    mv -f ${ROOT_DIR}.tgz $OUTPUT_DIR
+
     echo "[ADV] copy all images to $OUTPUT_DIR"
     echo "[ADV] copy ${IMAGE_DIR}_sdkimg.tgz to $OUTPUT_DIR"
     mv -f ${IMAGE_DIR}_sdkimg.tgz $OUTPUT_DIR
@@ -334,17 +372,8 @@ function copy_image_to_storage()
 # ================
 echo "[ADV] get yocto source code"
 mkdir $ROOT_DIR
-cd $ROOT_DIR
-if [ "$BSP_BRANCH" == "" ] ; then
-    repo init -u $BSP_URL
-elif [ "$BSP_XML" == "" ] ; then
-    repo init -u $BSP_URL -b $BSP_BRANCH
-else
-    repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
-fi
-repo sync
+get_source_code
 
-EXISTED_VERSION=`find .repo/manifests -name ${VER_TAG}.xml`
 if [ -z "$EXISTED_VERSION" ] ; then
     # Check meta-advantech tag exist or not, and checkout to tag version
     check_tag_and_checkout $META_ADVANTECH_PATH
@@ -353,9 +382,6 @@ if [ -z "$EXISTED_VERSION" ] ; then
     check_tag_and_replace $U_BOOT_PATH $U_BOOT_URL $U_BOOT_BRANCH
     check_tag_and_replace $KERNEL_PATH $KERNEL_URL $KERNEL_BRANCH
 fi
-
-echo "[ADV] add version"
-add_version
 
 # BSP source code
 echo "[ADV] tar $ROOT_DIR.tgz file"
@@ -381,6 +407,13 @@ fi
 echo "[ADV] build images"
 for NEW_MACHINE in $MACHINE_LIST
 do
+    CPU_TYPE=${NEW_MACHINE:0:6}
+
+    typeset -u OFFICIAL_VER
+    OFFICIAL_VER=${NEW_MACHINE:9}
+    OFFICIAL_VER="${OFFICIAL_VER}LIV${RELEASE_VERSION}"
+
+    add_version
     build_yocto_images
     prepare_images
     copy_image_to_storage
@@ -395,8 +428,8 @@ if [ -z "$EXISTED_VERSION" ] ; then
 
     # Add git tag
     echo "[ADV] Add tag"
-    auto_add_tag $U_BOOT_URL $U_BOOT_BRANCH uboot-ti
-    auto_add_tag $KERNEL_URL $KERNEL_BRANCH  linux-ti
+    auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$BUILD_TMP_DIR/work/${NEW_MACHINE}-linux-gnueabi/u-boot-ti-staging
+    auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$BUILD_TMP_DIR/work/${NEW_MACHINE}-linux-gnueabi/linux-processor-sdk
 
     # Create manifests xml and commit
     create_xml_and_commit

@@ -130,14 +130,15 @@ function check_tag_and_replace()
 function add_version()
 {
 	echo "[ADV] add version"
+	cd $CURR_PATH
 
 	# Set U-boot version
-	sed -i "/UBOOT_LOCALVERSION/d" $ROOT_DIR/$U_BOOT_PATH
-	echo "UBOOT_LOCALVERSION = \"-$OFFICIAL_VER\"" >> $ROOT_DIR/$U_BOOT_PATH
+	sed -i "/UBOOT_LOCALVERSION_append/d" $ROOT_DIR/$U_BOOT_PATH
+	echo "UBOOT_LOCALVERSION_append = \"_$OFFICIAL_VER\"" >> $ROOT_DIR/$U_BOOT_PATH
 	
 	# Set Linux version
-	sed -i "/LOCALVERSION/d" $ROOT_DIR/$KERNEL_PATH
-	echo "LOCALVERSION = \"-$OFFICIAL_VER\"" >> $ROOT_DIR/$KERNEL_PATH
+	sed -i "/KERNEL_LOCALVERSION_append/d" $ROOT_DIR/$KERNEL_PATH
+	echo "KERNEL_LOCALVERSION_append = \"_$OFFICIAL_VER\"" >> $ROOT_DIR/$KERNEL_PATH
 }
 
 function auto_add_tag()
@@ -332,7 +333,7 @@ function prepare_images()
 
     tar czf ${IMAGE_DIR}_zimage.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}_zimage.tgz
-    rm -rf $IMAGE_DIR
+    rm -rf $IMAGE_DIR/*
 
     # modules
     echo "[ADV] creating ${IMAGE_DIR}_modules.tgz for kernel modules ..."
@@ -362,6 +363,9 @@ function copy_image_to_storage()
 
     echo "[ADV] copy ${IMAGE_DIR}_zimage.tgz image to $OUTPUT_DIR"
     mv -f ${IMAGE_DIR}_zimage.tgz $OUTPUT_DIR
+
+    echo "[ADV] copy ${IMAGE_DIR}_modules.tgz to $OUTPUT_DIR"
+    mv -f ${IMAGE_DIR}_modules.tgz $OUTPUT_DIR
 
     echo "[ADV] copy all *.md5 images to $OUTPUT_DIR"
     mv -f *.md5 $OUTPUT_DIR

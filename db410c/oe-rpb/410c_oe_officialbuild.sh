@@ -118,7 +118,8 @@ function check_tag_and_replace()
                 HASH_ID=`git ls-remote $REMOTE_URL | grep refs/heads/$REMOTE_BRANCH | awk '{print $1}'`
                 echo "[ADV] $REMOTE_URL isn't tagged ,get latest HASH_ID is $HASH_ID"
         fi
-        sed -i "s/"\$\{AUTOREV\}"/$HASH_ID/g" $ROOT_DIR/$FILE_PATH
+        sed -i "/SRCREV/d" $ROOT_DIR/$FILE_PATH
+        echo "SRCREV = \"$HASH_ID\"" >> $ROOT_DIR/$FILE_PATH
 }
 
 function auto_add_tag()
@@ -269,6 +270,11 @@ function add_version()
     # Set Linux version
     sed -i "/LOCALVERSION/d" $ROOT_DIR/$KERNEL_PATH
     echo "LOCALVERSION = \"-$OFFICIAL_VER\"" >> $ROOT_DIR/$KERNEL_PATH
+}
+
+function remove_version()
+{
+    sed -i "/LOCALVERSION/d" $ROOT_DIR/$KERNEL_PATH
 }
 
 function building()
@@ -491,6 +497,7 @@ elif [ "$PRODUCT" == "push_commit" ]; then
 		NEW_MACHINE=$PRODUCT
 		set_environment
 		cd $CURR_PATH
+		remove_version
 
                 # Commit and create meta-advantech branch
                 create_branch_and_commit $META_ADVANTECH_PATH

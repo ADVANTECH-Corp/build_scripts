@@ -165,7 +165,8 @@ function check_tag_and_replace()
                 HASH_ID=`git ls-remote $REMOTE_URL | grep refs/heads/$REMOTE_BRANCH | awk '{print $1}'`
                 echo "[ADV] $REMOTE_URL isn't tagged ,get latest HASH_ID is $HASH_ID"
         fi
-        sed -i "s/"\$\{AUTOREV\}"/$HASH_ID/g" $ROOT_DIR/$FILE_PATH
+        sed -i "/SRCREV/d" $ROOT_DIR/$FILE_PATH
+        echo "SRCREV = \"$HASH_ID\"" >> $ROOT_DIR/$FILE_PATH
 }
 
 function auto_add_tag()
@@ -324,6 +325,12 @@ function add_version()
 	# Set Linux version
 	sed -i "/LOCALVERSION/d" $ROOT_DIR/$KERNEL_PATH
 	echo "LOCALVERSION = \"-$OFFICIAL_VER\"" >> $ROOT_DIR/$KERNEL_PATH
+}
+
+function remove_version()
+{
+        sed -i "/UBOOT_LOCALVERSION/d" $ROOT_DIR/$U_BOOT_PATH
+        sed -i "/LOCALVERSION/d" $ROOT_DIR/$KERNEL_PATH
 }
 
 function building()
@@ -748,10 +755,6 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 	tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
         generate_md5 $ROOT_DIR.tgz
 
-        # Package kernel & u-boot
-        wrap_source_code $KERNEL_URL $VER_TAG linux-imx6
-        wrap_source_code $U_BOOT_URL $VER_TAG uboot-imx6
-
         # Build Yocto SDK
         echo "[ADV] build yocto sdk"
         build_yocto_sdk
@@ -772,6 +775,7 @@ elif [ "$PRODUCT" == "push_commit" ]; then
                 PRODUCT=$2
                 define_cpu_type $PRODUCT
                 cd $CURR_PATH
+                remove_version
 
                 # Commit and create meta-advantech branch
                 create_branch_and_commit $META_ADVANTECH_PATH
@@ -783,6 +787,10 @@ elif [ "$PRODUCT" == "push_commit" ]; then
 
                 # Create manifests xml and commit
                 create_xml_and_commit
+
+                # Package kernel & u-boot
+                wrap_source_code $KERNEL_URL $VER_TAG linux-imx6
+                wrap_source_code $U_BOOT_URL $VER_TAG uboot-imx6
         fi
 
 else #"$PRODUCT" != "$VER_PREFIX"

@@ -6,7 +6,7 @@ echo "[ADV] DATE = ${DATE}"
 echo "[ADV] VERSION = ${VERSION}"
 echo "[ADV] STORED = ${STORED}"
 
-FTP_SITE="172.22.12.82"
+FTP_SITE="172.22.31.128"
 #FTP_DIR="imx6_yocto_bsp_2.1_2.0.0"
 VERSION_TAG=$(echo $VERSION | sed 's/[.]//')
 
@@ -19,7 +19,7 @@ function get_ubuntu_images()
 {
     mkdir out
     echo "[ADV] get_modules linux ftp"
-    pftp -v -n 172.22.12.82<<-EOF
+    pftp -v -n 172.22.31.128<<-EOF
 user "ftpuser" "P@ssw0rd"
 cd "Image/imx6/ubuntu/"
 prompt
@@ -44,7 +44,6 @@ function get_modules()
     
     MODULE_FILE_NAME="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_modules"
     FIRMWARE_FILE_NAME="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_firmware"
-    IMAGE_FILE_NAME="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_${DATE}.img.gz"
     echo "[ADV] get_modules ftp"
 
     pftp -v -n ${FTP_SITE}<<-EOF
@@ -55,7 +54,6 @@ binary
 ls
 mget ${MODULE_FILE_NAME}.tgz
 mget ${FIRMWARE_FILE_NAME}.tgz
-#mget ${IMAGE_FILE_NAME}
 close
 quit
 EOF
@@ -177,24 +175,29 @@ function generate_md5()
 
 function get_yocto_image()
 {
-    IMAGE_FILE_NAME="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_${DATE}.img"
+   if [ $NEW_MACHINE == "ubc220a1-solo" ]; then
+   IMAGE_FILE_NAME="fsl-image-qt5-${CPU_TYPE_Module}ubc220a1*.sdcard"
+   else
+   IMAGE_FILE_NAME="fsl-image-qt5-${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
+   fi
     IMAGE_NEW_FILE_NAME="${UBUNTU_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_${DATE}.img"
+
 
     OUT_POINT="$CURR_PATH/yocto"
     mkdir $OUT_POINT
     echo "[ADV] get_modules linux ftp"
-    pftp -v -n 172.22.12.82<<-EOF
+    pftp -v -n 172.22.31.128<<-EOF
 user "ftpuser" "P@ssw0rd"
 cd "officialbuild/${FTP_DIR}/${DATE}/"
 prompt
 binary
 ls
-mget ${IMAGE_FILE_NAME}.gz
+mget ${IMAGE_FILE_NAME}
 close
 quit
 EOF
-    echo "[ADV] gunzip"
-    sudo gunzip ${IMAGE_FILE_NAME}.gz
+    #echo "[ADV] gunzip"
+    #sudo gunzip ${IMAGE_FILE_NAME}.gz
 	echo "[ADV] Rename"
 	sudo mv ${IMAGE_FILE_NAME} ${IMAGE_NEW_FILE_NAME}
     sudo mv ${IMAGE_NEW_FILE_NAME} ${OUT_POINT}/

@@ -120,7 +120,7 @@ function check_tag_and_replace()
         fi
         LINE_NUM=`grep "SRCREV" $ROOT_DIR/$FILE_PATH -n | cut -f1 -d:`
         sed -i '/SRCREV/d' $ROOT_DIR/$FILE_PATH
-        sed -i ''$LINE_NUM'iSRCREV = \"'$HASH_ID'\"' $ROOT_DIR/$FILE_PATH
+	sed -i "${LINE_NUM}iSRCREV = \"$HASH_ID\"" $ROOT_DIR/$FILE_PATH
 }
 
 function auto_add_tag()

@@ -162,12 +162,12 @@ function check_tag_and_replace()
         if [ "$HASH_ID" != "" ]; then
                 echo "[ADV] $REMOTE_URL has been tagged ,ID is $HASH_ID"
         else
-                HASH_ID=`git ls-remote $REMOTE_URL | grep refs/heads/$REMOTE_BRANCH | awk '{print $1}'`
+                HASH_ID=`git ls-remote $REMOTE_URL | grep "refs/heads/$REMOTE_BRANCH$" | awk '{print $1}'`
                 echo "[ADV] $REMOTE_URL isn't tagged ,get latest HASH_ID is $HASH_ID"
         fi
 	LINE_NUM=`grep "SRCREV" $ROOT_DIR/$FILE_PATH -n | cut -f1 -d:`
         sed -i '/SRCREV/d' $ROOT_DIR/$FILE_PATH
-	sed -i "${LINE_NUM}iSRCREV = \"$HASH_ID\"" $ROOT_DIR/$FILE_PATH
+	sed -i ''$LINE_NUM'iSRCREV = \"'$HASH_ID'\"' $ROOT_DIR/$FILE_PATH
 }
 
 function auto_add_tag()

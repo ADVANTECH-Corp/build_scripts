@@ -224,7 +224,9 @@ fi
 if [ $UBC220A1 == true ]; then
 	MACHINE_LIST="$MACHINE_LIST ubc220a1"
 fi
-
+if [ $UBCDS31A1== true ]; then
+	MACHINE_LIST="$MACHINE_LIST ubcds31a1"
+fi
 if [ $ROM5420A1 == true ]; then
 	MACHINE_LIST="$MACHINE_LIST rom5420a1"
 fi
@@ -279,6 +281,11 @@ do
     elif [ $NEW_MACHINE == "ubc220a1" ]; then
         PRODUCT="U220A1LI"
 		UBUNTU_PRODUCT="U220A1UI"
+		CPU_TYPE="DualQuad"
+		CPU_TYPE_Module="imx6q"
+    elif [ $NEW_MACHINE == "ubcds31a1" ]; then
+        PRODUCT="DS31A1LI"
+		UBUNTU_PRODUCT="DS31A1UI"
 		CPU_TYPE="DualQuad"
 		CPU_TYPE_Module="imx6q"
     elif [ $NEW_MACHINE == "rom5420a1" ]; then

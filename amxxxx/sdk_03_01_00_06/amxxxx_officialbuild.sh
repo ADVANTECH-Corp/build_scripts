@@ -124,9 +124,7 @@ function check_tag_and_replace()
                 HASH_ID=`git ls-remote $REMOTE_URL | grep refs/heads/$REMOTE_BRANCH | awk '{print $1}'`
                 echo "[ADV] $REMOTE_URL isn't tagged ,get latest HASH_ID is $HASH_ID"
         fi
-        LINE_NUM=`grep "SRCREV" $ROOT_DIR/$FILE_PATH -n | cut -f1 -d:`
-        sed -i '/SRCREV/d' $ROOT_DIR/$FILE_PATH
-	sed -i "${LINE_NUM}iSRCREV = \"$HASH_ID\"" $ROOT_DIR/$FILE_PATH
+        sed -i "s/"\$\{AUTOREV\}"/$HASH_ID/g" $ROOT_DIR/$FILE_PATH
 }
 
 function add_version()
@@ -258,7 +256,7 @@ function building()
     if [ "$?" -ne 0 ]; then
         echo "[ADV] Build failure! Check details in ${LOG_DIR}.tgz"
         save_temp_log
-        rm -rf $CURR_PATH/$ROOT_DIR
+        #rm -rf $CURR_PATH/$ROOT_DIR
         exit 1
     fi
 }
@@ -454,8 +452,8 @@ if [ ! -e $CURR_PATH/downloads ] ; then
     cp -a $CURR_PATH/$ROOT_DIR/downloads $CURR_PATH
 fi
 
-cd $CURR_PATH
-rm -rf $ROOT_DIR
+#cd $CURR_PATH
+#rm -rf $ROOT_DIR
 
 echo "[ADV] build script done!"
 

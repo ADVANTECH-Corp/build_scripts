@@ -224,7 +224,7 @@ fi
 if [ $UBC220A1 == true ]; then
 	MACHINE_LIST="$MACHINE_LIST ubc220a1"
 fi
-if [ $UBCDS31A1== true ]; then
+if [ $UBCDS31A1 == true ]; then
 	MACHINE_LIST="$MACHINE_LIST ubcds31a1"
 fi
 if [ $ROM5420A1 == true ]; then

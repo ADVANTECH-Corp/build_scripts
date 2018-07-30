@@ -26,7 +26,7 @@ close
 quit
 EOF
     mkdir ./out
-    tar Jxf ${UBUNTU_ROOTFS}.tar.xz -C ./out/
+    sudo tar Jxf ${UBUNTU_ROOTFS}.tar.xz -C ./out/
     rm ${UBUNTU_ROOTFS}.tar.xz
 }
 
@@ -72,8 +72,8 @@ EOF
     rm ${SDKIMG_FILE_NAME}.tgz
 
     mkdir ./ti-sdk-004
-    tar Jxf processor-sdk-linux-image-*.tar.xz -C ti-sdk-004
-    rm processor-sdk-linux-image-*.tar.xz
+    tar Jxf ${MISC_FILE_NAME}/processor-sdk-linux-image-*.tar.xz -C ti-sdk-004
+    rm ${MISC_FILE_NAME}/processor-sdk-linux-image-*.tar.xz
 }
 
 function generate_md5()
@@ -121,7 +121,6 @@ depmod -a ${MODULE_VERSION}
 chown -R root:root /lib/modules/${MODULE_VERSION}/
 exit
 EOF
-
 	sudo rm out/usr/bin/qemu-arm-static
 
 	# Package 

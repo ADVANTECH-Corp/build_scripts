@@ -11,7 +11,7 @@ echo "[ADV] STORED = ${STORED}"
 CURR_PATH="$PWD"
 STORAGE_PATH="$CURR_PATH/$STORED"
 
-# === 1. Put the ubuntu image into out/ folder. =================================================
+# === [Functions] ===
 function get_rootfs_image()
 {
     # Get Ubuntu rootfs image
@@ -86,10 +86,8 @@ function generate_md5()
     fi
 }
 
-function package_ubuntu_rootfs()
+function get_install_files()
 {
-	MODULE_VERSION=`echo $(ls lib/modules/)`
-
 	# Mbed
 	wget --progress=dot -e dotbytes=2M \
 		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/factory-configurator-client/files/arago/factory-configurator-client-example.elf
@@ -114,6 +112,11 @@ function package_ubuntu_rootfs()
 
 	wget --progress=dot -e dotbytes=2M \
 		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-WISE-PaaS/recipes-ota/ota-script/files/do_update_mbed.sh
+}
+
+function package_ubuntu_rootfs()
+{
+	MODULE_VERSION=`echo $(ls lib/modules/)`
 
 	# Copy files
 	sudo rm -rf out/boot/*
@@ -150,8 +153,9 @@ EOF
 	cd out/
 	sudo tar Jcf ../tisdk-rootfs-image-ubuntu_${DATE}.tar.xz *
 
+	# Remove files
 	cd $CURR_PATH
-	rm -rf ${MISC_FILE_NAME}
+	sudo rm -rf ${MISC_FILE_NAME} boot lib out
 }
 
 function generate_sdkimg()
@@ -169,6 +173,7 @@ function generate_sdkimg()
 	generate_md5 ${OUTPUT_SDKIMG_TGZ}.tgz
 	mv ${OUTPUT_SDKIMG_TGZ}.tgz $STORAGE_PATH
 	mv *.md5 $STORAGE_PATH
+	sudo rm -rf ti-sdk-004
 }
 
 
@@ -199,7 +204,7 @@ VERSION_NUM=$NUM1$NUM2
 # Ubuntu
 OS_PREFIX="U"
 
-get_rootfs_image
+get_install_files
 
 for NEW_MACHINE in $MACHINE_LIST
 do
@@ -215,7 +220,12 @@ do
 	OUTPUT_SDKIMG_TGZ="${RELEASE_VERSION}_${CPU_TYPE}_${DATE}_sdkimg"
 	OUTPUT_SDKIMG_TAR_XZ="processor-sdk-linux-image-${NEW_MACHINE}-${DATE}"
 
+	echo "[ADV] get_rootfs_image"
+	get_rootfs_image
+	echo "[ADV] get_misc_image"
 	get_misc_image
+	echo "[ADV] package_ubuntu_rootfs"
 	package_ubuntu_rootfs
+	echo "[ADV] generate_sdkimg"
 	generate_sdkimg
 done

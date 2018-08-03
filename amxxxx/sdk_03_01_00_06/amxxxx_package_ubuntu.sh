@@ -161,14 +161,14 @@ EOF
 function generate_sdkimg()
 {
 	cd $CURR_PATH
-	mkdir ${MISC_FILE_NAME}
+	mkdir ${OUTPUT_SDKIMG_TGZ}
 
 	rm ti-sdk-004/filesystem/tisdk-rootfs-image-*
 	cp -a tisdk-rootfs-image-ubuntu_${DATE}.tar.xz ti-sdk-004/filesystem/
 	cd ti-sdk-004/
-	sudo tar Jcf ../${MISC_FILE_NAME}/${OUTPUT_SDKIMG_TAR_XZ}.tar.xz *
+	sudo tar Jcf ../${OUTPUT_SDKIMG_TGZ}/${OUTPUT_SDKIMG_TAR_XZ}.tar.xz *
 	cd ..
-	sudo tar zcf ${OUTPUT_SDKIMG_TGZ}.tgz ${MISC_FILE_NAME}
+	sudo tar zcf ${OUTPUT_SDKIMG_TGZ}.tgz ${OUTPUT_SDKIMG_TGZ}
 
 	generate_md5 ${OUTPUT_SDKIMG_TGZ}.tgz
 	mv ${OUTPUT_SDKIMG_TGZ}.tgz $STORAGE_PATH

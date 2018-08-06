@@ -45,7 +45,7 @@ function save_temp_log()
     mkdir $LOG_DIR
 
     # Backup conf, run script & log file
-    cp -a make.log $LOG_DIR
+    #cp -a make.log $LOG_DIR
 
     echo "[ADV] creating ${LOG_DIR}.tgz ..."
     tar czf $LOG_DIR.tgz $LOG_DIR
@@ -75,11 +75,10 @@ function build_yocto_images()
     set_environment
 
     # Build full image
-    make -j8 V=s 2>&1 | tee make.log
+    make -j8 V=s
 		
     if [ "$?" -ne 0 ]; then
-        echo "[ADV] Build failure! Check details in ${LOG_DIR}.tgz"
-        save_temp_log
+        echo "[ADV] Build failure! Check details in Jenkins output"
         rm -rf $CURR_PATH/$ROOT_DIR
         exit 1
     fi
@@ -165,7 +164,6 @@ do
     build_yocto_images
     prepare_images
     copy_image_to_storage
-    save_temp_log
 done
 
 # Copy downloads to backup

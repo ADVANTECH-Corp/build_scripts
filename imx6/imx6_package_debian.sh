@@ -250,6 +250,10 @@ if [ $ROM7421A1_SOLO == true ]; then
 	MACHINE_LIST="$MACHINE_LIST rom7421-solo"
 fi
 
+if [ $RSB6410A2 == true ]; then
+	MACHINE_LIST="$MACHINE_LIST rsb6410a2"
+fi
+
 # UBUNTU
  OS_PREFIX="U"
 
@@ -312,7 +316,12 @@ do
 		UBUNTU_PRODUCT="7421A1DI"
 		CPU_TYPE="DualQuadPlus"
 		CPU_TYPE_Module="imx6qp"
-    fi	
+    elif [ $NEW_MACHINE == "rsb6410a2" ]; then
+        PRODUCT="6410A2LI"
+        	UBUNTU_PRODUCT="6410A2UI"
+		CPU_TYPE="DualQuad"
+		CPU_TYPE_Module="imx6q"
+    fi
 
     echo "[ADV] get_modules"
 	get_modules

@@ -318,7 +318,7 @@ do
 		CPU_TYPE_Module="imx6qp"
     elif [ $NEW_MACHINE == "rsb6410a2" ]; then
         PRODUCT="6410A2LI"
-        	UBUNTU_PRODUCT="6410A2UI"
+        	UBUNTU_PRODUCT="6410A2DI"
 		CPU_TYPE="DualQuad"
 		CPU_TYPE_Module="imx6q"
     fi

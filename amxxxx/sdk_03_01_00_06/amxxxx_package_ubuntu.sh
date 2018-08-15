@@ -102,6 +102,9 @@ function get_install_files()
 		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-edge/files/mec.service
 
 	wget --progress=dot -e dotbytes=2M \
+		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-ti-adv/recipes-core/service/files/g_mass_storage.service
+
+	wget --progress=dot -e dotbytes=2M \
 		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-edge/files/arm_update_activate.sh
 
 	wget --progress=dot -e dotbytes=2M \
@@ -126,12 +129,13 @@ function package_ubuntu_rootfs()
 
 	#sudo mkdir /out/tools
 	sudo chmod 755 *
-	# [Note] Use dev mode by default
-	sudo cp -a edge-core out/usr/bin/edge-core_mp
-	sudo cp -a edge-core-dev out/usr/bin/edge-core
+
+	sudo cp -a edge-core out/usr/bin/edge-core
+	sudo cp -a edge-core-dev out/usr/bin/edge-core-dev
 
 	sudo cp -a factory-configurator-client-example.elf out/usr/bin/
 	sudo cp -a mec.service out/lib/systemd/system/
+	sudo cp -a g_mass_storage.service out/lib/systemd/system/
 	sudo cp -a arm_update_activate.sh out/usr/sbin/
 	sudo cp -a arm_update_active_details.sh out/usr/sbin/
 	sudo cp -a arm_update_prepare.sh out/usr/sbin/
@@ -145,6 +149,7 @@ function package_ubuntu_rootfs()
 depmod -a ${MODULE_VERSION}
 chown -R root:root /lib/modules/${MODULE_VERSION}/
 systemctl enable mec.service
+systemctl enable g_mass_storage.service
 exit
 EOF
 	sudo rm out/usr/bin/qemu-arm-static

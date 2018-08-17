@@ -177,6 +177,8 @@ function get_yocto_image()
 {
    if [ $NEW_MACHINE == "ubc220a1-solo" ]; then
    IMAGE_FILE_NAME="fsl-image-qt5-${CPU_TYPE_Module}ubc220a1*.sdcard"
+   elif [ $NEW_MACHINE == "rom7421a1-plus" ]; then
+   IMAGE_FILE_NAME="fsl-image-qt5-${CPU_TYPE_Module}rom7421a1*.sdcard"
    else
    IMAGE_FILE_NAME="fsl-image-qt5-${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
    fi

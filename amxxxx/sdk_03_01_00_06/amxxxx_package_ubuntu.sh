@@ -128,7 +128,8 @@ function package_ubuntu_rootfs()
 	sudo cp -ar lib/modules/ out/lib/
 
 	#sudo mkdir /out/tools
-	sudo chown root:root *
+	sudo chown root:root edge* *.sh *.service *.elf
+
 	sudo chmod 755 *
 
 	sudo cp -a edge-core out/usr/bin/edge-core

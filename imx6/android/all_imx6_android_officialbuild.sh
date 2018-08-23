@@ -29,6 +29,9 @@ fi
 if [ $EPCRS_200_A1 == true ]; then
         MACHINE_LIST="$MACHINE_LIST epcrs_200_a1"
 fi
+if [ $UBC_220_A1 == true ]; then
+        MACHINE_LIST="$MACHINE_LIST ubc_220_a1"
+fi
 
 export MACHINE_LIST
 ./imx6_android_officialbuild.sh

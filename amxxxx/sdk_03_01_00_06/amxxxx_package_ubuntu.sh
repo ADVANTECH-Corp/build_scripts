@@ -99,7 +99,13 @@ function get_install_files()
 		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-edge/files/arago/edge-core-dev
 
 	wget --progress=dot -e dotbytes=2M \
+		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-edge/files/arago/pt-example_modbus
+
+	wget --progress=dot -e dotbytes=2M \
 		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-edge/files/mec.service
+
+	wget --progress=dot -e dotbytes=2M \
+		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-edge/files/pt-modbus.service
 
 	wget --progress=dot -e dotbytes=2M \
 		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-ti-adv/recipes-core/service/files/g_multi.service
@@ -112,6 +118,9 @@ function get_install_files()
 
 	wget --progress=dot -e dotbytes=2M \
 		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-edge/files/arm_update_prepare.sh
+
+	wget --progress=dot -e dotbytes=2M \
+		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-Edge-Sense/recipes-mbed/mbed-edge/files/arago/arm_write_header.sh
 
 	wget --progress=dot -e dotbytes=2M \
 		https://github.com/ADVANTECH-Corp/meta-advantech/raw/${BSP_BRANCH%-EdgeSense}/meta-WISE-PaaS/recipes-ota/ota-script/files/do_update_mbed.sh
@@ -132,17 +141,22 @@ function package_ubuntu_rootfs()
 
 	sudo chmod 755 *
 
-	sudo cp -a edge-core out/usr/bin/edge-core
-	sudo cp -a edge-core-dev out/usr/bin/edge-core-dev
-
+	sudo cp -a edge-core out/usr/bin/
+	sudo cp -a edge-core-dev out/usr/bin/
+	sudo cp -a pt-example_modbus out/usr/bin/
 	sudo cp -a factory-configurator-client-example.elf out/usr/bin/
+
 	sudo cp -a arm_update_activate.sh out/usr/sbin/
 	sudo cp -a arm_update_active_details.sh out/usr/sbin/
 	sudo cp -a arm_update_prepare.sh out/usr/sbin/
+	sudo cp -a arm_write_header.sh out/usr/sbin/
+
 	sudo cp -a do_update_mbed.sh out/tools/
 
 	sudo chmod 644 mec.service
 	sudo cp -a mec.service out/lib/systemd/system/
+	sudo chmod 644 pt-modbus.service
+	sudo cp -a pt-modbus.service out/lib/systemd/system/
 	sudo chmod 644 g_multi.service
 	sudo cp -a g_multi.service out/lib/systemd/system/
 

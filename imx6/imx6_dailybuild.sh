@@ -129,8 +129,10 @@ function build_yocto_images()
     echo "[ADV] Build full image!"
     building $DEPLOY_IMAGE_NAME
 	
-    echo "[ADV] build_OTA_image!"
-    building $OTA_IMAGE_NAME
+    if [ "$OTA_IMAGE_NAME" == "core-image-full-cmdline" ]; then
+	echo "[ADV] build_OTA_image!"
+    	building $OTA_IMAGE_NAME
+    fi
 }
 
 function prepare_images()

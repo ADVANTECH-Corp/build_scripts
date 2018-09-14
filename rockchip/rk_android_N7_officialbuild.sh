@@ -352,16 +352,19 @@ function building()
     LOG3_FILE="$NEW_MACHINE"_Build3.log
 
     if [ "$1" == "uboot" ]; then
+        echo "[ADV] build uboot"
 		cd $CURR_PATH/$ROOT_DIR/u-boot
 		make clean
 		make rk3399_box_defconfig
 		make ARCHV=aarch64 -j12 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 	elif [ "$1" == "kernel" ]; then
+		echo "[ADV] build kernel  = $KERNEL_CONFIG"
 		cd $CURR_PATH/$ROOT_DIR/kernel
 		make distclean
 		make ARCH=arm64 $KERNEL_CONFIG
 		make ARCH=arm64 $KERNEL_DTB -j16 >> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
     elif [ "$1" == "android" ]; then
+		echo "[ADV] build android"
 		cd $CURR_PATH/$ROOT_DIR
 		source build/envsetup.sh
 		lunch rk3399_box-userdebug

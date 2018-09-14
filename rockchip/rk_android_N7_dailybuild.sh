@@ -1,5 +1,6 @@
 #!/bin/bash
 
+PRODUCT=$1
 VER_PREFIX="rk"
 
 
@@ -255,6 +256,9 @@ function copy_image_to_storage()
 # ================
 #  Main procedure 
 # ================
+
+
+if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 echo "[ADV] get android source code"
 mkdir $ROOT_DIR
 cd $ROOT_DIR
@@ -270,7 +274,7 @@ else
 fi
 repo sync
 
-
+else #"$PRODUCT" != "$VER_PREFIX"
 echo "[ADV] build images"
 
 for NEW_MACHINE in $MACHINE_LIST
@@ -284,6 +288,7 @@ echo "[ADV] NEW_MACHINE = $NEW_MACHINE"
 	save_temp_log
 done
 
+fi
 cd $CURR_PATH
 #rm -rf $ROOT_DIR
 

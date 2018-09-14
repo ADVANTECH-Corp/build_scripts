@@ -1,5 +1,7 @@
 #!/bin/bash
 MACHINE_LIST=""
+#rk_BSP
+./rk_android_N7_dailybuild.sh rk $VERSION_NUM
 
 #DS100_projects
 if [ "$DS100" == "true" ]; then
@@ -9,7 +11,7 @@ if [ "$DS100" == "true" ]; then
 export KERNEL_DTB
 export KERNEL_CONFIG
 export MACHINE_LIST
-./rk_android_N7_dailybuild.sh $VERSION_NUM
+./rk_android_N7_dailybuild.sh ds100 $VERSION_NUM
 fi
 #DS100Lite_projects
 if [ "$DS100L" == "true" ]; then
@@ -19,7 +21,7 @@ if [ "$DS100L" == "true" ]; then
 export KERNEL_DTB
 export KERNEL_CONFIG
 export MACHINE_LIST
-./rk_android_N7_dailybuild.sh $VERSION_NUM
+./rk_android_N7_dailybuild.sh ds100l $VERSION_NUM
 fi
 echo "[ADV] All done!"
 

@@ -9,6 +9,11 @@ if [ "$RSB4680A3" == "true" ]; then
 	KERNEL_DTB=rk3288-rsb4680-a3.img
 	ANDROID_CONFIG=rsb4680-userdebug
 	MACHINE_LIST="$MACHINE_LIST rsb_4680"
+elif [ "$EBCRB03A2" == "true" ]; then
+	UBOOT_DEFCONFIG=rk3288_ebcrb03a2_2G_defconfig
+        KERNEL_DTB=rk3288-ebcrb03-a2.img
+        ANDROID_CONFIG=ebcRB03-userdebug
+        MACHINE_LIST="$MACHINE_LIST ebc_rb03"
 fi
 
 export UBOOT_DEFCONFIG

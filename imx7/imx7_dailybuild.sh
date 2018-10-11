@@ -164,6 +164,13 @@ function prepare_images()
     tar czf ${IMAGE_DIR}_uboot.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}_uboot.tgz
 
+    # Kernel
+    cp ota-package.sh $DEPLOY_IMAGE_PATH
+    cd $DEPLOY_IMAGE_PATH
+    cp zImage-imx*.dtb `ls zImage-imx*.dtb | cut -d '-' -f 2-` 
+    echo "[ADV] creating ${IMAGE_DIR}_kernel.zip for kernel image ..."
+    ./ota-package.sh -k zImage -d imx*.dtb -o update_${IMAGE_DIR}_kernel.zip
+    mv update*.zip $CURR_PATH
     cd $CURR_PATH
     
     rm -rf $IMAGE_DIR
@@ -176,6 +183,7 @@ function copy_image_to_storage()
     mv -f ${IMAGE_DIR}.img.gz $OUTPUT_DIR
     mv -f ${IMAGE_DIR}_eng.img.gz $OUTPUT_DIR
     mv -f ${IMAGE_DIR}_uboot.tgz $OUTPUT_DIR
+    mv -f update*.zip $OUTPUT_DIR
     mv -f *.md5 $OUTPUT_DIR
 }
 

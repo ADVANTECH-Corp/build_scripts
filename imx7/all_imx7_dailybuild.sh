@@ -1,6 +1,6 @@
 #!/bin/bash
 MACHINE_LIST=""
-#imx6_projects
+#imx7_projects
 if [ $EBCRM01A1 == true ]; then
 	MACHINE_LIST="$MACHINE_LIST imx7debcrm01a1"
 fi

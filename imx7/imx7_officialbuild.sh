@@ -447,13 +447,6 @@ function generate_mksd_linux()
 	sudo chown 0.0 $MOUNT_POINT/mk_inand/mksd-linux.sh
 }
 
-function generate_mkspi_advboot()
-{
-        sudo mkdir $MOUNT_POINT/recovery
-        chmod 755 $CURR_PATH/mkspi-advboot.sh
-        sudo cp $CURR_PATH/mkspi-advboot.sh $MOUNT_POINT/recovery/
-        sudo chown 0.0 $MOUNT_POINT/recovery/mkspi-advboot.sh
-}
 function insert_image_file()
 {
 	IMAGE_TYPE=$1
@@ -573,6 +566,9 @@ function prepare_images()
                         echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
 			tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
 			generate_md5 ${OUTPUT_DIR}.tgz
+                        ;;
+                "ota")
+                        echo "[ADV] ota case: Don't need to create any file ..."
                         ;;
                 *) # Normal image
                         echo "[ADV] creating ${OUTPUT_DIR}.img.gz ..."

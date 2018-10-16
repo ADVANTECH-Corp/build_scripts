@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VER_PREFIX="imx6"
+VER_PREFIX="imx7"
 
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"

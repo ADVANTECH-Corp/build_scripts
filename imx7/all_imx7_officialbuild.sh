@@ -6,7 +6,7 @@ PRODUCT=""
 
 #[x11]
 #imx7_BSP
-./imx7_officialbuild.sh imx7 imx7LBV"$VERSION_NUM" 2G x11
+./imx7_officialbuild.sh imx7 imx7LBV"$VERSION_NUM" 2G_IM x11
 [ "$?" -ne 0 ] && exit 1
 
 #imx7_projects

@@ -704,8 +704,8 @@ elif [ "$PRODUCT" == "push_commit" ]; then
                 create_xml_and_commit
 
                 # Package kernel & u-boot
-                wrap_source_code $KERNEL_URL $VER_TAG linux-imx6
-                wrap_source_code $U_BOOT_URL $VER_TAG uboot-imx6
+                wrap_source_code $KERNEL_URL $VER_TAG linux-imx7
+                wrap_source_code $U_BOOT_URL $VER_TAG uboot-imx7
         fi
 
 else #"$PRODUCT" != "$VER_PREFIX"

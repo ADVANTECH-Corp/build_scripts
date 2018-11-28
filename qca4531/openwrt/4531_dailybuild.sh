@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 VER_PREFIX="4531"
 
@@ -89,7 +89,9 @@ function add_version()
     sed -i "${LINE_NUM}iEXTRAVERSION = ${DAILYBUILD_VER}" $ROOT_DIR/$U_BOOT_PATH
 
     # Set Linux version
-    rm $ROOT_DIR/$KERNEL_PATH
+    if [ -e $ROOT_DIR/$KERNEL_PATH ] ; then
+        rm $ROOT_DIR/$KERNEL_PATH
+    fi
     echo "${DAILYBUILD_VER}" > $ROOT_DIR/$KERNEL_PATH
 }
 
@@ -105,7 +107,7 @@ function build_images()
     make V=s
 
     if [ "$?" -ne 0 ]; then
-        echo "[ADV] Build failure! Check details in ${LOG_DIR}.tgz"
+        echo "[ADV] Build failure! Check details in Jenkins console output."
         exit 1
     fi
 }

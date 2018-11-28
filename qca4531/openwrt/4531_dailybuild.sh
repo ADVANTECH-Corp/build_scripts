@@ -92,7 +92,7 @@ function add_version()
     if [ -e $ROOT_DIR/$KERNEL_PATH ] ; then
         rm $ROOT_DIR/$KERNEL_PATH
     fi
-    echo "\"${DAILYBUILD_VER}\"" > $ROOT_DIR/$KERNEL_PATH
+    echo "${DAILYBUILD_VER}" > $ROOT_DIR/$KERNEL_PATH
 }
 
 function build_images()

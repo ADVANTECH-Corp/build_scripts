@@ -152,6 +152,8 @@ function copy_image_to_storage()
 echo "[ADV] get source code"
 git clone $BSP_URL $ROOT_DIR
 cd $ROOT_DIR
+git submodule init
+git submodule update
 
 echo "[ADV] build images"
 for NEW_MACHINE in $MACHINE_LIST

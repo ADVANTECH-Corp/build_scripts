@@ -61,7 +61,7 @@ function generate_csv()
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV
 ESSD Software/OS Update News
-OS,Linux OpenWrt 4.4.16
+OS,Linux OpenWrt 4.4.60
 Part Number,N/A
 Author,
 Date,${DATE}

@@ -56,7 +56,7 @@ function generate_csv()
     fi
 
     HASH_BSP=$(cd $CURR_PATH/$ROOT_DIR && git rev-parse --short HEAD)
-    HASH_KERNEL=$(cd $CURR_PATH/$ROOT_DIR/qca/src/linux-4.4 && git rev-parse --short HEAD)
+    HASH_KERNEL=$(cd $CURR_PATH/$ROOT_DIR/qsdk/qca/src/linux-4.4 && git rev-parse --short HEAD)
     cd $CURR_PATH
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV
@@ -97,13 +97,13 @@ function add_version()
 
 function build_images()
 {
+    add_version
+
     cd $CURR_PATH/$ROOT_DIR/qsdk
 
     make package/symlinks
     cp qca/configs/advantech/${NEW_MACHINE}.config .config
     make defconfig
-
-    add_version
     make V=s
 
     if [ "$?" -ne 0 ]; then
@@ -153,6 +153,8 @@ function copy_image_to_storage()
 echo "[ADV] get source code"
 git clone $BSP_URL $ROOT_DIR
 cd $ROOT_DIR
+git submodule init
+git submodule update
 
 echo "[ADV] build images"
 for NEW_MACHINE in $MACHINE_LIST

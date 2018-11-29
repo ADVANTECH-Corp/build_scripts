@@ -56,7 +56,7 @@ function generate_csv()
     fi
 
     HASH_BSP=$(cd $CURR_PATH/$ROOT_DIR && git rev-parse --short HEAD)
-    HASH_KERNEL=$(cd $CURR_PATH/$ROOT_DIR/qca/src/linux-4.4 && git rev-parse --short HEAD)
+    HASH_KERNEL=$(cd $CURR_PATH/$ROOT_DIR/qsdk/qca/src/linux-4.4 && git rev-parse --short HEAD)
     cd $CURR_PATH
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV

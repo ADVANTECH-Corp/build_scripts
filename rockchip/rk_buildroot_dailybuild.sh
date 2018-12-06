@@ -81,22 +81,24 @@ function building()
     if [ "$1" == "uboot" ]; then
         echo "[ADV] build uboot"
 		cd $CURR_PATH/$ROOT_DIR/u-boot
-		make clean
-		make rk3399_box_defconfig
-		make ARCHV=aarch64 -j12 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
+		#make clean
+		./make.sh evb-rk3399
 	elif [ "$1" == "kernel" ]; then
 		echo "[ADV] build kernel  = $KERNEL_CONFIG"
 		cd $CURR_PATH/$ROOT_DIR/kernel
-		make distclean
-		make ARCH=arm64 $KERNEL_CONFIG
-		make ARCH=arm64 $KERNEL_DTB -j16 >> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
-    elif [ "$1" == "android" ]; then
+		#make distclean
+		make ARCH=arm64 rockchip_linux_defconfig
+		make ARCH=arm64 rk3399-sapphire-excavator-linux.img -j12
+		#make ARCH=arm64 $KERNEL_CONFIG
+		#make ARCH=arm64 $KERNEL_DTB -j16 >> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
+    elif [ "$1" == "buildroot" ]; then
 		echo "[ADV] build android"
 		cd $CURR_PATH/$ROOT_DIR
-		source build/envsetup.sh
-		lunch rk3399_box-userdebug
-		make clean
-		make -j4 2>> $CURR_PATH/$ROOT_DIR/$LOG3_FILE
+		./build.sh recovery
+    elif [ "$1" == "buildroot" ]; then
+		echo "[ADV] build android"
+		cd $CURR_PATH/$ROOT_DIR
+		./build.sh rootfs
 	else
     echo "[ADV] pass building..."
     fi
@@ -112,15 +114,14 @@ function set_environment()
 	export CLASSPATH=.:$JAVA_HOME/lib:$JAVA_HOME/lib/tools.jar
 }
 
-function build_android_images()
+function build_linux_images()
 {
     cd $CURR_PATH/$ROOT_DIR
 
-	set_environment
-    # Android 
+	#set_environment
 	building uboot
 	building kernel
-	building android
+	#building buildroot
     # package image to rockdev folder
     ./mkimage.sh
 }
@@ -135,8 +136,11 @@ function prepare_images()
 
     # Copy image files to image directory
 
-
-	cp -a $CURR_PATH/$ROOT_DIR/rockdev/* $IMAGE_DIR
+    cp -a $CURR_PATH/$ROOT_DIR/u-boot/rk3399_loader_v1.14.115.bin $IMAGE_DIR
+	cp -a $CURR_PATH/$ROOT_DIR/u-boot/trust.img $IMAGE_DIR
+	cp -a $CURR_PATH/$ROOT_DIR/u-boot/uboot.img $IMAGE_DIR
+	cp -a $CURR_PATH/$ROOT_DIR/kernel/boot.img $IMAGE_DIR
+	#cp -a $CURR_PATH/$ROOT_DIR/rockdev/* $IMAGE_DIR
 
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
@@ -173,7 +177,7 @@ echo "[ADV] build images"
 for NEW_MACHINE in $MACHINE_LIST
 do
 echo "[ADV] NEW_MACHINE = $NEW_MACHINE"
-	build_android_images
+	build_linux_images
 #echo "[ADV] prepare_images"
 	prepare_images
 #echo "[ADV] copy_image_to_storage"

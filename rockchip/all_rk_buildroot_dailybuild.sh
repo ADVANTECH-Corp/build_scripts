@@ -10,7 +10,7 @@ if [ "$DS100" == "true" ]; then
 export KERNEL_DTB
 export KERNEL_CONFIG
 export MACHINE_LIST
-#./rk_buildroot_dailybuild.sh 
+./rk_buildroot_dailybuild.sh ds100 $VERSION_NUM
 fi
 echo "[ADV] All done!"
 

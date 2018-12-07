@@ -91,7 +91,7 @@ function building()
 		make ARCH=arm64 rk3399-sapphire-excavator-linux.img -j12
 		#make ARCH=arm64 $KERNEL_CONFIG
 		#make ARCH=arm64 $KERNEL_DTB -j16 >> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
-    elif [ "$1" == "buildroot" ]; then
+    elif [ "$1" == "recovery" ]; then
 		echo "[ADV] build android"
 		cd $CURR_PATH/$ROOT_DIR
 		./build.sh recovery
@@ -121,7 +121,8 @@ function build_linux_images()
 	#set_environment
 	building uboot
 	building kernel
-	#building buildroot
+    building recovery
+	building buildroot
     # package image to rockdev folder
     ./mkimage.sh
 }
@@ -136,12 +137,12 @@ function prepare_images()
 
     # Copy image files to image directory
 
-    cp -a $CURR_PATH/$ROOT_DIR/u-boot/rk3399_loader_v1.14.115.bin $IMAGE_DIR
+    cp -a $CURR_PATH/$ROOT_DIR/u-boot/*.bin $IMAGE_DIR
 	cp -a $CURR_PATH/$ROOT_DIR/u-boot/trust.img $IMAGE_DIR
 	cp -a $CURR_PATH/$ROOT_DIR/u-boot/uboot.img $IMAGE_DIR
 	cp -a $CURR_PATH/$ROOT_DIR/kernel/boot.img $IMAGE_DIR
-	#cp -a $CURR_PATH/$ROOT_DIR/rockdev/* $IMAGE_DIR
-
+	cp -a $CURR_PATH/$ROOT_DIR/buildroot/output/rockchip_rk3399_recovery/images/recovery.img $IMAGE_DIR
+    cp -a $CURR_PATH/$ROOT_DIR/buildroot/output/rockchip_rk3399/images/rootfs.ext4 $IMAGE_DIR
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}.tgz

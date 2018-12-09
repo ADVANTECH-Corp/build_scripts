@@ -121,7 +121,8 @@ function build_linux_images()
 	#set_environment
 	building uboot
 	building kernel
-    building recovery
+	building recovery
+	building recovery  #<--for debug
 	building buildroot
     # package image to rockdev folder
     ./mkimage.sh

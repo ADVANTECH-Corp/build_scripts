@@ -222,6 +222,13 @@ echo "[ADV] tar $ROOT_DIR.tgz file"
 tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs
 generate_md5 $ROOT_DIR.tgz
 
+# Link downloads directory from backup
+if [ -e $CURR_PATH/dl ] ; then
+    echo "[ADV] link downloads directory"
+    rm -rf $ROOT_DIR/qsdk/dl
+    ln -s $CURR_PATH/dl $ROOT_DIR/qsdk/dl
+fi
+
 echo "[ADV] build images"
 for NEW_MACHINE in $MACHINE_LIST
 do
@@ -241,6 +248,12 @@ copy_image_to_storage sdk
 echo "[ADV] add git tag"
 auto_add_tag /
 auto_add_tag $KERNEL_PATH
+
+# Copy downloads to backup
+if [ ! -e $CURR_PATH/dl ] ; then
+    echo "[ADV] backup downloads directory"
+    cp -a $CURR_PATH/$ROOT_DIR/qsdk/dl $CURR_PATH
+fi
 
 cd $CURR_PATH
 #rm -rf $ROOT_DIR

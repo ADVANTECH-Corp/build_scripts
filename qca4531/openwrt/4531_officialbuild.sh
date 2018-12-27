@@ -111,7 +111,7 @@ END_OF_CSV
 function add_version()
 {
     cd $CURR_PATH
-    DAILYBUILD_VER="-${PROJECT_PREFIX}OI${RELEASE_VERSION}.${BUILD_NUMBER}"
+    DAILYBUILD_VER="-${PROJECT_PREFIX}OI${RELEASE_VERSION}"
 
     # Set U-boot version
     U_BOOT_VER_FILE="${ROOT_DIR}/${U_BOOT_PATH}/Makefile"

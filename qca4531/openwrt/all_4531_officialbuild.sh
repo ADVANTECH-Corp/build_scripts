@@ -1,7 +1,7 @@
 #!/bin/bash
 NUM1=`expr $VERSION : 'V\([0-9]*\)'`
 NUM2=`expr $VERSION : '.*[.]\([0-9A-Z]*\)'`
-RELEASE_VERSION=$NUM1$NUM2
+RELEASE_VERSION="V$NUM1$NUM2"
 MACHINE_LIST=""
 
 #Projects

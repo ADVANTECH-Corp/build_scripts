@@ -255,8 +255,11 @@ if [ ! -e $CURR_PATH/dl ] ; then
     cp -a $CURR_PATH/$ROOT_DIR/qsdk/dl $CURR_PATH
 fi
 
+# Remove strange filepath
+cd $CURR_PATH/$ROOT_DIR/qsdk/build_dir/host/findutils-4.4.2
+while [ -e confdir3/ ]; do mv confdir3/ d/; cd d/; done
+
 cd $CURR_PATH
-#rm -rf $ROOT_DIR
 
 echo "[ADV] build script done!"
 

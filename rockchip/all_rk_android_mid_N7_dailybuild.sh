@@ -1,7 +1,7 @@
 #!/bin/bash
 MACHINE_LIST=""
 #rk_BSP
-./rk_android_N7_dailybuild.sh rk $VERSION_NUM
+./rk_android_mid_N7_dailybuild.sh rk $VERSION_NUM
 
 #DS100_projects
 if [ "$DS100" == "true" ]; then

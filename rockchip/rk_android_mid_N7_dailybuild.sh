@@ -223,6 +223,13 @@ function build_android_images()
     ./mkimage.sh
 }
 
+function build_ota_images()
+{
+    cd $CURR_PATH/$ROOT_DIR
+    rm -rf $CURR_PATH/$ROOT_DIR/rockdev/*
+    ./mkimage.sh ota
+}
+
 function prepare_images()
 {
     cd $CURR_PATH
@@ -242,14 +249,34 @@ function prepare_images()
     #rm -rf $IMAGE_DIR
 }
 
+function prepare_ota_images()
+{
+    cd $CURR_PATH
+
+    OTA_IMAGE_DIR="OTA_AI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
+    echo "[ADV] mkdir $IMAGE_DIR"
+    mkdir $OTA_IMAGE_DIR
+
+    # Copy image files to image directory
+
+
+	cp -a $CURR_PATH/$ROOT_DIR/rockdev/* $OTA_IMAGE_DIR
+
+    echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
+    tar czf ${IOTA_IMAGE_DIRR}.tgz $OTA_IMAGE_DIR
+    generate_md5 ${OTA_IMAGE_DIR}.tgz
+    #rm -rf $IMAGE_DIR
+}
+
+
 function copy_image_to_storage()
 {
     echo "[ADV] copy images to $OUTPUT_DIR"
 
     generate_csv ${IMAGE_DIR}.tgz
     mv ${IMAGE_DIR}.csv $OUTPUT_DIR
-
     mv -f ${IMAGE_DIR}.tgz $OUTPUT_DIR
+    mv -f ${OTA_IMAGE_DIR}.tgz $OUTPUT_DIR
     mv -f *.md5 $OUTPUT_DIR
 
 }
@@ -281,9 +308,11 @@ for NEW_MACHINE in $MACHINE_LIST
 do
 echo "[ADV] NEW_MACHINE = $NEW_MACHINE"
 	build_android_images
-#echo "[ADV] prepare_images"
 	prepare_images
-#echo "[ADV] copy_image_to_storage"
+#-------------------------------------
+    build_ota_images
+    prepare_ota_images
+#-------------------------------------
 	copy_image_to_storage
 	save_temp_log
 done

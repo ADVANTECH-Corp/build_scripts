@@ -256,15 +256,36 @@ function prepare_ota_images()
     OTA_IMAGE_DIR="OTA_AI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
     echo "[ADV] mkdir $OTA_IMAGE_DIR"
     mkdir $OTA_IMAGE_DIR
-
+    mkdir $CURR_PATH/rockdev/Image
     # Copy image files to image directory
 
 
 	cp -a $CURR_PATH/$ROOT_DIR/rockdev/* $OTA_IMAGE_DIR
 
+    cp -a $CURR_PATH/$ROOT_DIR/rockdev/* $CURR_PATH/rockdev/Image
     echo "[ADV] creating ${OTA_IMAGE_DIR}.tgz ..."
     tar czf ${OTA_IMAGE_DIR}.tgz $OTA_IMAGE_DIR
     generate_md5 ${OTA_IMAGE_DIR}.tgz
+    #rm -rf $IMAGE_DIR
+}
+
+function create_update_images()
+{
+    cd $CURR_PATH
+    SD_IMAGE_DIR="SD_AI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
+    echo "[ADV] mkdir $SD_IMAGE_DIR"
+    mkdir $SD_IMAGE_DIR
+
+    cd $CURR_PATH/rockdev/
+    ./mkupdate.sh
+    # Copy image files to image directory
+
+    cd $CURR_PATH
+	cp -a $CURR_PATH/rockdev/update.img $SD_IMAGE_DIR
+
+    echo "[ADV] creating ${SD_IMAGE_DIR}.tgz ..."
+    tar czf ${SD_IMAGE_DIR}.tgz $SD_IMAGE_DIR
+    generate_md5 ${SD_IMAGE_DIR}.tgz
     #rm -rf $IMAGE_DIR
 }
 
@@ -277,6 +298,7 @@ function copy_image_to_storage()
     mv ${IMAGE_DIR}.csv $OUTPUT_DIR
     mv -f ${IMAGE_DIR}.tgz $OUTPUT_DIR
     mv -f ${OTA_IMAGE_DIR}.tgz $OUTPUT_DIR
+    mv -f ${SD_IMAGE_DIR}.tgz $OUTPUT_DIR
     mv -f *.md5 $OUTPUT_DIR
 
 }
@@ -312,6 +334,8 @@ echo "[ADV] NEW_MACHINE = $NEW_MACHINE"
 #-------------------------------------
     build_ota_images
     prepare_ota_images
+#-------------------------------------
+    create_update_images
 #-------------------------------------
 	copy_image_to_storage
 	save_temp_log

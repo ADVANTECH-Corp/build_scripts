@@ -256,13 +256,13 @@ function prepare_ota_images()
     OTA_IMAGE_DIR="OTA_AI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
     echo "[ADV] mkdir $OTA_IMAGE_DIR"
     mkdir $OTA_IMAGE_DIR
-    mkdir $CURR_PATH/rockdev/Image
+    #mkdir $CURR_PATH/rockdev/Image
     # Copy image files to image directory
 
 
 	cp -a $CURR_PATH/$ROOT_DIR/rockdev/* $OTA_IMAGE_DIR
 
-    cp -a $CURR_PATH/$ROOT_DIR/rockdev/* $CURR_PATH/rockdev/Image
+    cp -a $CURR_PATH/$ROOT_DIR/rockdev/Image* $CURR_PATH/rockdev/Image
     echo "[ADV] creating ${OTA_IMAGE_DIR}.tgz ..."
     tar czf ${OTA_IMAGE_DIR}.tgz $OTA_IMAGE_DIR
     generate_md5 ${OTA_IMAGE_DIR}.tgz

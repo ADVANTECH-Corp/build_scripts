@@ -74,7 +74,10 @@ function building()
 	elif [ "$1" == "kernel" ]; then
 		echo "[ADV] build kernel KERNEL_DEFCONFIG = $KERNEL_DEFCONFIG KERNEL_DTB=$KERNEL_DTB"
 		cd $CURR_PATH/$ROOT_DIR/kernel
+
+		echo "[ADV] build kernel make ARCH=arm $KERNEL_DEFCONFIG"
 		make ARCH=arm $KERNEL_DEFCONFIG
+		echo "[ADV] build kernel make ARCH=arm $KERNEL_DTB -j12"
 		make ARCH=arm $KERNEL_DTB -j12
     elif [ "$1" == "recovery" ]; then
 		echo "[ADV] build recovery"

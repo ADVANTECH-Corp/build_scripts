@@ -169,8 +169,8 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 echo "[ADV] get rockchip code"
 mkdir $ROOT_DIR
 cd $ROOT_DIR
-#repo init --repo-url=https://github.com/rockchip-linux/repo -u https://github.com/rockchip-linux/manifests -b master -m rk3399_linux_release.xml
-repo init --repo-url=https://github.com/rockchip-linux/repo -u https://github.com/clayderhua/manifests -b master -m rk3399_linux_release.xml
+repo init --repo-url=https://github.com/rockchip-linux/repo -u https://github.com/rockchip-linux/manifests -b master -m rk3399_linux_release.xml
+#repo init --repo-url=https://github.com/rockchip-linux/repo -u https://github.com/clayderhua/manifests -b master -m rk3399_linux_release.xml
 repo sync
 
 else #"$PRODUCT" != "$VER_PREFIX"

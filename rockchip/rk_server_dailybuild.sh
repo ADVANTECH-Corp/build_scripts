@@ -101,7 +101,11 @@ function building()
 		./build.sh rootfs
     elif [ "$1" == "debian" ]; then
         echo "[ADV] install tools for build debian"
-        sudo apt-get install -f binfmt-support qemu-user-static live-build
+        sudo apt-get install -y binfmt-support
+        sudo apt-get install -y qemu-user-static
+		sudo apt-get -y update
+		sudo apt-get install -y live-build
+        echo "[ADV] dpkg packages"
         sudo dpkg -i ubuntu-build-service/packages/*
         sudo apt-get install -f
         echo "[ADV] mk-base-debian.sh"

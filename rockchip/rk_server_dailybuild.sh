@@ -112,10 +112,10 @@ function building()
         echo "[ADV]-------------FOR armhf-----------"
         echo "[ADV] armhf mk-base-debian.sh"
         RELEASE=stretch TARGET=desktop ARCH=armhf ./mk-base-debian.sh
-        echo "[ADV] mk-rootfs-stretch-armhf.sh"
+        echo "[ADV] mk-rootfs-stretch.sh"
         VERSION=debug ARCH=armhf ./mk-rootfs-stretch.sh
-        echo "[ADV] mk-image.sh armhf"
-        ./mk-image.sh
+        #echo "[ADV] mk-image.sh armhf"
+        #./mk-image.sh
 		echo "[ADV]---------------------------------"
 		echo "[ADV]-------------FOR armhf-----------"
         echo "[ADV] arm64 mk-base-debian.sh"
@@ -151,7 +151,8 @@ function build_linux_images()
 	building buildroot
 	building debian
     # package image to rockdev folder
-    ./mkimage.sh
+
+	cd $CURR_PATH/$ROOT_DIR
 }
 
 function prepare_images()

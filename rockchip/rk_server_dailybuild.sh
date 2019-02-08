@@ -109,12 +109,22 @@ function building()
         echo "[ADV] dpkg packages"
         sudo dpkg -i ubuntu-build-service/packages/*
         sudo apt-get install -f
-        echo "[ADV] mk-base-debian.sh"
+        echo "[ADV]-------------FOR armhf-----------"
+        echo "[ADV] armhf mk-base-debian.sh"
+        RELEASE=stretch TARGET=desktop ARCH=armhf ./mk-base-debian.sh
+        echo "[ADV] mk-rootfs-stretch-armhf.sh"
+        VERSION=debug ARCH=armhf ./mk-rootfs-stretch.sh
+        echo "[ADV] mk-image.sh armhf"
+        ./mk-image.sh
+		echo "[ADV]---------------------------------"
+		echo "[ADV]-------------FOR armhf-----------"
+        echo "[ADV] arm64 mk-base-debian.sh"
         RELEASE=stretch TARGET=desktop ARCH=arm64 ./mk-base-debian.sh
         echo "[ADV] mk-rootfs-stretch-arm64.sh"
         VERSION=debug ARCH=arm64 ./mk-rootfs-stretch-arm64.sh
-        echo "[ADV] mk-image.sh"
+		echo "[ADV] mk-image.sh arm64 "
         ./mk-image.sh
+		echo "[ADV]---------------------------------"
     else
     echo "[ADV] pass building..."
     fi

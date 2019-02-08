@@ -100,6 +100,7 @@ function building()
 		cd $CURR_PATH/$ROOT_DIR
 		./build.sh rootfs
     elif [ "$1" == "debian" ]; then
+        cd $CURR_PATH/$ROOT_DIR/rootfs
         echo "[ADV] install tools for build debian"
         sudo apt-get install -y binfmt-support
         sudo apt-get install -y qemu-user-static
@@ -109,7 +110,6 @@ function building()
         sudo dpkg -i ubuntu-build-service/packages/*
         sudo apt-get install -f
         echo "[ADV] mk-base-debian.sh"
-        cd $CURR_PATH/$ROOT_DIR/rootfs
         RELEASE=stretch TARGET=desktop ARCH=arm64 ./mk-base-debian.sh
         echo "[ADV] mk-rootfs-stretch-arm64.sh"
         VERSION=debug ARCH=arm64 ./mk-rootfs-stretch-arm64.sh

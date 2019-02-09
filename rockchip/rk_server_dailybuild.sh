@@ -82,7 +82,7 @@ function building()
         echo "[ADV] build uboot"
 		cd $CURR_PATH/$ROOT_DIR/u-boot
 		#make clean
-		./make.sh evb-rk3399
+		./make.sh rk3399
 	elif [ "$1" == "kernel" ]; then
 		echo "[ADV] build kernel  = $KERNEL_CONFIG"
 		cd $CURR_PATH/$ROOT_DIR/kernel
@@ -115,7 +115,7 @@ function building()
         echo "[ADV] mk-rootfs-stretch.sh"
         VERSION=debug ARCH=armhf ./mk-rootfs-stretch.sh
         #echo "[ADV] mk-image.sh armhf"
-        #./mk-image.sh
+        ./mk-image.sh
 		echo "[ADV]---------------------------------"
 		echo "[ADV]-------------FOR armhf-----------"
         echo "[ADV] arm64 mk-base-debian.sh"

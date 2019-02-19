@@ -87,6 +87,8 @@ function building()
     elif [ "$1" == "rootfs" ]; then
 		echo "[ADV] build rootfs"
 		cd $CURR_PATH/$ROOT_DIR/rootfs
+		sudo dpkg -i ubuntu-build-service/packages/*
+		sudo apt-get install -f 
 		./mk-base-debian.sh ARCH=armhf
 		./mk-rootfs.sh ARCH=armhf
 		./mk-adv.sh ARCH=armhf

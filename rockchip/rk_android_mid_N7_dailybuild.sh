@@ -15,6 +15,8 @@ echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
 #echo "[ADV] SCRIPT_XML = ${SCRIPT_XML}"
 echo "[ADV] KERNEL_CONFIG = ${KERNEL_CONFIG}"
 echo "[ADV] KERNEL_DTB = ${KERNEL_DTB}"
+echo "[ADV] LUNCH_MODE = ${LUNCH_MODE}"
+
 CURR_PATH="$PWD"
 ROOT_DIR="${VER_PREFIX}AB${RELEASE_VERSION}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
@@ -192,7 +194,7 @@ function building()
 		echo "[ADV] build android"
 		cd $CURR_PATH/$ROOT_DIR
 		source build/envsetup.sh
-		lunch rk3399_box-userdebug
+		lunch $LUNCH_MODE
 		make clean
 		make -j4 2>> $CURR_PATH/$ROOT_DIR/$LOG3_FILE
 	else

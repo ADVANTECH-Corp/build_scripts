@@ -58,6 +58,8 @@ function generate_mksd_linux()
 
 function create_ubuntu_image()
 {
+    SDCARD_SIZE=7200
+
     YOCTO_IMAGE="fsl-image-qt5-${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
     UBUNTU_IMAGE="${UBUNTU_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_${DATE}.img"
     pftp -v -n ${FTP_SITE} << EOF
@@ -85,9 +87,30 @@ EOF
     sudo umount $MOUNT_POINT
     sudo losetup -d ${LOOP_DEV}
 
-    # insert mksd-linux.sh & sdcard image
-    sudo cp ${UBUNTU_IMAGE} ${UBUNTU_IMAGE/.img}.sdcard
+    # resize
+    sudo mv ${UBUNTU_IMAGE} ${UBUNTU_IMAGE/.img}.sdcard
+    sudo dd if=/dev/zero of=${UBUNTU_IMAGE} bs=1M count=$SDCARD_SIZE
     sudo losetup ${LOOP_DEV} ${UBUNTU_IMAGE}
+    echo "[ADV] resize ${UBUNTU_IMAGE} to ${SDCARD_SIZE}MB"
+    sudo dd if=${UBUNTU_IMAGE/.img}.sdcard of=$LOOP_DEV
+    sudo sync
+
+    rootfs_start=`sudo fdisk -u -l ${LOOP_DEV} | grep ${LOOP_DEV}p2 | awk '{print $2}'`
+    sudo fdisk -u $LOOP_DEV << EOF &>/dev/null
+d
+2
+n
+p
+$rootfs_start
+$PARTITION_SIZE_LIMIT
+w
+EOF
+    sudo sync
+    sudo partprobe ${LOOP_DEV}
+    sudo e2fsck -f -y ${LOOP_DEV}p2
+    sudo resize2fs ${LOOP_DEV}p2
+
+    # insert mksd-linux.sh & sdcard image
     sudo mount ${LOOP_DEV}p2 $MOUNT_POINT
     sudo mkdir -p $MOUNT_POINT/image
     sudo mv ${UBUNTU_IMAGE/.img}.sdcard $MOUNT_POINT/image/

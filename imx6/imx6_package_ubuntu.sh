@@ -48,6 +48,14 @@ function generate_md5()
     fi
 }
 
+function generate_mksd_linux()
+{
+    sudo mkdir $MOUNT_POINT/mk_inand
+    chmod 755 $CURR_PATH/mksd-linux.sh
+    sudo cp $CURR_PATH/mksd-linux.sh $MOUNT_POINT/mk_inand/
+    sudo chown 0.0 $MOUNT_POINT/mk_inand/mksd-linux.sh
+}
+
 function create_ubuntu_image()
 {
     YOCTO_IMAGE="fsl-image-qt5-${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
@@ -77,6 +85,18 @@ EOF
     sudo umount $MOUNT_POINT
     sudo losetup -d ${LOOP_DEV}
 
+    # insert mksd-linux.sh & sdcard image
+    sudo cp ${UBUNTU_IMAGE} ${UBUNTU_IMAGE/.img}.sdcard
+    sudo losetup ${LOOP_DEV} ${UBUNTU_IMAGE}
+    sudo mount ${LOOP_DEV}p2 $MOUNT_POINT
+    sudo mkdir -p $MOUNT_POINT/image
+    sudo mv ${UBUNTU_IMAGE/.img}.sdcard $MOUNT_POINT/image/
+    sudo chown -R 0.0 $MOUNT_POINT/image
+    generate_mksd_linux
+    sudo umount $MOUNT_POINT
+    sudo losetup -d $LOOP_DEV
+
+    # output file
     gzip -c9 ${UBUNTU_IMAGE} > ${UBUNTU_IMAGE}.gz
     md5sum ${UBUNTU_IMAGE}.gz > ${UBUNTU_IMAGE/.img}.md5
     sudo mv ${UBUNTU_IMAGE}.gz $STORAGE_PATH

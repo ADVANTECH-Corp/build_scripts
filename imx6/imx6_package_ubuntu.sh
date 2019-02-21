@@ -1,4 +1,4 @@
-#!/bin/bash  -xe
+#!/bin/bash
 
 echo "[ADV] FTP_SITE = ${FTP_SITE}"
 echo "[ADV] FTP_DIR = ${FTP_DIR}"
@@ -72,6 +72,10 @@ mget ${YOCTO_IMAGE}
 close
 quit
 EOF
+
+    # Maybe the loop device is occuppied, unmount it first
+    sudo umount $MOUNT_POINT
+    sudo losetup -d $LOOP_DEV
 
     echo "[ADV] rename yocto image file to ubuntu image file"
     sudo mv ${YOCTO_IMAGE} ${UBUNTU_IMAGE}

@@ -32,7 +32,7 @@ cd "Image/imx6/debian/${DEBIAN_VERSION}"
 prompt
 binary
 ls
-mget ${DEBIAN_ROOTFS}.tgz
+mget ${DEBIAN_ROOTFS}
 close
 quit
 EOF
@@ -118,7 +118,7 @@ EOF
     sudo mkdir -p $MOUNT_POINT/.modules
     sudo mv $MOUNT_POINT/lib/modules/* $MOUNT_POINT/.modules/
     sudo rm -rf $MOUNT_POINT/*
-    sudo tar xvf ${DEBIAN_ROOTFS}.tgz -C $MOUNT_POINT/
+    sudo tar jxf ${DEBIAN_ROOTFS} -C $MOUNT_POINT/
     sudo mkdir -p $MOUNT_POINT/lib/modules
     sudo mv $MOUNT_POINT/.modules/* $MOUNT_POINT/lib/modules/
     sudo rmdir $MOUNT_POINT/.modules

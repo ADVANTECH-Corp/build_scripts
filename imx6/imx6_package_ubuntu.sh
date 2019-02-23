@@ -32,7 +32,7 @@ cd "Image/imx6/ubuntu/${UBUNTU_VERSION}"
 prompt
 binary
 ls
-mget ${UBUNTU_ROOTFS}.tgz
+mget ${UBUNTU_ROOTFS}
 close
 quit
 EOF
@@ -118,7 +118,7 @@ EOF
     sudo mkdir -p $MOUNT_POINT/.modules
     sudo mv $MOUNT_POINT/lib/modules/* $MOUNT_POINT/.modules/
     sudo rm -rf $MOUNT_POINT/*
-    sudo tar xvf ${UBUNTU_ROOTFS}.tgz -C $MOUNT_POINT/
+    sudo tar zxf ${UBUNTU_ROOTFS} -C $MOUNT_POINT/
     sudo mkdir -p $MOUNT_POINT/lib/modules
     sudo mv $MOUNT_POINT/.modules/* $MOUNT_POINT/lib/modules/
     sudo rmdir $MOUNT_POINT/.modules

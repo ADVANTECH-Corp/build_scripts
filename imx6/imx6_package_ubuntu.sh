@@ -159,7 +159,7 @@ EOF
 
     # output file
     gzip -c9 ${UBUNTU_IMAGE} > ${UBUNTU_IMAGE}.gz
-    md5sum ${UBUNTU_IMAGE}.gz > ${UBUNTU_IMAGE}.gz.md5
+    generate_md5 ${UBUNTU_IMAGE}.gz
     generate_csv ${UBUNTU_IMAGE}.gz
     sudo mv ${UBUNTU_IMAGE}.csv $STORAGE_PATH
     sudo mv ${UBUNTU_IMAGE}.gz $STORAGE_PATH

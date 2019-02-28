@@ -107,7 +107,7 @@ function build_linux_images()
 	
 	building uboot
 	building kernel
-	#building recovery
+	building recovery
 	building rootfs
 
     # package image to rockdev folder

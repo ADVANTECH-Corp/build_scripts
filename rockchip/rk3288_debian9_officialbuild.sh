@@ -44,6 +44,97 @@ fi
 # ===========
 #  Functions
 # ===========
+function generate_md5()
+{
+    FILENAME=$1
+
+    if [ -e $FILENAME ]; then
+        MD5_SUM=`md5sum -b $FILENAME | cut -d ' ' -f 1`
+        echo $MD5_SUM > $FILENAME.md5
+    fi
+}
+
+function generate_csv()
+{
+    FILENAME=$1
+    MD5_SUM=
+    FILE_SIZE_BYTE=
+    FILE_SIZE=
+
+    if [ -e $FILENAME ]; then
+        MD5_SUM=`cat ${FILENAME}.md5`
+        set - `ls -l ${FILENAME}`; FILE_SIZE_BYTE=$5
+        set - `ls -lh ${FILENAME}`; FILE_SIZE=$5
+    fi
+
+    HASH_DEBIAN_UBOOT=$(cd $CURR_PATH/$ROOT_DIR/u-boot && git rev-parse --short HEAD)
+    HASH_DEBIAN_KERNEL=$(cd $CURR_PATH/$ROOT_DIR/kernel && git rev-parse --short HEAD)
+    HASH_DEBIAN_APP=$(cd $CURR_PATH/$ROOT_DIR/app && git rev-parse --short HEAD)
+    HASH_DEBIAN_BUILDROOT=$(cd $CURR_PATH/$ROOT_DIR/buildroot && git rev-parse --short HEAD)
+    HASH_DEBIAN_DEVICE=$(cd $CURR_PATH/$ROOT_DIR/device && git rev-parse --short HEAD)
+    HASH_DEBIAN_EXTERNAL=$(cd $CURR_PATH/$ROOT_DIR/external && git rev-parse --short HEAD)
+    HASH_DEBIAN_PREBUILTS=$(cd $CURR_PATH/$ROOT_DIR/prebuilts && git rev-parse --short HEAD)
+    HASH_DEBIAN_RKBIN=$(cd $CURR_PATH/$ROOT_DIR/rkbin && git rev-parse --short HEAD)
+    HASH_DEBIAN_ROOTFS=$(cd $CURR_PATH/$ROOT_DIR/rootfs && git rev-parse --short HEAD)
+    HASH_DEBIAN_TOOLS=$(cd $CURR_PATH/$ROOT_DIR/tools && git rev-parse --short HEAD)
+
+    cd $CURR_PATH
+
+
+    cat > ${FILENAME%.*}.csv << END_OF_CSV
+ESSD Software/OS Update News
+OS,Debian GNU/Linux 9.x (stretch)
+Part Number,N/A
+Author,
+Date,${DATE}
+Build Number,${BUILD_NUMBER}
+TAG,
+Tested Platform,${NEW_MACHINE}
+MD5 Checksum,TGZ: ${MD5_SUM}
+Image Size,${FILE_SIZE}B (${FILE_SIZE_BYTE} bytes)
+Issue description, N/A
+Function Addition,
+Manifest, ${HASH_BSP}
+
+DEBIAN_UBOOT, ${HASH_DEBIAN_UBOOT}
+DEBIAN_KERNEL, ${HASH_DEBIAN_KERNEL}
+DEBIAN_APP, ${HASH_DEBIAN_APP}
+DEBIAN_BUILDROOT, ${HASH_DEBIAN_BUILDROOT}
+DEBIAN_DEVICE, ${HASH_DEBIAN_DEVICE}
+DEBIAN_EXTERNAL, ${HASH_DEBIAN_EXTERNAL}
+DEBIAN_PREBUILTS, ${HASH_DEBIAN_PREBUILTS}
+DEBIAN_RKBIN, ${HASH_DEBIAN_RKBIN}
+DEBIAN_ROOTFS, ${HASH_DEBIAN_ROOTFS}
+DEBIAN_TOOLS, ${HASH_DEBIAN_TOOLS}
+
+
+
+END_OF_CSV
+}
+
+function save_temp_log()
+{
+    LOG_PATH="$CURR_PATH/$ROOT_DIR"
+    cd $LOG_PATH
+
+    LOG_DIR="AI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
+    echo "[ADV] mkdir $LOG_DIR"
+    mkdir $LOG_DIR
+
+    # Backup conf, run script & log file
+    cp -a *.log $LOG_DIR
+
+    echo "[ADV] creating ${LOG_DIR}.tgz ..."
+    tar czf $LOG_DIR.tgz $LOG_DIR
+    generate_md5 $LOG_DIR.tgz
+
+    mv -f $LOG_DIR.tgz $OUTPUT_DIR
+    mv -f $LOG_DIR.tgz.md5 $OUTPUT_DIR
+
+    # Remove all temp logs
+    rm -rf $LOG_DIR
+}
+
 function get_source_code()
 {
     echo "[ADV] get rk3288 debian9 source code"
@@ -114,8 +205,37 @@ function build_linux_images()
 	cd $CURR_PATH/$ROOT_DIR
 	echo "[ADV] build link images to rockdev"
 	./mkfirmware.sh
-	
 	echo "[ADV] build linux images end"
+}
+
+function prepare_images()
+{
+    cd $CURR_PATH
+
+    IMAGE_DIR="AI${RELEASE_VERSION}"_"$NEW_MACHINE"_Debian_"$DATE"
+    echo "[ADV] mkdir $IMAGE_DIR"
+    mkdir $IMAGE_DIR
+	mkdir -p $IMAGE_DIR/rockdev/image
+
+    # Copy image files to image directory
+
+    cp -a $CURR_PATH/$ROOT_DIR/rockdev/* $IMAGE_DIR/rockdev/image
+    echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
+    tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
+    generate_md5 ${IMAGE_DIR}.tgz
+    #rm -rf $IMAGE_DIR
+}
+
+function copy_image_to_storage()
+{
+    echo "[ADV] copy images to $OUTPUT_DIR"
+
+    generate_csv ${IMAGE_DIR}.tgz
+    mv ${IMAGE_DIR}.csv $OUTPUT_DIR
+
+    mv -f ${IMAGE_DIR}.tgz $OUTPUT_DIR
+    mv -f *.md5 $OUTPUT_DIR
+
 }
 
 # ================
@@ -124,6 +244,10 @@ function build_linux_images()
     mkdir $ROOT_DIR
     get_source_code
     build_linux_images
+    prepare_images
+    copy_image_to_storage
+    save_temp_log
+
 
 echo "[ADV] build script done!"
 

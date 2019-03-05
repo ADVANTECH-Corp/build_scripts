@@ -314,14 +314,15 @@ function copy_image_to_storage()
 # ================
 if [ $isFirstMachine == "true" ]; then
 	get_source_code
-	create_xml_and_commit
-	auto_add_tag
 fi
 build_linux_images
 prepare_images
 copy_image_to_storage
 save_temp_log
-
+if [ $isFirstMachine == "true" ]; then
+	create_xml_and_commit
+	auto_add_tag
+fi
 
 echo "[ADV] build script done!"
 

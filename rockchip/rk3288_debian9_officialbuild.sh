@@ -245,7 +245,7 @@ function building()
 		cd $CURR_PATH/$ROOT_DIR/rootfs
 		sudo dpkg -i ubuntu-build-service/packages/*
 		sudo apt-get install -f 
-		./mk-base-debian.sh ARCH=armhf >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
+		# ./mk-base-debian.sh ARCH=armhf >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
 		./mk-rootfs.sh ARCH=armhf >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
 		./mk-adv.sh ARCH=armhf >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
 		./mk-image.sh >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS

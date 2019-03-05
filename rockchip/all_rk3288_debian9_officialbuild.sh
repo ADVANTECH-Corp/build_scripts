@@ -11,20 +11,37 @@ if [ "$RSB4680A3" == "true" ]; then
 	KERNEL_DEFCONFIG=rk3288_adv_defconfig
 	KERNEL_DTB=rk3288-rsb4680-a3.img
 	MACHINE_LIST="$MACHINE_LIST rsb_4680"
-elif [ "$USM110A2" == "true" ]; then
+
+	export UBOOT_DEFCONFIG
+	export KERNEL_DEFCONFIG
+	export KERNEL_DTB
+	export MACHINE_LIST
+	./rk3288_debian9_officialbuild.sh $VERSION_NUM
+fi
+
+if [ "$USM110A2" == "true" ]; then
 	UBOOT_DEFCONFIG=usm110a2-2G-rk3288
 	KERNEL_DEFCONFIG=rk3288_adv_defconfig
 	KERNEL_DTB=rk3288-usm110-a2.img
 	MACHINE_LIST="$MACHINE_LIST usm_110"
-elif [ "$EBCRB03A2" == "true" ]; then
+
+	export UBOOT_DEFCONFIG
+	export KERNEL_DEFCONFIG
+	export KERNEL_DTB
+	export MACHINE_LIST
+	./rk3288_debian9_officialbuild.sh $VERSION_NUM
+fi
+
+if [ "$EBCRB03A2" == "true" ]; then
 	UBOOT_DEFCONFIG=ebcrb03a2-2G-rk3288
 	KERNEL_DEFCONFIG=rk3288_adv_defconfig
 	KERNEL_DTB=rk3288-ebcrb03-a2.img
 	MACHINE_LIST="$MACHINE_LIST ebc_rb03"
+
+	export UBOOT_DEFCONFIG
+	export KERNEL_DEFCONFIG
+	export KERNEL_DTB
+	export MACHINE_LIST
+	./rk3288_debian9_officialbuild.sh $VERSION_NUM
 fi
 
-export UBOOT_DEFCONFIG
-export KERNEL_DEFCONFIG
-export KERNEL_DTB
-export MACHINE_LIST
-./rk3288_debian9_officialbuild.sh $VERSION_NUM

@@ -1,11 +1,19 @@
 #!/bin/bash
 
-VER_PREFIX="rk"
+VER_PREFIX="RK3288"
+
+idx=0
+isFirstMachine="true"
 
 for i in $MACHINE_LIST
 do
-        NEW_MACHINE=$i
+    let idx=$idx+1
+    NEW_MACHINE=$i
 done
+
+if [ $idx -gt 1 ];then
+    isFirstMachine="false"
+fi
 
 RELEASE_VERSION=$1
 echo "[ADV] DATE = ${DATE}"
@@ -16,10 +24,10 @@ echo "[ADV] BSP_XML = ${BSP_XML}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] MACHINE_LIST= ${MACHINE_LIST}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
-VER_TAG="${VER_PREFIX}ABV"$(echo $RELEASE_VERSION | sed 's/[.]//')
+VER_TAG="${VER_PREFIX}LBV"$(echo $RELEASE_VERSION | sed 's/[.]//')
 echo "[ADV] VER_TAG = $VER_TAG"
 CURR_PATH="$PWD"
-ROOT_DIR="${VER_PREFIX}ABV${RELEASE_VERSION}"_"$DATE"
+ROOT_DIR="${VER_PREFIX}LBV${RELEASE_VERSION}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
 
 echo "$Release_Note" > Release_Note
@@ -28,8 +36,8 @@ REALEASE_NOTE="Release_Note"
 #--------------------------------------------------
 #======================
 AND_BSP="debian"
-AND_BSP_VER="9.5"
-AND_VERSION="debian_V9.5"
+AND_BSP_VER="9.x"
+AND_VERSION="debian_V9.x"
 
 #======================
 
@@ -44,6 +52,49 @@ fi
 # ===========
 #  Functions
 # ===========
+
+function auto_add_tag()
+{
+    cd $CURR_PATH/$ROOT_DIR/kernel
+    HEAD_HASH_ID=`git rev-parse HEAD`
+    TAG_HASH_ID=`git tag -v $VER_TAG | grep object | cut -d ' ' -f 2`
+	REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+    if [ "$HEAD_HASH_ID" == "$TAG_HASH_ID" ]; then
+        echo "[ADV] tag exists! There is no need to add tag"
+    else
+        echo "[ADV] Add tag $VER_TAG"
+		repo forall -c git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
+		repo forall -c git push $REMOTE_SERVER $VER_TAG
+    fi
+    cd $CURR_PATH
+}
+
+function create_xml_and_commit()
+{
+    cd $CURR_PATH
+    if [ -d "$ROOT_DIR/.repo/manifests" ];then
+        echo "[ADV] Create XML file"
+        cd $ROOT_DIR
+        # add revision into xml
+        repo manifest -o $VER_TAG.xml -r
+        mv $VER_TAG.xml .repo/manifests
+        cd .repo/manifests
+		git checkout $BSP_BRANCH
+
+        # push to github
+        REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+        git add $VER_TAG.xml
+        git commit -m "[Official Release] ${VER_TAG}"
+        git push
+        git tag -a $VER_TAG -F $CURR_PATH/$REALEASE_NOTE
+        git push $REMOTE_SERVER $VER_TAG
+        cd $CURR_PATH
+    else
+        echo "[ADV] Directory $ROOT_DIR/.repo/manifests doesn't exist"
+        exit 1
+    fi
+}
+
 function generate_md5()
 {
     FILENAME=$1
@@ -84,6 +135,8 @@ function generate_csv()
     cat > ${FILENAME%.*}.csv << END_OF_CSV
 ESSD Software/OS Update News
 OS,Debian GNU/Linux 9.x (stretch)
+Version,V${RELEASE_VERSION}
+
 Part Number,N/A
 Author,
 Date,${DATE}
@@ -112,12 +165,18 @@ DEBIAN_TOOLS, ${HASH_DEBIAN_TOOLS}
 END_OF_CSV
 }
 
+function generate_manifest()
+{
+    cd $CURR_PATH/$ROOT_DIR/
+	repo manifest -o V${RELEASE_VERSION}.xml -r
+}
+
 function save_temp_log()
 {
     LOG_PATH="$CURR_PATH/$ROOT_DIR"
     cd $LOG_PATH
 
-    LOG_DIR="AI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
+    LOG_DIR="RK3288LBV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
     echo "[ADV] mkdir $LOG_DIR"
     mkdir $LOG_DIR
 
@@ -138,6 +197,7 @@ function save_temp_log()
 function get_source_code()
 {
     echo "[ADV] get rk3288 debian9 source code"
+	cd $CURR_PATH
     mkdir $ROOT_DIR
     cd $ROOT_DIR
 
@@ -157,33 +217,38 @@ function building()
 {
     echo "[ADV] building $1 ..."
     LOG_FILE="$NEW_MACHINE"_Build.log
+	
+	LOG_FILE_UBOOT="$NEW_MACHINE"_Build_uboot.log
+	LOG_FILE_KERNEL="$NEW_MACHINE"_Build_kernel.log
+	LOG_FILE_RECOVERY="$NEW_MACHINE"_Build_recovery.log
+	LOG_FILE_ROOTFS="$NEW_MACHINE"_Build_rootfs.log
 
     if [ "$1" == "uboot" ]; then
         echo "[ADV] build uboot UBOOT_DEFCONFIG=$UBOOT_DEFCONFIG"
 		cd $CURR_PATH/$ROOT_DIR/u-boot
-		./make.sh $UBOOT_DEFCONFIG
+		./make.sh $UBOOT_DEFCONFIG >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_UBOOT
 	elif [ "$1" == "kernel" ]; then
 		echo "[ADV] build kernel KERNEL_DEFCONFIG = $KERNEL_DEFCONFIG KERNEL_DTB=$KERNEL_DTB"
 		cd $CURR_PATH/$ROOT_DIR/kernel
 
 		echo "[ADV] build kernel make ARCH=arm $KERNEL_DEFCONFIG"
-		make ARCH=arm $KERNEL_DEFCONFIG
+		make ARCH=arm $KERNEL_DEFCONFIG >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL
 		echo "[ADV] build kernel make ARCH=arm $KERNEL_DTB -j12"
-		make ARCH=arm $KERNEL_DTB -j12
+		make ARCH=arm $KERNEL_DTB -j12 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL
     elif [ "$1" == "recovery" ]; then
 		echo "[ADV] build recovery"
 		cd $CURR_PATH/$ROOT_DIR
 		source envsetup.sh 20
-		./build.sh recovery
+		./build.sh recovery >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_RECOVERY
     elif [ "$1" == "rootfs" ]; then
 		echo "[ADV] build rootfs"
 		cd $CURR_PATH/$ROOT_DIR/rootfs
 		sudo dpkg -i ubuntu-build-service/packages/*
 		sudo apt-get install -f 
-		./mk-base-debian.sh ARCH=armhf
-		./mk-rootfs.sh ARCH=armhf
-		./mk-adv.sh ARCH=armhf
-		./mk-image.sh
+		./mk-base-debian.sh ARCH=armhf >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
+		./mk-rootfs.sh ARCH=armhf >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
+		./mk-adv.sh ARCH=armhf >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
+		./mk-image.sh >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
 	else
         echo "[ADV] pass building..."
     fi
@@ -198,7 +263,9 @@ function build_linux_images()
 	
 	building uboot
 	building kernel
-	building rootfs
+	if [ $isFirstMachine == "true" ]; then
+	    building rootfs
+	fi
 	building recovery
 
     # package image to rockdev folder
@@ -212,14 +279,14 @@ function prepare_images()
 {
     cd $CURR_PATH
 
-    IMAGE_DIR="AI${RELEASE_VERSION}"_"$NEW_MACHINE"_Debian_"$DATE"
+    IMAGE_DIR="RK3288LBV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
 	mkdir -p $IMAGE_DIR/rockdev/image
 
     # Copy image files to image directory
 
-    cp -a $CURR_PATH/$ROOT_DIR/rockdev/* $IMAGE_DIR/rockdev/image
+    cp -aRL $CURR_PATH/$ROOT_DIR/rockdev/* $IMAGE_DIR/rockdev/image
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}.tgz
@@ -229,6 +296,10 @@ function prepare_images()
 function copy_image_to_storage()
 {
     echo "[ADV] copy images to $OUTPUT_DIR"
+	if [ $isFirstMachine == "true" ]; then
+	    generate_manifest
+	    mv V${RELEASE_VERSION}.xml $OUTPUT_DIR
+	fi
 
     generate_csv ${IMAGE_DIR}.tgz
     mv ${IMAGE_DIR}.csv $OUTPUT_DIR
@@ -241,12 +312,15 @@ function copy_image_to_storage()
 # ================
 #  Main procedure 
 # ================
-    mkdir $ROOT_DIR
-    get_source_code
-    build_linux_images
-    prepare_images
-    copy_image_to_storage
-    save_temp_log
+if [ $isFirstMachine == "true" ]; then
+	get_source_code
+	create_xml_and_commit
+	auto_add_tag
+fi
+build_linux_images
+prepare_images
+copy_image_to_storage
+save_temp_log
 
 
 echo "[ADV] build script done!"

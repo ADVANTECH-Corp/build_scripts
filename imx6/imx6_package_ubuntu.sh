@@ -32,7 +32,7 @@ cd "Image/imx6/ubuntu/${UBUNTU_VERSION}"
 prompt
 binary
 ls
-mget ${UBUNTU_ROOTFS}.tgz
+mget ${UBUNTU_ROOTFS}
 close
 quit
 EOF
@@ -46,6 +46,40 @@ function generate_md5()
         MD5_SUM=`md5sum -b $FILENAME | cut -d ' ' -f 1`
         echo $MD5_SUM > $FILENAME.md5
     fi
+}
+
+function generate_csv()
+{
+    FILENAME=$1
+    MD5_SUM=
+    FILE_SIZE_BYTE=
+    FILE_SIZE=
+
+    if [ -e $FILENAME ]; then
+        MD5_SUM=`cat ${FILENAME}.md5`
+        set - `ls -l ${FILENAME}`; FILE_SIZE_BYTE=$5
+        set - `ls -lh ${FILENAME}`; FILE_SIZE=$5
+    fi
+
+    cd $CURR_PATH
+
+    cat > ${FILENAME%.*}.csv << END_OF_CSV
+ESSD Software/OS Update News
+OS,Ubuntu ${UBUNTU_VERSION}
+Part Number,N/A
+Author,
+Date,${DATE}
+Version,${UBUNTU_PRODUCT}${VERSION_TAG}
+Build Number,${BUILD_NUMBER}
+TAG,
+Tested Platform,${CPU_TYPE_Module}${NEW_MACHINE}
+MD5 Checksum,GZ: ${MD5_SUM}
+Image Size,${FILE_SIZE}B (${FILE_SIZE_BYTE} bytes)
+Issue description, N/A
+Function Addition,
+Yocto Kernel,imx6LB${VERSION_TAG}_${DATE}
+Ubuntu Rootfs,${UBUNTU_ROOTFS}
+END_OF_CSV
 }
 
 function generate_mksd_linux()
@@ -84,7 +118,7 @@ EOF
     sudo mkdir -p $MOUNT_POINT/.modules
     sudo mv $MOUNT_POINT/lib/modules/* $MOUNT_POINT/.modules/
     sudo rm -rf $MOUNT_POINT/*
-    sudo tar xvf ${UBUNTU_ROOTFS}.tgz -C $MOUNT_POINT/
+    sudo tar zxf ${UBUNTU_ROOTFS} -C $MOUNT_POINT/
     sudo mkdir -p $MOUNT_POINT/lib/modules
     sudo mv $MOUNT_POINT/.modules/* $MOUNT_POINT/lib/modules/
     sudo rmdir $MOUNT_POINT/.modules
@@ -125,9 +159,11 @@ EOF
 
     # output file
     gzip -c9 ${UBUNTU_IMAGE} > ${UBUNTU_IMAGE}.gz
-    md5sum ${UBUNTU_IMAGE}.gz > ${UBUNTU_IMAGE/.img}.md5
+    generate_md5 ${UBUNTU_IMAGE}.gz
+    generate_csv ${UBUNTU_IMAGE}.gz
+    sudo mv ${UBUNTU_IMAGE}.csv $STORAGE_PATH
     sudo mv ${UBUNTU_IMAGE}.gz $STORAGE_PATH
-    sudo mv ${UBUNTU_IMAGE/.img}.md5 $STORAGE_PATH
+    sudo mv ${UBUNTU_IMAGE}.gz.md5 $STORAGE_PATH
 }
 
 # === [Main] List Official Build Version ============================================================
@@ -156,12 +192,7 @@ done
 # echo MACHINE_LIST=\"$MACHINE_LIST\"
 
 # UBUNTU
-case $UBUNTU_VERSION in
-14.04) OS_PREFIX="T" ;; # Trusty Tahr
-16.04) OS_PREFIX="X" ;; # Xenial Xerus
-18.04) OS_PREFIX="B" ;; # Bionic Beaver
-*) echo "cannot generate Ubuntu \"$UBUNTU_VERSION\""; exit 1 ;;
-esac
+OS_PREFIX="U"
 
 get_ubuntu_rootfs
 

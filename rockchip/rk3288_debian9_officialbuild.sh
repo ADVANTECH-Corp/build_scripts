@@ -26,6 +26,7 @@ echo "[ADV] MACHINE_LIST= ${MACHINE_LIST}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
 VER_TAG="${VER_PREFIX}LBV"$(echo $RELEASE_VERSION | sed 's/[.]//')
 echo "[ADV] VER_TAG = $VER_TAG"
+echo "[ADV] isFirstMachine = $isFirstMachine"
 CURR_PATH="$PWD"
 ROOT_DIR="${VER_PREFIX}LBV${RELEASE_VERSION}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
@@ -226,6 +227,7 @@ function building()
     if [ "$1" == "uboot" ]; then
         echo "[ADV] build uboot UBOOT_DEFCONFIG=$UBOOT_DEFCONFIG"
 		cd $CURR_PATH/$ROOT_DIR/u-boot
+		echo " V$RELEASE_VERSION" > .scmversion
 		./make.sh $UBOOT_DEFCONFIG >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_UBOOT
 	elif [ "$1" == "kernel" ]; then
 		echo "[ADV] build kernel KERNEL_DEFCONFIG = $KERNEL_DEFCONFIG KERNEL_DTB=$KERNEL_DTB"

@@ -110,6 +110,16 @@ if [ $RSB6410A2 == true ]; then
 	./imx6_officialbuild.sh rsb6410a2 6410A2LIV"$VERSION_NUM" 1G-2G x11
 	[ "$?" -ne 0 ] && exit 1
 fi
+if [ $RSB3430A1 == true ]; then
+	PRODUCT="rsb3430a1"
+	./imx6_officialbuild.sh rsb3430a1 3430A1LIV"$VERSION_NUM" 1G x11
+	[ "$?" -ne 0 ] && exit 1
+fi
+if [ $RSB3430A1_SOLO == true ]; then
+	PRODUCT="rsb3430a1-solo"
+	./imx6_officialbuild.sh rsb3430a1-solo 3430A1LIV"$VERSION_NUM" 1G x11
+	[ "$?" -ne 0 ] && exit 1
+fi
 # Push commit
 if [ -n $PRODUCT ]; then
 	./imx6_officialbuild.sh push_commit $PRODUCT

@@ -180,6 +180,8 @@ TOTAL_LIST=" \
     ROM7421A1_PLUS \
     ROM7421A1_SOLO \
     RSB6410A2 \
+    RSB3430A1_SOLO \
+    RSB3430A1
 "
 MACHINE_LIST=""
 
@@ -219,6 +221,7 @@ do
     rom3420a1) PROD="3420A1" ;;
     rom7421a1) PROD="7421A1" ;;
     rsb6410a2) PROD="6410A2" ;;
+    rsb3430a1) PROD="3430A1" ;;
     *) echo "cannot handle \"$NEW_MACHINE\""; exit 1 ;;
     esac
 

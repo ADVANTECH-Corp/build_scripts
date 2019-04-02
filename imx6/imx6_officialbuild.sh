@@ -372,9 +372,14 @@ function set_environment()
 	        # Use default device for sdk
                 EULA=1 MACHINE=$DEFAULT_DEVICE source fsl-setup-release.sh -b $BUILDALL_DIR -e $BACKEND_TYPE
         else
-                # Change MACHINE setting
-                sed -i "s/MACHINE ??=.*/MACHINE ??= '${KERNEL_CPU_TYPE}${PRODUCT}'/g" $BUILDALL_DIR/conf/local.conf
-                EULA=1 source setup-environment $BUILDALL_DIR
+                if [ -e $BUILDALL_DIR/conf/local.conf ] ; then
+                        # Change MACHINE setting
+                        sed -i "s/MACHINE ??=.*/MACHINE ??= '${KERNEL_CPU_TYPE}${PRODUCT}'/g" $BUILDALL_DIR/conf/local.conf
+                        EULA=1 source setup-environment $BUILDALL_DIR
+                else
+                        # First build
+                        EULA=1 MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} source fsl-setup-release.sh -b $BUILDALL_DIR -e $BACKEND_TYPE
+                fi
         fi
 }
 function build_yocto_sdk()

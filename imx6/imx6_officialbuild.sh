@@ -745,26 +745,27 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 		# Check tag exist or not, and replace bbappend file SRCREV
 		check_tag_and_replace $U_BOOT_PATH $U_BOOT_URL $U_BOOT_BRANCH
 		check_tag_and_replace $KERNEL_PATH $KERNEL_URL $KERNEL_BRANCH
-	fi
-        # BSP source code
-        echo "[ADV] tar $ROOT_DIR.tgz file"
-	rm $ROOT_DIR/setup-environment $ROOT_DIR/fsl-setup-release.sh
-	cp $ROOT_DIR/.repo/manifests/fsl-setup-release.sh $ROOT_DIR/fsl-setup-release.sh
-	cp $ROOT_DIR/.repo/manifests/setup-environment $ROOT_DIR/setup-environment
-	tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
-        generate_md5 $ROOT_DIR.tgz
 
-        # Build Yocto SDK
-        echo "[ADV] build yocto sdk"
-        build_yocto_sdk
+                # BSP source code
+                echo "[ADV] tar $ROOT_DIR.tgz file"
+                rm $ROOT_DIR/setup-environment $ROOT_DIR/fsl-setup-release.sh
+                cp $ROOT_DIR/.repo/manifests/fsl-setup-release.sh $ROOT_DIR/fsl-setup-release.sh
+                cp $ROOT_DIR/.repo/manifests/setup-environment $ROOT_DIR/setup-environment
+                tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
+                generate_md5 $ROOT_DIR.tgz
 
-	echo "[ADV] generate sdk image"
-        SDK_DIR="$ROOT_DIR"_sdk
-        prepare_images sdk $SDK_DIR
-	copy_image_to_storage sdk
+                # Build Yocto SDK
+                echo "[ADV] build yocto sdk"
+                build_yocto_sdk
 
-        # Remove pre-built image & backup generic rpm packages
-        rm $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/$DEFAULT_DEVICE/*
+                echo "[ADV] generate sdk image"
+                SDK_DIR="$ROOT_DIR"_sdk
+                prepare_images sdk $SDK_DIR
+                copy_image_to_storage sdk
+
+                # Remove pre-built image & backup generic rpm packages
+                rm $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/$DEFAULT_DEVICE/*
+        fi
 
 elif [ "$PRODUCT" == "push_commit" ]; then
         EXISTED_VERSION=`find $ROOT_DIR/.repo/manifests -name ${VER_TAG}.xml`

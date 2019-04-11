@@ -134,14 +134,8 @@ function copy_image_to_storage()
 echo "[ADV] get yocto source code"
 mkdir $ROOT_DIR
 cd $ROOT_DIR
-#repo init -u https://source.codeaurora.org/external/imx/imx-manifest -b imx-linux-sumo -m imx-4.14.78-1.0.0_ga.xml
-if [ "$BSP_BRANCH" == "" ] ; then
-    repo init -u $BSP_URL
-elif [ "$BSP_XML" == "" ] ; then
-    repo init -u $BSP_URL -b $BSP_BRANCH
-else
-    repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
-fi
+#repo init -u git://github.com/ADVANTECH-Corp/adv-arm-yocto-bsp.git -b imx-linux-sumo -m imx-4.14.78-1.0.0_ga.xml
+repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
 repo sync
 # Link downloads directory from backup
 #if [ -e $CURR_PATH/downloads ] ; then
@@ -149,7 +143,7 @@ repo sync
 #    ln -s $CURR_PATH/downloads downloads
 #fi
 
-EULA=1 DISTRO=fsl-imx-wayland source fsl-setup-release.sh -b $BUILDALL_DIR
+EULA=1 DISTRO=fsl-imx-xwayland MACHINE=imx8qmrom7720a1 source fsl-setup-release.sh -b $BUILDALL_DIR
 
 #imx8m
 #EULA=1 DISTRO=fsl-imx-wayland MACHINE=imx8mqevk source fsl-setup-release.sh -b $BUILDALL_DIR
@@ -160,8 +154,13 @@ EULA=1 DISTRO=fsl-imx-wayland source fsl-setup-release.sh -b $BUILDALL_DIR
 #bitbake fsl-image-qt5-validation-imx
 
 echo "[ADV] build images"
+declare -A DIST
+DIST[imx8qmrom7720a1]=fsl-imx-xwayland
+DIST[imx8mqrom5720a1]=fsl-imx-wayland
+
 for NEW_MACHINE in $MACHINE_LIST
 do
+    sed -i "s/\(MACHINE.*= \).*/\1'${NEW_MACHINE}'/; s/\(DISTRO.*= \).*/\1'${DIST[${NEW_MACHINE}]}'/" conf/local.conf
     build_yocto_images
     prepare_images
     copy_image_to_storage

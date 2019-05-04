@@ -9,7 +9,7 @@ if [ "$DS100" == "true" ]; then
 export KERNEL_DTB
 export KERNEL_CONFIG
 export MACHINE_LIST
-rk3399_debian9_v210_officialbuild.sh $VERSION_NUM
+./rk3399_debian9_v210_officialbuild.sh $VERSION_NUM
 fi
 #DS100Lite_projects
 if [ "$DS100L" == "true" ]; then
@@ -19,7 +19,7 @@ if [ "$DS100L" == "true" ]; then
 export KERNEL_DTB
 export KERNEL_CONFIG
 export MACHINE_LIST
-rk3399_debian9_v210_officialbuild.sh $VERSION_NUM
+./rk3399_debian9_v210_officialbuild.sh $VERSION_NUM
 fi
 echo "[ADV] All done!"
 

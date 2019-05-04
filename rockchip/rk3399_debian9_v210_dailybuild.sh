@@ -53,7 +53,7 @@ function save_temp_log()
     LOG_PATH="$CURR_PATH/$ROOT_DIR"
     cd $LOG_PATH
 
-    LOG_DIR="AI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
+    LOG_DIR="DI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
     echo "[ADV] mkdir $LOG_DIR"
     mkdir $LOG_DIR
 
@@ -146,14 +146,6 @@ function set_environment()
 function build_linux_images()
 {
 	cd $CURR_PATH/$ROOT_DIR
-	echo "[ADV] remove uboot kernel source form rk"
-	rm -rf u-boot/
-	rm -rf kernel/
-	echo "[ADV] add uboot kernel source form ADV"
-	git clone https://github.com/ADVANTECH-Rockchip/linux_u-boot-rk.git -b rk3399_linux_release
-	git clone https://github.com/ADVANTECH-Rockchip/linux_kernel-rk.git -b rk3399_linux_release
-	mv linux_u-boot-rk u-boot
-	mv linux_kernel-rk kernel
 	#set_environment
 	building uboot
 	building kernel

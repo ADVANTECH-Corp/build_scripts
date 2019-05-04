@@ -146,14 +146,6 @@ function set_environment()
 function build_linux_images()
 {
 	cd $CURR_PATH/$ROOT_DIR
-	echo "[ADV] remove uboot kernel source form rk"
-	rm -rf u-boot/
-	rm -rf kernel/
-	echo "[ADV] add uboot kernel source form ADV"
-	git clone https://github.com/ADVANTECH-Rockchip/linux_u-boot-rk.git -b rk3399_linux_release
-	git clone https://github.com/ADVANTECH-Rockchip/linux_kernel-rk.git -b rk3399_linux_release
-	mv linux_u-boot-rk u-boot
-	mv linux_kernel-rk kernel
 	#set_environment
 	building uboot
 	building kernel

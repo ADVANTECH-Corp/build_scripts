@@ -96,6 +96,19 @@ function create_xml_and_commit()
     fi
 }
 
+function uboot_version_commit()
+{
+    cd $CURR_PATH
+	cd $ROOT_DIR/u-boot
+
+	# push to github
+	git add .scmversion -f
+	git commit -m "[Official Release] ${VER_TAG}"
+	git push
+	cd $CURR_PATH
+
+}
+
 function generate_md5()
 {
     FILENAME=$1
@@ -211,6 +224,11 @@ function get_source_code()
     fi
     repo sync
 
+    cd u-boot
+    REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+    repo forall -c git checkout -b local --track $REMOTE_SERVER/$BSP_BRANCH
+    cd ..
+
     cd $CURR_PATH
 }
 
@@ -322,6 +340,7 @@ prepare_images
 copy_image_to_storage
 save_temp_log
 if [ $isFirstMachine == "true" ]; then
+	uboot_version_commit
 	create_xml_and_commit
 	auto_add_tag
 fi

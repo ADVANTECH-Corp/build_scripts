@@ -24,12 +24,6 @@ OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
 echo "[ADV-ROOT]  $ROOT_DIR"
 echo "[ADV] ANDROID_KERNEL_PATH = $CURR_PATH/$ROOT_DIR/kernel"
 echo "[ADV] ANDROID_UBOOT_PATH = $CURR_PATH/$ROOT_DIR/u-boot"
-#======================
-AND_BSP="android"
-AND_BSP_VER="7.1"
-AND_VERSION="android_N7.1.2"
-
-#======================
 
 # Make storage folder
 if [ -e $OUTPUT_DIR ] ; then
@@ -213,7 +207,7 @@ function generate_csv()
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV
 ESSD Software/OS Update News
-OS,Android 7.1.1
+OS,Debian 9
 Part Number,N/A
 Author,
 Date,${DATE}
@@ -236,7 +230,7 @@ function save_temp_log()
     LOG_PATH="$CURR_PATH/$ROOT_DIR"
     cd $LOG_PATH
 
-    LOG_DIR="AI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
+    LOG_DIR="DI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
     echo "[ADV] mkdir $LOG_DIR"
     mkdir $LOG_DIR
 
@@ -332,9 +326,9 @@ function build_linux_images()
 	#set_environment
 	building uboot
 	building kernel
-	#building recovery
-	#building buildroot
-	#building debian
+	building recovery
+	building buildroot
+	building debian
 
     #=== package image to rockdev folder ===
 	cd $CURR_PATH/$ROOT_DIR
@@ -354,10 +348,10 @@ function prepare_images()
 	cp -aRL $CURR_PATH/$ROOT_DIR/u-boot/trust.img $IMAGE_DIR
 	cp -aRL $CURR_PATH/$ROOT_DIR/u-boot/uboot.img $IMAGE_DIR
 	cp -aRL $CURR_PATH/$ROOT_DIR/kernel/boot.img $IMAGE_DIR
-#	cp -aRL $CURR_PATH/$ROOT_DIR/buildroot/output/rockchip_rk3399_recovery/images/recovery.img $IMAGE_DIR
-#    cp -aRL $CURR_PATH/$ROOT_DIR/buildroot/output/rockchip_rk3399/images/rootfs.ext4 $IMAGE_DIR
-#    cp -aRL $CURR_PATH/$ROOT_DIR/out/linaro-rootfs.img $IMAGE_DIR
-#    cp -aRL $CURR_PATH/$ROOT_DIR/rockdev/oem* $IMAGE_DIR
+	cp -aRL $CURR_PATH/$ROOT_DIR/buildroot/output/rockchip_rk3399_recovery/images/recovery.img $IMAGE_DIR
+    cp -aRL $CURR_PATH/$ROOT_DIR/buildroot/output/rockchip_rk3399/images/rootfs.ext4 $IMAGE_DIR
+    cp -aRL $CURR_PATH/$ROOT_DIR/out/linaro-rootfs.img $IMAGE_DIR
+    cp -aRL $CURR_PATH/$ROOT_DIR/rockdev/oem* $IMAGE_DIR
     cp -aRL $CURR_PATH/$ROOT_DIR/device/rockchip/rk3399/parameter* $IMAGE_DIR
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR

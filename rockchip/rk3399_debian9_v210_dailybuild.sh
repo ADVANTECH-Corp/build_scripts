@@ -81,14 +81,16 @@ function building()
     if [ "$1" == "uboot" ]; then
         echo "[ADV] build uboot"
 		cd $CURR_PATH/$ROOT_DIR/u-boot
-		make clean
+		#make clean
 		./make.sh evb-rk3399 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 	elif [ "$1" == "kernel" ]; then
 		echo "[ADV] build kernel  = $KERNEL_CONFIG"
+        echo "[ADV] build kernel dtb  = $KERNEL_DTB"
 		cd $CURR_PATH/$ROOT_DIR/kernel
-		make distclean
+		#make distclean
 		make ARCH=arm64 $KERNEL_CONFIG
 		make ARCH=arm64 $KERNEL_DTB -j16 >> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
+        echo "[ADV] build kernel Finished"
     elif [ "$1" == "recovery" ]; then
 		echo "[ADV] build recovery"
 		cd $CURR_PATH/$ROOT_DIR
@@ -149,9 +151,9 @@ function build_linux_images()
 	#set_environment
 	building uboot
 	building kernel
-	building recovery
-	building buildroot
-	building debian
+#	building recovery
+#	building buildroot
+#	building debian
 
     #=== package image to rockdev folder ===
 	cd $CURR_PATH/$ROOT_DIR

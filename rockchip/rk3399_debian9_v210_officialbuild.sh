@@ -262,10 +262,12 @@ function building()
 		./make.sh evb-rk3399 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 	elif [ "$1" == "kernel" ]; then
 		echo "[ADV] build kernel  = $KERNEL_CONFIG"
+        echo "[ADV] build kernel dtb  = $KERNEL_DTB"
 		cd $CURR_PATH/$ROOT_DIR/kernel
-		make distclean
+		#make distclean
 		make ARCH=arm64 $KERNEL_CONFIG
 		make ARCH=arm64 $KERNEL_DTB -j16 >> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
+        echo "[ADV] build kernel Finished"
     elif [ "$1" == "recovery" ]; then
 		echo "[ADV] build recovery"
 		cd $CURR_PATH/$ROOT_DIR

@@ -302,9 +302,9 @@ function building()
 #		echo "[ADV] mk-image.sh arm64 "
 #        ./mk-image.sh
 #		echo "[ADV]---------------------------------"
-	cd $CURR_PATH/$ROOT_DIR 
-	./build.sh BoardConfig_debian.mk
-	./mkfirmware.sh
+	    cd $CURR_PATH/$ROOT_DIR 
+	    ./build.sh BoardConfig_debian.mk
+	    ./mkfirmware.sh
 
 
     else

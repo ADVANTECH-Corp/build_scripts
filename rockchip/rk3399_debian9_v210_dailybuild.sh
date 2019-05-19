@@ -126,8 +126,8 @@ function building()
         ./mk-image.sh
 		echo "[ADV]---------------------------------"
     	cd $CURR_PATH/$ROOT_DIR 
-    	#./build.sh BoardConfig_debian.mk
-	    #./mkfirmware.sh
+    	./build.sh BoardConfig_debian.mk
+	    ./mkfirmware.sh
 
 
     else
@@ -151,9 +151,9 @@ function build_linux_images()
 	#set_environment
 	building uboot
 	building kernel
-	building recovery
+#	building recovery
 	building buildroot
-#	building debian
+	building debian
 
     #=== package image to rockdev folder ===
 	cd $CURR_PATH/$ROOT_DIR

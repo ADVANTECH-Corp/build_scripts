@@ -258,7 +258,7 @@ function building()
     if [ "$1" == "uboot" ]; then
         echo "[ADV] build uboot"
 		cd $CURR_PATH/$ROOT_DIR/u-boot
-		make clean
+		#make clean
 		./make.sh evb-rk3399 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 	elif [ "$1" == "kernel" ]; then
 		echo "[ADV] build kernel  = $KERNEL_CONFIG"
@@ -328,7 +328,7 @@ function build_linux_images()
 	#set_environment
 	building uboot
 	building kernel
-	building recovery
+#	building recovery
 	building buildroot
 	building debian
 

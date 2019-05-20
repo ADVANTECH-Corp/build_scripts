@@ -14,6 +14,11 @@ elif [ "$EBCRB03A2" == "true" ]; then
         KERNEL_DTB=rk3288-ebcrb03-a2.img
         ANDROID_CONFIG=ebcRB03-userdebug
         MACHINE_LIST="$MACHINE_LIST ebc_rb03"
+elif [ "$USM110A2" == "true" ]; then
+        UBOOT_DEFCONFIG=rk3288_usm110a2_2G_defconfig
+        KERNEL_DTB=rk3288-usm110-a2.img
+        ANDROID_CONFIG=usm_110-userdebug
+        MACHINE_LIST="$MACHINE_LIST usm_110"
 fi
 
 export UBOOT_DEFCONFIG

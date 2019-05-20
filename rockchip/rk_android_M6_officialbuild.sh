@@ -307,6 +307,15 @@ function build_android_images()
     ./mkimage.sh
 }
 
+function build_android_OTA_images()
+{
+    LOG4_FILE="$NEW_MACHINE"_Build4.log
+    cd $CURR_PATH/$ROOT_DIR
+    set_environment
+    ./mkimage.sh ota
+    make -j4 otapackage 2>> $CURR_PATH/$ROOT_DIR/$LOG4_FILE
+}
+
 function prepare_images()
 {
     cd $CURR_PATH
@@ -334,6 +343,9 @@ function prepare_images()
 	cp -a $CURR_PATH/$ROOT_DIR/kernel/*.img $IMAGE_DIR/rockdev/image	
 	cp -a $CURR_PATH/$ROOT_DIR/u-boot/RK3288UbootLoader_V2.30.10.bin $IMAGE_DIR/rockdev
 	cp -a $CURR_PATH/rk3288_tools/Linux_rockdev/*.img $IMAGE_DIR/rockdev
+
+    build_android_OTA_images
+        cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/*.zip $IMAGE_DIR/rockdev
 
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR

@@ -345,6 +345,7 @@ function prepare_images()
 	cp -a $CURR_PATH/rk3288_tools/Linux_rockdev/*.img $IMAGE_DIR/rockdev
 
     build_android_OTA_images
+    cd $CURR_PATH
         cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/*.zip $IMAGE_DIR/rockdev
 
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."

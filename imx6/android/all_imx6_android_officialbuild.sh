@@ -26,6 +26,9 @@ fi
 if [ $ROM_5420_B1 == true ]; then
         MACHINE_LIST="$MACHINE_LIST rom_5420_b1"
 fi
+if [ $RSB_3430_A1 == true ]; then
+        MACHINE_LIST="$MACHINE_LIST rsb_3430_a1"
+fi
 if [ $EPCRS_200_A1 == true ]; then
         MACHINE_LIST="$MACHINE_LIST epcrs_200_a1"
 fi

@@ -138,10 +138,10 @@ cd $ROOT_DIR
 repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
 repo sync
 # Link downloads directory from backup
-#if [ -e $CURR_PATH/downloads ] ; then
-#    echo "[ADV] link downloads directory"
-#    ln -s $CURR_PATH/downloads downloads
-#fi
+if [ -e $CURR_PATH/downloads ] ; then
+    echo "[ADV] link downloads directory"
+    ln -s $CURR_PATH/downloads downloads
+fi
 
 EULA=1 DISTRO=fsl-imx-xwayland MACHINE=imx8qmrom7720a1 source fsl-setup-release.sh -b $BUILDALL_DIR
 
@@ -168,10 +168,10 @@ do
 done
 
 # Copy downloads to backup
-#if [ ! -e $CURR_PATH/downloads ] ; then
-#    echo "[ADV] backup 'downloads' directory"
-#    cp -a $CURR_PATH/$ROOT_DIR/downloads $CURR_PATH
-#fi
+if [ ! -e $CURR_PATH/downloads ] ; then
+    echo "[ADV] backup 'downloads' directory"
+    cp -a $CURR_PATH/$ROOT_DIR/downloads $CURR_PATH
+fi
 
 #cd $CURR_PATH
 #rm -rf $ROOT_DIR

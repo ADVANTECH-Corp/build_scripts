@@ -245,6 +245,7 @@ function building()
     if [ "$1" == "uboot" ]; then
         echo "[ADV] build uboot UBOOT_DEFCONFIG=$UBOOT_DEFCONFIG"
 		cd $CURR_PATH/$ROOT_DIR/u-boot
+		make clean
 		echo " V$RELEASE_VERSION" > .scmversion
 		./make.sh $UBOOT_DEFCONFIG >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_UBOOT
 	elif [ "$1" == "kernel" ]; then
@@ -252,12 +253,16 @@ function building()
 		cd $CURR_PATH/$ROOT_DIR/kernel
 
 		echo "[ADV] build kernel make ARCH=arm $KERNEL_DEFCONFIG"
+		make clean
 		make ARCH=arm $KERNEL_DEFCONFIG >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL
 		echo "[ADV] build kernel make ARCH=arm $KERNEL_DTB -j12"
 		make ARCH=arm $KERNEL_DTB -j12 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL
     elif [ "$1" == "recovery" ]; then
 		echo "[ADV] build recovery"
 		cd $CURR_PATH/$ROOT_DIR
+		if [  -d "buildroot/output/rockchip_rk3288_recovery" ];then
+		    rm buildroot/output/rockchip_rk3288_recovery -rf
+		fi
 		source envsetup.sh 20
 		./build.sh recovery >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_RECOVERY
     elif [ "$1" == "rootfs" ]; then

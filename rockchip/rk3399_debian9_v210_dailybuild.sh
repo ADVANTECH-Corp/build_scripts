@@ -116,8 +116,8 @@ function building()
         #VERSION=debug ARCH=armhf ./mk-rootfs-stretch.sh
         #echo "[ADV] mk-image.sh armhf"
         #./mk-image.sh
-		#echo "[ADV]---------------------------------"
-		echo "[ADV]-------------FOR arm64  64-----------"
+        #echo "[ADV]---------------------------------"
+        echo "[ADV]-------------FOR arm64  64-----------"
         echo "[ADV] arm64 mk-base-debian.sh"
         RELEASE=stretch TARGET=desktop ARCH=arm64 ./mk-base-debian.sh
         echo "[ADV] mk-rootfs-stretch-arm64.sh"
@@ -125,9 +125,10 @@ function building()
         echo "[ADV] add advantech "
         cp -aRL $CURR_PATH/$ROOT_DIR/rootfs/adv/* $CURR_PATH/$ROOT_DIR/rootfs
         ./mk-adv.sh ARCH=arm64
-		echo "[ADV] mk-image.sh arm64 "
+	echo "[ADV] mk-image.sh arm64 "
         ./mk-image.sh
-		echo "[ADV]---------------------------------"
+        sudo tar cvf binary.tgz $CURR_PATH/$ROOT_DIR/rootfs/binary
+	echo "[ADV]---------------------------------"
     	cd $CURR_PATH/$ROOT_DIR 
     	./build.sh BoardConfig_debian.mk
 	    ./mkfirmware.sh
@@ -197,7 +198,7 @@ function copy_image_to_storage()
 
     mv -f ${IMAGE_DIR}.tgz $OUTPUT_DIR
     mv -f *.md5 $OUTPUT_DIR
-
+    sudo mv -f $CURR_PATH/$ROOT_DIR/rootfs/binary.tgz $OUTPUT_DIR
 }
 # ================
 #  Main procedure 

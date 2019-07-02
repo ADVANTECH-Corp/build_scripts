@@ -23,7 +23,16 @@ export KERNEL_CONFIG
 export MACHINE_LIST
 ./rk3399_debian9_v210_dailybuild.sh ds100l $VERSION_NUM
 fi
-
+#DMSSA53_projects
+if [ "$DMSSA53" == "true" ]; then
+	KERNEL_DTB=rk3399-dmssa53.img
+	KERNEL_CONFIG=rockchip_dmssa53_defconfig
+	MACHINE_LIST="$MACHINE_LIST dmssa53"
+export KERNEL_DTB
+export KERNEL_CONFIG
+export MACHINE_LIST
+./rk3399_debian9_v210_dailybuild.sh dmssa53 $VERSION_NUM
+fi
 echo "[ADV] All done!"
 
 

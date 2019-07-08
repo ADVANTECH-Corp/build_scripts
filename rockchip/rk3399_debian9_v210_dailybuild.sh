@@ -82,7 +82,7 @@ function building()
         echo "[ADV] build uboot"
 		cd $CURR_PATH/$ROOT_DIR/u-boot
 		#make clean
-		./make.sh evb-rk3399 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE
+		./make.sh rk3399 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 	elif [ "$1" == "kernel" ]; then
 		echo "[ADV] build kernel  = $KERNEL_CONFIG"
         echo "[ADV] build kernel dtb  = $KERNEL_DTB"
@@ -125,6 +125,8 @@ function building()
         echo "[ADV] add advantech "
         cp -aRL $CURR_PATH/$ROOT_DIR/rootfs/adv/* $CURR_PATH/$ROOT_DIR/rootfs
         ./mk-adv.sh ARCH=arm64
+        ./mk-adv-module.sh ARCH=arm64
+        ./mk-adv-word.sh ARCH=arm64
 	echo "[ADV] mk-image.sh arm64 "
         ./mk-image.sh
         sudo tar cvf binary.tgz $CURR_PATH/$ROOT_DIR/rootfs/binary

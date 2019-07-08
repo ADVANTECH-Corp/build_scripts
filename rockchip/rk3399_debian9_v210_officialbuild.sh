@@ -259,7 +259,7 @@ function building()
         echo "[ADV] build uboot"
 		cd $CURR_PATH/$ROOT_DIR/u-boot
 		#make clean
-		./make.sh evb-rk3399 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE
+		./make.sh rk3399 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 	elif [ "$1" == "kernel" ]; then
 		echo "[ADV] build kernel  = $KERNEL_CONFIG"
         echo "[ADV] build kernel dtb  = $KERNEL_DTB"

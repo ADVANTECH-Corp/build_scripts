@@ -287,23 +287,29 @@ function building()
         sudo dpkg -i ubuntu-build-service/packages/*
         sudo apt-get install -f
         echo "[ADV]-------------FOR armhf  32-----------"
-        echo "[ADV] armhf mk-base-debian.sh"
-        RELEASE=stretch TARGET=desktop ARCH=armhf ./mk-base-debian.sh
-        echo "[ADV] mk-rootfs-stretch.sh"
-        VERSION=debug ARCH=armhf ./mk-rootfs-stretch.sh
+        #echo "[ADV] armhf mk-base-debian.sh"
+        #RELEASE=stretch TARGET=desktop ARCH=armhf ./mk-base-debian.sh
+        #echo "[ADV] mk-rootfs-stretch.sh"
+        #VERSION=debug ARCH=armhf ./mk-rootfs-stretch.sh
         #echo "[ADV] mk-image.sh armhf"
+        #./mk-image.sh
+        #echo "[ADV]---------------------------------"
+        echo "[ADV]-------------FOR arm64  64-----------"
+        echo "[ADV] arm64 mk-base-debian.sh"
+        RELEASE=stretch TARGET=desktop ARCH=arm64 ./mk-base-debian.sh
+        echo "[ADV] mk-rootfs-stretch-arm64.sh"
+        VERSION=debug ARCH=arm64 ./mk-rootfs-stretch-arm64.sh
+        echo "[ADV] add advantech "
+        cp -aRL $CURR_PATH/$ROOT_DIR/rootfs/adv/* $CURR_PATH/$ROOT_DIR/rootfs
+        ./mk-adv.sh ARCH=arm64
+        ./mk-adv-module.sh ARCH=arm64
+        ./mk-adv-word.sh ARCH=arm64
+	echo "[ADV] mk-image.sh arm64 "
         ./mk-image.sh
-#		echo "[ADV]---------------------------------"
-#		echo "[ADV]-------------FOR arm64  64-----------"
-#        echo "[ADV] arm64 mk-base-debian.sh"
-#        RELEASE=stretch TARGET=desktop ARCH=arm64 ./mk-base-debian.sh
-#        echo "[ADV] mk-rootfs-stretch-arm64.sh"
-#        VERSION=debug ARCH=arm64 ./mk-rootfs-stretch-arm64.sh
-#		echo "[ADV] mk-image.sh arm64 "
-#        ./mk-image.sh
-#		echo "[ADV]---------------------------------"
-	    cd $CURR_PATH/$ROOT_DIR 
-	    ./build.sh BoardConfig_debian.mk
+        sudo tar cvf binary.tgz $CURR_PATH/$ROOT_DIR/rootfs/binary
+	echo "[ADV]---------------------------------"
+    	cd $CURR_PATH/$ROOT_DIR 
+    	./build.sh BoardConfig_debian.mk
 	    ./mkfirmware.sh
 
 
@@ -355,6 +361,7 @@ function prepare_images()
     cp -aRL $CURR_PATH/$ROOT_DIR/out/linaro-rootfs.img $IMAGE_DIR
     cp -aRL $CURR_PATH/$ROOT_DIR/rockdev/oem* $IMAGE_DIR
     cp -aRL $CURR_PATH/$ROOT_DIR/device/rockchip/rk3399/parameter* $IMAGE_DIR
+    cp -aRL $CURR_PATH/$ROOT_DIR/rootfs/linaro-rootfs.img $IMAGE_DIR
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}.tgz

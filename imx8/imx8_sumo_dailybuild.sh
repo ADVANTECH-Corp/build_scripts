@@ -157,6 +157,7 @@ echo "[ADV] build images"
 declare -A DIST
 DIST[imx8qmrom7720a1]=fsl-imx-xwayland
 DIST[imx8mqrom5720a1]=fsl-imx-wayland
+DIST[imx6qrom7420a1]=fsl-imx-wayland
 
 for NEW_MACHINE in $MACHINE_LIST
 do

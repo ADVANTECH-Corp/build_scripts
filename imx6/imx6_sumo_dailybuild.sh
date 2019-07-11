@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VER_PREFIX="imx8"
+VER_PREFIX="imx6"
 
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
@@ -90,6 +90,13 @@ function build_yocto_images()
 
     EULA=1 source setup-environment $BUILDALL_DIR
 
+    # Re-build U-Boot & kernel
+    building u-boot-imx cleansstate
+    building u-boot-imx
+
+    building linux-imx cleansstate
+    building linux-imx
+    
     echo "[ADV] Build full image!"
     building $DEPLOY_IMAGE_NAME
 }
@@ -106,7 +113,7 @@ function prepare_images()
     DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/tmp/deploy/images/${NEW_MACHINE}"
 
     # Normal image
-    FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${NEW_MACHINE}"*.sdcard"
+    FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${NEW_MACHINE}"*.rootfs.sdcard"
     bunzip2 -f $DEPLOY_IMAGE_PATH/$FILE_NAME.bz2
     mv $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
 
@@ -115,6 +122,21 @@ function prepare_images()
     generate_md5 $IMAGE_DIR.img.gz
     rm $IMAGE_DIR/$FILE_NAME
 
+    # Eng image
+    FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${NEW_MACHINE}"*.rootfs.eng.sdcard"
+    mv $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
+
+    echo "[ADV] creating ${IMAGE_DIR}_eng.img.gz ..."
+    gzip -c9 $IMAGE_DIR/$FILE_NAME > ${IMAGE_DIR}_eng.img.gz
+    generate_md5 ${IMAGE_DIR}_eng.img.gz
+    rm $IMAGE_DIR/$FILE_NAME
+
+    # U-Boot & SPL
+    echo "[ADV] creating ${IMAGE_DIR}_spl.tgz for u-boot & SPL images ..."
+    mv $DEPLOY_IMAGE_PATH/SPL* $IMAGE_DIR
+    mv $DEPLOY_IMAGE_PATH/u-boot* $IMAGE_DIR
+    tar czf ${IMAGE_DIR}_spl.tgz $IMAGE_DIR
+    generate_md5 ${IMAGE_DIR}_spl.tgz
     cd $CURR_PATH
     
     rm -rf $IMAGE_DIR
@@ -125,6 +147,8 @@ function copy_image_to_storage()
     echo "[ADV] copy images to $OUTPUT_DIR"
 
     mv -f ${IMAGE_DIR}.img.gz $OUTPUT_DIR
+    mv -f ${IMAGE_DIR}_eng.img.gz $OUTPUT_DIR
+    mv -f ${IMAGE_DIR}_spl.tgz $OUTPUT_DIR
     mv -f *.md5 $OUTPUT_DIR
 }
 
@@ -134,8 +158,13 @@ function copy_image_to_storage()
 echo "[ADV] get yocto source code"
 mkdir $ROOT_DIR
 cd $ROOT_DIR
-#repo init -u git://github.com/ADVANTECH-Corp/adv-arm-yocto-bsp.git -b imx-linux-sumo -m imx-4.14.78-1.0.0_ga.xml
-repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
+if [ "$BSP_BRANCH" == "" ] ; then
+    repo init -u $BSP_URL
+elif [ "$BSP_XML" == "" ] ; then
+    repo init -u $BSP_URL -b $BSP_BRANCH
+else
+    repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
+fi
 repo sync
 # Link downloads directory from backup
 if [ -e $CURR_PATH/downloads ] ; then
@@ -143,24 +172,11 @@ if [ -e $CURR_PATH/downloads ] ; then
     ln -s $CURR_PATH/downloads downloads
 fi
 
-EULA=1 DISTRO=fsl-imx-xwayland MACHINE=imx8qmrom7720a1 source fsl-setup-release.sh -b $BUILDALL_DIR
-
-#imx8m
-#EULA=1 DISTRO=fsl-imx-wayland MACHINE=imx8mqevk source fsl-setup-release.sh -b $BUILDALL_DIR
-#bitbake $DEPLOY_IMAGE_NAME
-
-#imx8qx
-#EULA=1 DISTRO=fsl-imx-xwayland MACHINE=imx8qxpmek source fsl-setup-release.sh -b $BUILDALL_DIR
-#bitbake fsl-image-qt5-validation-imx
+EULA=1 DISTRO=fsl-imx-wayland source fsl-setup-release.sh -b $BUILDALL_DIR
 
 echo "[ADV] build images"
-declare -A DIST
-DIST[imx8qmrom7720a1]=fsl-imx-xwayland
-DIST[imx8mqrom5720a1]=fsl-imx-wayland
-
 for NEW_MACHINE in $MACHINE_LIST
 do
-    sed -i "s/\(MACHINE.*= \).*/\1'${NEW_MACHINE}'/; s/\(DISTRO.*= \).*/\1'${DIST[${NEW_MACHINE}]}'/" conf/local.conf
     build_yocto_images
     prepare_images
     copy_image_to_storage

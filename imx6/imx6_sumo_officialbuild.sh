@@ -584,7 +584,7 @@ function prepare_images()
                         FILE_NAME="SPL-"${KERNEL_CPU_TYPE}${PRODUCT}"-"${MEMORY}
                         echo "[ADV] Copy eng $FILE_NAME"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
-                        FILE_NAME=`readlink $DEPLOY_IMAGE_PATH/"${DEPLOY_IMAGE_NAME}-${KERNEL_CPU_TYPE}${PRODUCT}.sdcard" | cut -d '.' -f 1`".rootfs.eng.sdcard"
+                        FILE_NAME=`readlink $DEPLOY_IMAGE_PATH/"${DEPLOY_IMAGE_NAME}-${KERNEL_CPU_TYPE}${PRODUCT}.sdcard" | cut -d '.' -f 1`"*.rootfs.eng.sdcard"
                         echo "[ADV] Copy eng $FILE_NAME"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
                         if [ -e $OUTPUT_DIR/$FILE_NAME ]; then

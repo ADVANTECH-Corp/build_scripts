@@ -154,13 +154,10 @@ EULA=1 DISTRO=fsl-imx-xwayland MACHINE=imx8qmrom7720a1 source fsl-setup-release.
 #bitbake fsl-image-qt5-validation-imx
 
 echo "[ADV] build images"
-declare -A DIST
-DIST[imx8qmrom7720a1]=fsl-imx-xwayland
-DIST[imx8mqrom5720a1]=fsl-imx-wayland
 
 for NEW_MACHINE in $MACHINE_LIST
 do
-    sed -i "s/\(MACHINE.*= \).*/\1'${NEW_MACHINE}'/; s/\(DISTRO.*= \).*/\1'${DIST[${NEW_MACHINE}]}'/" conf/local.conf
+    sed -i "s/\(MACHINE.*= \).*/\1'${NEW_MACHINE}'/" conf/local.conf
     build_yocto_images
     prepare_images
     copy_image_to_storage

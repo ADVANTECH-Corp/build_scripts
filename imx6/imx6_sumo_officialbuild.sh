@@ -694,14 +694,14 @@ function wrap_source_code()
 define_cpu_type $PRODUCT
 
 case $BACKEND_TYPE in
-    "wayland")
+    "xwayland")
         DEPLOY_IMAGE_NAME="fsl-image-weston"
         ;;
     "fb")
         DEPLOY_IMAGE_NAME="fsl-image-gui"
         ;;
     *)
-        # dfb & fsl-imx-wayland are correct. Do nothing.
+        # dfb & fsl-imx-xwayland are correct. Do nothing.
         ;;
 esac
 if [ "$PRODUCT" == "$VER_PREFIX" ]; then

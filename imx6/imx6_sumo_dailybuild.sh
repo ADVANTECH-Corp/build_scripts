@@ -172,7 +172,7 @@ if [ -e $CURR_PATH/downloads ] ; then
     ln -s $CURR_PATH/downloads downloads
 fi
 
-EULA=1 DISTRO=fsl-imx-wayland source fsl-setup-release.sh -b $BUILDALL_DIR
+EULA=1 DISTRO=fsl-imx-xwayland source fsl-setup-release.sh -b $BUILDALL_DIR
 
 echo "[ADV] build images"
 for NEW_MACHINE in $MACHINE_LIST

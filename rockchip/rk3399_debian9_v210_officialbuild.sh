@@ -304,6 +304,10 @@ function building()
         ./mk-adv.sh ARCH=arm64
         ./mk-adv-module.sh ARCH=arm64
         ./mk-adv-word.sh ARCH=arm64
+	if [ "$NEW_MACHINE" == "dmssa53"]; then
+		echo "[ADV] mk-adv-dms53"
+		./mk-adv-dms53.sh ARCH=arm64
+	fi
 	echo "[ADV] mk-image.sh arm64 "
         ./mk-image.sh
         sudo tar cvf binary.tgz $CURR_PATH/$ROOT_DIR/rootfs/binary
@@ -411,7 +415,7 @@ echo "[ADV] copy_image_to_storage"
 	save_temp_log
 done
 
-fi
+
 cd $CURR_PATH
 #rm -rf $ROOT_DIR
 

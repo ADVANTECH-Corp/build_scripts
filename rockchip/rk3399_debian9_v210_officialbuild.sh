@@ -304,8 +304,9 @@ function building()
         ./mk-adv.sh ARCH=arm64
         ./mk-adv-module.sh ARCH=arm64
         ./mk-adv-word.sh ARCH=arm64
-	if [ "$NEW_MACHINE" == "dmssa53"]; then
-		echo "[ADV] mk-adv-dms53"
+		echo "[ADV] check MACHINE is dms53"
+	if [ "$NEW_MACHINE" == "dmssa53" ]; then
+		echo "[ADV] mk-adv-dms53 shell script"
 		./mk-adv-dms53.sh ARCH=arm64
 	fi
 	echo "[ADV] mk-image.sh arm64 "

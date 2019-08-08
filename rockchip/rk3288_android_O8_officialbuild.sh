@@ -88,19 +88,19 @@ function check_tag_and_checkout()
     for TEMP_PATH in ${ADV_PATH}
     do
 	    cd $CURR_PATH/$ROOT_DIR/
-        if [ -d "$TEMP_PATH" ];then
-            cd $TEMP_PATH
+        if [ -d "${TEMP_PATH}" ];then
+            cd ${TEMP_PATH}
             RESPOSITORY_TAG=`git tag | grep $VER_TAG`
             if [ "$RESPOSITORY_TAG" != "" ]; then
-                echo "[ADV] [FILE_PATH] repository has been tagged ,and check to this $VER_TAG version"
+                echo "[ADV] [${TEMP_PATH}] repository has been tagged ,and check to this $VER_TAG version"
                 REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
                 git checkout $VER_TAG
             else
-                echo "[ADV] [FILE_PATH] repository isn't tagged ,nothing to do"
+                echo "[ADV] [${TEMP_PATH}] repository isn't tagged ,nothing to do"
             fi
             
         else
-            echo "[ADV] Directory $FILE_PATH doesn't exist"
+            echo "[ADV] Directory ${TEMP_PATH} doesn't exist"
         fi
     done
 
@@ -112,8 +112,8 @@ function auto_add_tag()
     for TEMP_PATH in ${ADV_PATH}
     do
 	    cd $CURR_PATH/$ROOT_DIR/
-        if [ -d "$TEMP_PATH" ];then
-            cd $TEMP_PATH
+        if [ -d "${TEMP_PATH}" ];then
+            cd ${TEMP_PATH}
             HEAD_HASH_ID=`git rev-parse HEAD`
             TAG_HASH_ID=`git tag -v $VER_TAG | grep object | cut -d ' ' -f 2`
             REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
@@ -125,7 +125,7 @@ function auto_add_tag()
             fi
             
         else
-            echo "[ADV] Directory $FILE_PATH doesn't exist"
+            echo "[ADV] Directory ${TEMP_PATH} doesn't exist"
         fi
     done
 

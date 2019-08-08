@@ -20,7 +20,7 @@ vendor \
 rkbin \
 "
 
-VER_PREFIX="RK3288"
+VER_PREFIX="RK3288_O8_"
 
 idx=0
 isFirstMachine="true"

@@ -52,8 +52,9 @@ echo "[ADV] ANDROID_PRODUCT = ${ANDROID_PRODUCT}"
 VER_TAG="${VER_PREFIX}AIV"$(echo $RELEASE_VERSION | sed 's/[.]//')
 echo "[ADV] VER_TAG = $VER_TAG"
 echo "[ADV] isFirstMachine = $isFirstMachine"
+echo "[ADV] TARGET_PRODUCT = $TARGET_PRODUCT"
 CURR_PATH="$PWD"
-ROOT_DIR="${VER_PREFIX}AIV${RELEASE_VERSION}"_"$DATE"
+ROOT_DIR="${VER_TAG}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
 
 #-- Advantech/rk3288 gitlab android source code repository
@@ -217,12 +218,14 @@ END_OF_CSV
         HASH_ANDROID=$(cd $CURR_PATH/$ROOT_DIR/$TEMP_PATH && git rev-parse --short HEAD)
 	    echo "${TEMP_PATH}, ${HASH_ANDROID}" >> ${FILENAME%.*}.csv
     done
+	
+	cd $CURR_PATH
 }
 
 function generate_manifest()
 {
     cd $CURR_PATH/$ROOT_DIR/
-	repo manifest -o V${RELEASE_VERSION}.xml -r
+	repo manifest -o ${VER_TAG}.xml -r
 }
 
 function save_temp_log()
@@ -230,12 +233,12 @@ function save_temp_log()
     LOG_PATH="$CURR_PATH/$ROOT_DIR"
     cd $LOG_PATH
 
-    LOG_DIR="RK3288AIV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
+    LOG_DIR="${VER_TAG}"_"$NEW_MACHINE"_"$DATE"_log
     echo "[ADV] mkdir $LOG_DIR"
     mkdir $LOG_DIR
 
     # Backup conf, run script & log file
-    cp -a *.log $LOG_DIR
+    cp -a "$NEW_MACHINE"_Build*.log $LOG_DIR
 
     echo "[ADV] creating ${LOG_DIR}.tgz ..."
     tar czf $LOG_DIR.tgz $LOG_DIR
@@ -263,11 +266,12 @@ function get_source_code()
        repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
     fi
     repo sync
-
-    cd u-boot
-    REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
-    repo forall -c git checkout -b local --track $REMOTE_SERVER/$BSP_BRANCH
-    cd ..
+	
+    for TEMP_PATH in ${ADV_PATH}
+    do
+        REMOTE_SERVER=$(cd $CURR_PATH/$ROOT_DIR/$TEMP_PATH && git remote -v | grep push | cut -d $'\t' -f 1)
+	    git checkout -b local --track $REMOTE_SERVER/$BSP_BRANCH
+    done
 
     cd $CURR_PATH
 }
@@ -331,14 +335,14 @@ function prepare_images()
 {
     cd $CURR_PATH
 
-    IMAGE_DIR="RK3288AIV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
+    IMAGE_DIR="${VER_TAG}"_"$NEW_MACHINE"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
     mkdir -p $IMAGE_DIR/rockdev/image
 
     # Copy image files to image directory
 
-    cp -aRL $CURR_PATH/$ROOT_DIR/rockdev/* $IMAGE_DIR/rockdev/image
+    cp -aRL $CURR_PATH/$ROOT_DIR/rockdev/Image-$TARGET_PRODUCT/* $IMAGE_DIR/rockdev/image
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}.tgz
@@ -350,7 +354,7 @@ function copy_image_to_storage()
     echo "[ADV] copy images to $OUTPUT_DIR"
 	if [ $isFirstMachine == "true" ]; then
 	    generate_manifest
-	    mv V${RELEASE_VERSION}.xml $OUTPUT_DIR
+	    mv ${VER_TAG}.xml $OUTPUT_DIR
 	fi
 
     generate_csv ${IMAGE_DIR}.tgz
@@ -360,6 +364,7 @@ function copy_image_to_storage()
     mv -f *.md5 $OUTPUT_DIR
 
 }
+
 # ================
 #  Main procedure 
 # ================

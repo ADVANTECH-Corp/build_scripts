@@ -52,7 +52,6 @@ echo "[ADV] ANDROID_PRODUCT = ${ANDROID_PRODUCT}"
 VER_TAG="${VER_PREFIX}AIV"$(echo $RELEASE_VERSION | sed 's/[.]//')
 echo "[ADV] VER_TAG = $VER_TAG"
 echo "[ADV] isFirstMachine = $isFirstMachine"
-echo "[ADV] TARGET_PRODUCT = $TARGET_PRODUCT"
 CURR_PATH="$PWD"
 ROOT_DIR="${VER_TAG}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
@@ -164,10 +163,11 @@ function uboot_version_commit()
     cd $CURR_PATH
     cd $ROOT_DIR/u-boot
 
-	# push to github
+    # push to github
+    REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
     git add .scmversion -f
     git commit -m "[Official Release] ${VER_TAG}"
-    git push
+    git push $REMOTE_SERVER local:$BSP_BRANCH
     cd $CURR_PATH
 }
 
@@ -266,11 +266,17 @@ function get_source_code()
        repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
     fi
     repo sync
-	
+
     for TEMP_PATH in ${ADV_PATH}
     do
-        REMOTE_SERVER=$(cd $CURR_PATH/$ROOT_DIR/$TEMP_PATH && git remote -v | grep push | cut -d $'\t' -f 1)
-	    git checkout -b local --track $REMOTE_SERVER/$BSP_BRANCH
+        cd $CURR_PATH/$ROOT_DIR/
+        if [ -d "${TEMP_PATH}" ];then
+            cd ${TEMP_PATH}
+		    REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+		    git checkout -b local --track $REMOTE_SERVER/$BSP_BRANCH
+        else
+            echo "[ADV] Directory ${TEMP_PATH} doesn't exist"
+        fi
     done
 
     cd $CURR_PATH

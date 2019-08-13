@@ -8,7 +8,7 @@ BACKEND_TYPE=$4
 #--- [platform specific] ---
 VER_PREFIX="imx6"
 TMP_DIR="tmp"
-DEFAULT_DEVICE="imx6qrsb4410a1"
+DEFAULT_DEVICE="imx6qrom7420a1"
 #---------------------------
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
@@ -16,7 +16,6 @@ echo "[ADV] BSP_URL = ${BSP_URL}"
 echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
 echo "[ADV] BSP_XML = ${BSP_XML}"
 echo "[ADV] DEPLOY_IMAGE_NAME = ${DEPLOY_IMAGE_NAME}"
-echo "[ADV] OTA_IMAGE_NAME = ${OTA_IMAGE_NAME}"
 echo "[ADV] BACKEND_TYPE = ${BACKEND_TYPE}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
@@ -338,9 +337,9 @@ function building()
         LOG_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"_log
 
         if [ "$1" == "populate_sdk" ]; then
-                if [ "$DEPLOY_IMAGE_NAME" == "fsl-image-qt5" ]; then
-                        echo "[ADV] bitbake meta-toolchain-qt5"
-                        bitbake meta-toolchain-qt5
+                if [ "$DEPLOY_IMAGE_NAME" == "fsl-image-validation-imx" ]; then
+                        echo "[ADV] bitbake meta-toolchain"
+                        bitbake meta-toolchain
                 else
                         echo "[ADV] bitbake $DEPLOY_IMAGE_NAME -c populate_sdk"
                         bitbake $DEPLOY_IMAGE_NAME -c populate_sdk
@@ -370,7 +369,7 @@ function set_environment()
                        ln -s $CURR_PATH/downloads downloads
                 fi
 	        # Use default device for sdk
-                EULA=1 MACHINE=$DEFAULT_DEVICE source fsl-setup-release.sh -b $BUILDALL_DIR -e $BACKEND_TYPE
+                EULA=1 MACHINE=$DEFAULT_DEVICE DISTRO=$BACKEND_TYPE source fsl-setup-release.sh -b $BUILDALL_DIR
         else
                 if [ -e $BUILDALL_DIR/conf/local.conf ] ; then
                         # Change MACHINE setting
@@ -378,7 +377,7 @@ function set_environment()
                         EULA=1 source setup-environment $BUILDALL_DIR
                 else
                         # First build
-                        EULA=1 MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} source fsl-setup-release.sh -b $BUILDALL_DIR -e $BACKEND_TYPE
+                        EULA=1 MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} DISTRO=$BACKEND_TYPE source fsl-setup-release.sh -b $BUILDALL_DIR
                 fi
         fi
 }
@@ -386,10 +385,7 @@ function build_yocto_sdk()
 {
         set_environment sdk
 
-	echo "[ADV] Build recovery image!"
-	building initramfs-debug-image
-
-        # Build imx6qrsb4410a1 full image first
+        # Build imx6qrom7420a1 full image first
         building $DEPLOY_IMAGE_NAME
 
         # Generate sdk image
@@ -408,40 +404,8 @@ function build_yocto_images()
         building linux-imx cleansstate
         building linux-imx
 
-        # Clean QMAKE configs for qt5
-        if [ "$DEPLOY_IMAGE_NAME" == "fsl-image-qt5" ]; then
-                echo "[ADV] build_yocto_image: qt package cleansstate!"
-                building qtbase-native cleansstate
-                building qtbase cleansstate
-                building qtdeclarative cleansstate
-                building qtxmlpatterns cleansstate
-                building qtwayland cleansstate
-                building qtmultimedia cleansstate
-                building qt3d cleansstate
-                building qtgraphicaleffects cleansstate
-                building qt5nmapcarousedemo cleansstate
-                building qt5everywheredemo cleansstate
-                building quitbattery cleansstate
-                building qtsmarthome cleansstate
-                building qtsensors cleansstate
-                building cinematicexperience cleansstate
-                building qt5nmapper cleansstate
-                building quitindicators cleansstate
-                building qtlocation cleansstate
-                building qtwebkit cleansstate
-                building qtwebkit-examples cleansstate
-        fi
-
-	echo "[ADV] Build recovery image!"
-	building initramfs-debug-image
-        
 	# Build full image
         building $DEPLOY_IMAGE_NAME
-
-	# Build OTA image
-	echo "[ADV] build_OTA_image!"
-	building $OTA_IMAGE_NAME
-
 }
 function rebuild_u-boot()
 {
@@ -594,6 +558,7 @@ function prepare_images()
                         ;;
                 "normal")
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
+                        bunzip2 -f $DEPLOY_IMAGE_PATH/$FILE_NAME.bz2
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
 			cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
                         if [ -e $OUTPUT_DIR/$FILE_NAME ]; then
@@ -619,7 +584,7 @@ function prepare_images()
                         FILE_NAME="SPL-"${KERNEL_CPU_TYPE}${PRODUCT}"-"${MEMORY}
                         echo "[ADV] Copy eng $FILE_NAME"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
-                        FILE_NAME=`readlink $DEPLOY_IMAGE_PATH/"${DEPLOY_IMAGE_NAME}-${KERNEL_CPU_TYPE}${PRODUCT}.sdcard" | cut -d '.' -f 1`".rootfs.eng.sdcard"
+                        FILE_NAME=`readlink $DEPLOY_IMAGE_PATH/"${DEPLOY_IMAGE_NAME}-${KERNEL_CPU_TYPE}${PRODUCT}.sdcard" | cut -d '.' -f 1`"*.rootfs.eng.sdcard"
                         echo "[ADV] Copy eng $FILE_NAME"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
                         if [ -e $OUTPUT_DIR/$FILE_NAME ]; then
@@ -729,14 +694,14 @@ function wrap_source_code()
 define_cpu_type $PRODUCT
 
 case $BACKEND_TYPE in
-    "wayland")
+    "xwayland")
         DEPLOY_IMAGE_NAME="fsl-image-weston"
         ;;
     "fb")
         DEPLOY_IMAGE_NAME="fsl-image-gui"
         ;;
     *)
-        # dfb & x11 are correct. Do nothing.
+        # dfb & fsl-imx-xwayland are correct. Do nothing.
         ;;
 esac
 if [ "$PRODUCT" == "$VER_PREFIX" ]; then
@@ -833,11 +798,6 @@ else #"$PRODUCT" != "$VER_PREFIX"
         FIRMWARE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_firmware
         prepare_images firmware $FIRMWARE_DIR
         copy_image_to_storage firmware
-
-        echo "[ADV] generate ota image"
-	OTA_IMAGE_DIR="$IMAGE_DIR"_ota
-	prepare_images ota $OTA_IMAGE_DIR
-	copy_image_to_storage ota
 
         while [ "$MEMORY" != "$PRE_MEMORY" ]
         do

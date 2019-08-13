@@ -1,0 +1,177 @@
+#!/bin/bash
+
+VER_PREFIX="imx8"
+
+echo "[ADV] DATE = ${DATE}"
+echo "[ADV] STORED = ${STORED}"
+echo "[ADV] BSP_URL = ${BSP_URL}"
+echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
+echo "[ADV] BUILDALL_DIR = ${BUILDALL_DIR}"
+echo "[ADV] DEPLOY_IMAGE_NAME = ${DEPLOY_IMAGE_NAME}"
+echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
+echo "[ADV] MACHINE_LIST = ${MACHINE_LIST}"
+echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
+
+CURR_PATH="$PWD"
+ROOT_DIR="${VER_PREFIX}LB${RELEASE_VERSION}"_"$DATE"
+OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
+
+# Make storage folder
+if [ -e $OUTPUT_DIR ] ; then
+    echo "[ADV] $OUTPUT_DIR had already been created"
+else
+    echo "[ADV] mkdir $OUTPUT_DIR"
+    mkdir -p $OUTPUT_DIR
+fi
+
+# ===========
+#  Functions
+# ===========
+function generate_md5()
+{
+    FILENAME=$1
+
+    if [ -e $FILENAME ]; then
+        MD5_SUM=`md5sum -b $FILENAME | cut -d ' ' -f 1`
+        echo $MD5_SUM > $FILENAME.md5
+    fi
+}
+
+function save_temp_log()
+{
+    LOG_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR"
+    cd $LOG_PATH
+
+    echo "[ADV] mkdir $LOG_DIR"
+    mkdir $LOG_DIR
+
+    # Backup conf, run script & log file
+    cp -a conf $LOG_DIR
+    find tmp/work -name "log.*_*" -o -name "run.*_*" | xargs -i cp -a --parents {} $LOG_DIR
+
+    echo "[ADV] creating ${LOG_DIR}.tgz ..."
+    tar czf $LOG_DIR.tgz $LOG_DIR
+    generate_md5 $LOG_DIR.tgz
+
+    mv -f $LOG_DIR.tgz $OUTPUT_DIR
+    mv -f $LOG_DIR.tgz.md5 $OUTPUT_DIR
+
+    # Remove all temp logs
+    rm -rf $LOG_DIR
+    find . -name "temp" | xargs rm -rf
+}
+
+function building()
+{
+    echo "[ADV] building $1 $2..."
+    LOG_DIR="LI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
+
+    if [ "x" != "x$2" ]; then
+        bitbake $1 -c $2 -f
+    else
+        bitbake $1
+    fi
+
+    if [ "$?" -ne 0 ]; then
+        echo "[ADV] Build failure! Check details in ${LOG_DIR}.tgz"
+        save_temp_log
+        rm -rf $CURR_PATH/$ROOT_DIR
+        exit 1
+    fi
+}
+
+function build_yocto_images()
+{
+    cd $CURR_PATH/$ROOT_DIR
+
+    # set_environment
+    echo "[ADV] change $NEW_MACHINE"
+    sed -i "s/MACHINE ??=.*/MACHINE ??= '$NEW_MACHINE'/g" $BUILDALL_DIR/conf/local.conf
+
+    EULA=1 source setup-environment $BUILDALL_DIR
+
+    echo "[ADV] Build full image!"
+    building $DEPLOY_IMAGE_NAME
+}
+
+function prepare_images()
+{
+    cd $CURR_PATH
+
+    IMAGE_DIR="LI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
+    echo "[ADV] mkdir $IMAGE_DIR"
+    mkdir $IMAGE_DIR
+
+    # Copy image files to image directory
+    DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/tmp/deploy/images/${NEW_MACHINE}"
+
+    # Normal image
+    FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${NEW_MACHINE}"*.sdcard"
+    bunzip2 -f $DEPLOY_IMAGE_PATH/$FILE_NAME.bz2
+    mv $DEPLOY_IMAGE_PATH/$FILE_NAME $IMAGE_DIR
+
+    echo "[ADV] creating ${IMAGE_DIR}.img.gz ..."
+    gzip -c9 $IMAGE_DIR/$FILE_NAME > $IMAGE_DIR.img.gz
+    generate_md5 $IMAGE_DIR.img.gz
+    rm $IMAGE_DIR/$FILE_NAME
+
+    cd $CURR_PATH
+    
+    rm -rf $IMAGE_DIR
+}
+
+function copy_image_to_storage()
+{
+    echo "[ADV] copy images to $OUTPUT_DIR"
+
+    mv -f ${IMAGE_DIR}.img.gz $OUTPUT_DIR
+    mv -f *.md5 $OUTPUT_DIR
+}
+
+# ================
+#  Main procedure 
+# ================
+echo "[ADV] get yocto source code"
+mkdir $ROOT_DIR
+cd $ROOT_DIR
+#repo init -u git://github.com/ADVANTECH-Corp/adv-arm-yocto-bsp.git -b imx-linux-sumo -m imx-4.14.78-1.0.0_ga.xml
+repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
+repo sync
+# Link downloads directory from backup
+if [ -e $CURR_PATH/downloads ] ; then
+    echo "[ADV] link downloads directory"
+    ln -s $CURR_PATH/downloads downloads
+fi
+
+EULA=1 DISTRO=fsl-imx-xwayland MACHINE=imx8qmrom7720a1 source fsl-setup-release.sh -b $BUILDALL_DIR
+
+#imx8m
+#EULA=1 DISTRO=fsl-imx-wayland MACHINE=imx8mqevk source fsl-setup-release.sh -b $BUILDALL_DIR
+#bitbake $DEPLOY_IMAGE_NAME
+
+#imx8qx
+#EULA=1 DISTRO=fsl-imx-xwayland MACHINE=imx8qxpmek source fsl-setup-release.sh -b $BUILDALL_DIR
+#bitbake fsl-image-qt5-validation-imx
+
+echo "[ADV] build images"
+
+for NEW_MACHINE in $MACHINE_LIST
+do
+    sed -i "s/\(MACHINE.*= \).*/\1'${NEW_MACHINE}'/" conf/local.conf
+    build_yocto_images
+    prepare_images
+    copy_image_to_storage
+    save_temp_log
+done
+
+# Copy downloads to backup
+if [ ! -e $CURR_PATH/downloads ] ; then
+    echo "[ADV] backup 'downloads' directory"
+    cp -a $CURR_PATH/$ROOT_DIR/downloads $CURR_PATH
+fi
+
+#cd $CURR_PATH
+#rm -rf $ROOT_DIR
+
+echo "[ADV] build script done!"
+

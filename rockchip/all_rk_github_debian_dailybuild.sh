@@ -1,7 +1,7 @@
 #!/bin/bash
 MACHINE_LIST=""
 #rk_BSP
-./rk_server_dailybuild.sh rk $VERSION_NUM
+./rk_github_debian_dailybuild.sh rk $VERSION_NUM
 
 if [ "$DS100" == "true" ]; then
 	KERNEL_DTB=rk3399-ds100.img
@@ -10,7 +10,7 @@ if [ "$DS100" == "true" ]; then
 export KERNEL_DTB
 export KERNEL_CONFIG
 export MACHINE_LIST
-./rk_server_dailybuild.sh ds100 $VERSION_NUM
+./rk_github_debian_dailybuild.sh ds100 $VERSION_NUM
 fi
 echo "[ADV] All done!"
 

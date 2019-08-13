@@ -2,12 +2,7 @@
 
 VER_PREFIX="rk"
 
-for i in $MACHINE_LIST
-do
-        NEW_MACHINE=$i
-done
 
-RELEASE_VERSION=$1
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
 echo "[ADV] BSP_URL = ${BSP_URL}"
@@ -17,22 +12,18 @@ echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] MACHINE_LIST= ${MACHINE_LIST}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
 #echo "[ADV] SCRIPT_XML = ${SCRIPT_XML}"
-VER_TAG="${VER_PREFIX}ABV"$(echo $RELEASE_VERSION | sed 's/[.]//')
+echo "[ADV] KERNEL_CONFIG = ${KERNEL_CONFIG}"
+echo "[ADV] KERNEL_DTB = ${KERNEL_DTB}"
+VER_TAG="${VER_PREFIX}AB"$(echo $RELEASE_VERSION | sed 's/[.]//')
 echo "[ADV] VER_TAG = $VER_TAG"
 CURR_PATH="$PWD"
-ROOT_DIR="${VER_PREFIX}ABV${RELEASE_VERSION}"_"$DATE"
+ROOT_DIR="${VER_PREFIX}AB${RELEASE_VERSION}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
 
-echo "$Release_Note" > Release_Note
-REALEASE_NOTE="Release_Note"
-
-#--------------------------------------------------
-#======================
-AND_BSP="android"
-AND_BSP_VER="6.0"
-AND_VERSION="android_M6.0.1"
-
-#======================
+#-- Advantech/rk3399 gitlab debian source code repository
+echo "[ADV-ROOT]  $ROOT_DIR"
+echo "[ADV] ANDROID_KERNEL_PATH = $CURR_PATH/$ROOT_DIR/kernel"
+echo "[ADV] ANDROID_UBOOT_PATH = $CURR_PATH/$ROOT_DIR/u-boot"
 
 # Make storage folder
 if [ -e $OUTPUT_DIR ] ; then
@@ -47,7 +38,7 @@ fi
 # ===========
 function get_source_code()
 {
-    echo "[ADV] get android source code"
+    echo "[ADV] get debian source code"
     mkdir $ROOT_DIR
     cd $ROOT_DIR
 
@@ -104,16 +95,14 @@ function check_tag_and_replace()
 
 function auto_add_tag()
 {
-        REMOTE_URL=$1
-        REMOTE_BRANCH=$2
-        FILE_PATH=$3
-        
-        git clone $REMOTE_URL
-        
+        FILE_PATH=$1
+        echo "[ADV] $FILE_PATH"
+        cd $CURR_PATH
         if [ -d "$FILE_PATH" ];then
                 cd $FILE_PATH
-                git checkout $REMOTE_BRANCH
-		HEAD_HASH_ID=`git rev-parse HEAD`
+				echo "[ADV] get HEAD_HASH_ID"
+                HEAD_HASH_ID=`git rev-parse HEAD`
+				echo "[ADV] TAG_HASH_ID"
                 TAG_HASH_ID=`git tag -v $VER_TAG | grep object | cut -d ' ' -f 2`
                 if [ "$HEAD_HASH_ID" == "$TAG_HASH_ID" ]; then
                         echo "[ADV] tag exists! There is no need to add tag"
@@ -124,23 +113,54 @@ function auto_add_tag()
                         git push $REMOTE_SERVER $VER_TAG
                 fi
                 cd $CURR_PATH
-                rm -rf $FILE_PATH
         else
                 echo "[ADV] Directory $FILE_PATH doesn't exist"
                 exit 1
         fi
 }
 
+
+function update_revision_for_xml()
+{
+        FILE_PATH=$1
+        PROJECT_LIST=`grep "path=" $FILE_PATH`
+        XML_PATH="$PWD"
+
+        # Delete old revision
+        for PROJECT in $PROJECT_LIST
+        do
+                REV=`expr ${PROJECT} : 'revision="\([a-zA-Z0-9_.-]*\)"'`
+                if [ "$REV" != "" ]; then
+                        echo "[ADV] delete revision : $REV"
+                        sed -i "s/ revision=\"${REV}\"//g" $FILE_PATH
+                fi
+        done
+
+        # Add new revision
+        for PROJECT in $PROJECT_LIST
+        do
+                LAYER=`expr ${PROJECT} : 'path="\([a-zA-Z0-9/-]*\)"'`
+                if [ "$LAYER" != "" ]; then
+                        echo "[ADV] add revision for $LAYER"
+                        cd ../../$LAYER
+                        HASH_ID=`git rev-parse HEAD`
+                        cd $XML_PATH
+                        sed -i "s:path=\"${LAYER}\":path=\"${LAYER}\" revision=\"${HASH_ID}\":g" $FILE_PATH
+                fi
+        done
+}
+
 function create_xml_and_commit()
 {
         if [ -d "$ROOT_DIR/.repo/manifests" ];then
                 echo "[ADV] Create XML file"
-                cd $ROOT_DIR
+                cd $ROOT_DIR/.repo
+                cp manifest.xml manifests/$VER_TAG.xml
+                cd manifests
+				git checkout $BSP_BRANCH
+
                 # add revision into xml
-                repo manifest -o $VER_TAG.xml -r
-                mv $VER_TAG.xml .repo/manifests
-                cd .repo/manifests
-		git checkout $BSP_BRANCH
+                update_revision_for_xml $VER_TAG.xml
 
                 # push to github
                 REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
@@ -180,29 +200,14 @@ function generate_csv()
     fi
 
     #HASH_BSP=$(cd $CURR_PATH/$ROOT_DIR/.repo/manifests && git rev-parse --short HEAD)
-    HASH_ANDROID_UBOOT=$(cd $CURR_PATH/$ROOT_DIR/u-boot && git rev-parse --short HEAD)
     HASH_ANDROID_KERNEL=$(cd $CURR_PATH/$ROOT_DIR/kernel && git rev-parse --short HEAD)
-    HASH_ANDROID_BIONIC=$(cd $CURR_PATH/$ROOT_DIR/bionic && git rev-parse --short HEAD)
-    HASH_ANDROID_BOOTABLE=$(cd $CURR_PATH/$ROOT_DIR/bootable && git rev-parse --short HEAD)
-    HASH_ANDROID_BUILD=$(cd $CURR_PATH/$ROOT_DIR/build && git rev-parse --short HEAD)
-    HASH_ANDROID_DEVICE=$(cd $CURR_PATH/$ROOT_DIR/device && git rev-parse --short HEAD)
-    HASH_ANDROID_EXTERNAL=$(cd $CURR_PATH/$ROOT_DIR/external && git rev-parse --short HEAD)
-    HASH_ANDROID_FRAMEWORKS=$(cd $CURR_PATH/$ROOT_DIR/frameworks && git rev-parse --short HEAD)
-    HASH_ANDROID_HARDWARE=$(cd $CURR_PATH/$ROOT_DIR/hardware && git rev-parse --short HEAD)
-    HASH_ANDROID_PACKAGES=$(cd $CURR_PATH/$ROOT_DIR/packages && git rev-parse --short HEAD)
-    HASH_ANDROID_PREBUILTS=$(cd $CURR_PATH/$ROOT_DIR/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6 && git rev-parse --short HEAD)
-    HASH_ANDROID_RKST=$(cd $CURR_PATH/$ROOT_DIR/rkst && git rev-parse --short HEAD)
-    HASH_ANDROID_SYSTEM=$(cd $CURR_PATH/$ROOT_DIR/system && git rev-parse --short HEAD)
-    HASH_ANDROID_VENDOR=$(cd $CURR_PATH/$ROOT_DIR/vendor && git rev-parse --short HEAD)
-    
-    
-
+    HASH_ANDROID_UBOOT=$(cd $CURR_PATH/$ROOT_DIR/u-boot && git rev-parse --short HEAD)
     cd $CURR_PATH
 
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV
 ESSD Software/OS Update News
-OS,Android 6.0.1
+OS,Debian 9
 Part Number,N/A
 Author,
 Date,${DATE}
@@ -213,23 +218,8 @@ MD5 Checksum,TGZ: ${MD5_SUM}
 Image Size,${FILE_SIZE}B (${FILE_SIZE_BYTE} bytes)
 Issue description, N/A
 Function Addition,
-Android-manifest, ${HASH_BSP}
-
-ANDROID_UBOOT, ${HASH_ANDROID_UBOOT}
 ANDROID_KERNEL, ${HASH_ANDROID_KERNEL}
-ANDROID_BIONIC, ${HASH_ANDROID_BIONIC}
-ANDROID_BOOTABLE, ${HASH_ANDROID_BOOTABLE}
-ANDROID_BUILD, ${HASH_ANDROID_BUILD}
-ANDROID_DEVICE, ${HASH_ANDROID_DEVICE}
-ANDROID_EXTERNAL, ${HASH_ANDROID_EXTERNAL}
-ANDROID_FRAMEWORKS, ${HASH_ANDROID_FRAMEWORKS}
-ANDROID_HARDWARE, ${HASH_ANDROID_HARDWARE}
-ANDROID_PACKAGES, ${HASH_ANDROID_PACKAGES}
-ANDROID_PREBUILTS, ${HASH_ANDROID_PREBUILTS}
-ANDROID_RKST, ${HASH_ANDROID_RKST}
-ANDROID_SYSTEM, ${HASH_ANDROID_SYSTEM}
-ANDROID_VENDOR, ${HASH_ANDROID_VENDOR}
-
+ANDROID_UBOOT, ${HASH_ANDROID_UBOOT}
 
 
 END_OF_CSV
@@ -240,7 +230,7 @@ function save_temp_log()
     LOG_PATH="$CURR_PATH/$ROOT_DIR"
     cd $LOG_PATH
 
-    LOG_DIR="AIV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
+    LOG_DIR="DI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
     echo "[ADV] mkdir $LOG_DIR"
     mkdir $LOG_DIR
 
@@ -266,20 +256,56 @@ function building()
     LOG3_FILE="$NEW_MACHINE"_Build3.log
 
     if [ "$1" == "uboot" ]; then
+        echo "[ADV] build uboot"
 		cd $CURR_PATH/$ROOT_DIR/u-boot
-		echo "[ADV] UBOOT_DEFCONFIG=$UBOOT_DEFCONFIG"
-		make $UBOOT_DEFCONFIG
-		make 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
+		make clean
+		./make.sh evb-rk3399 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 	elif [ "$1" == "kernel" ]; then
+		echo "[ADV] build kernel  = $KERNEL_CONFIG"
 		cd $CURR_PATH/$ROOT_DIR/kernel
-		make rk3288_adv_defconfig 
-		make $KERNEL_DTB >> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
-    elif [ "$1" == "android" ]; then
+		make distclean
+		make ARCH=arm64 $KERNEL_CONFIG
+		make ARCH=arm64 $KERNEL_DTB -j16 >> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
+    elif [ "$1" == "recovery" ]; then
+		echo "[ADV] build recovery"
 		cd $CURR_PATH/$ROOT_DIR
-		source build/envsetup.sh
-		lunch $ANDROID_CONFIG
-		make -j4 2>> $CURR_PATH/$ROOT_DIR/$LOG3_FILE
-	else
+		./build.sh recovery
+    elif [ "$1" == "buildroot" ]; then
+		echo "[ADV] build buildroot"
+		cd $CURR_PATH/$ROOT_DIR
+		./build.sh rootfs
+    elif [ "$1" == "debian" ]; then
+        cd $CURR_PATH/$ROOT_DIR/rootfs
+        echo "[ADV] install tools for build debian"
+        sudo apt-get install -y binfmt-support
+        sudo apt-get install -y qemu-user-static
+		sudo apt-get -y update
+		sudo apt-get install -y live-build
+        echo "[ADV] dpkg packages"
+        sudo dpkg -i ubuntu-build-service/packages/*
+        sudo apt-get install -f
+        echo "[ADV]-------------FOR armhf  32-----------"
+        echo "[ADV] armhf mk-base-debian.sh"
+        RELEASE=stretch TARGET=desktop ARCH=armhf ./mk-base-debian.sh
+        echo "[ADV] mk-rootfs-stretch.sh"
+        VERSION=debug ARCH=armhf ./mk-rootfs-stretch.sh
+        #echo "[ADV] mk-image.sh armhf"
+        ./mk-image.sh
+#		echo "[ADV]---------------------------------"
+#		echo "[ADV]-------------FOR arm64  64-----------"
+#        echo "[ADV] arm64 mk-base-debian.sh"
+#        RELEASE=stretch TARGET=desktop ARCH=arm64 ./mk-base-debian.sh
+#        echo "[ADV] mk-rootfs-stretch-arm64.sh"
+#        VERSION=debug ARCH=arm64 ./mk-rootfs-stretch-arm64.sh
+#		echo "[ADV] mk-image.sh arm64 "
+#        ./mk-image.sh
+#		echo "[ADV]---------------------------------"
+	cd $CURR_PATH/$ROOT_DIR 
+	./build.sh BoardConfig_debian.mk
+	./mkfirmware.sh
+
+
+    else
     echo "[ADV] pass building..."
     fi
     [ "$?" -ne 0 ] && echo "[ADV] Build failure! Check log file '$LOG_FILE'" && exit 1
@@ -294,64 +320,43 @@ function set_environment()
 	export CLASSPATH=.:$JAVA_HOME/lib:$JAVA_HOME/lib/tools.jar
 }
 
-function build_android_images()
+function build_linux_images()
 {
-    cd $CURR_PATH/$ROOT_DIR
-
-	set_environment
-    # Android 
+	cd $CURR_PATH/$ROOT_DIR
+	#set_environment
 	building uboot
 	building kernel
-	building android
-    # package image to rockdev folder
-    ./mkimage.sh
-}
+	building recovery
+	building buildroot
+	building debian
 
-function build_android_OTA_images()
-{
-    LOG4_FILE="$NEW_MACHINE"_Build4.log
-    cd $CURR_PATH/$ROOT_DIR
-    set_environment
-    ./mkimage.sh ota
-    make -j4 otapackage 2>> $CURR_PATH/$ROOT_DIR/$LOG4_FILE
+    #=== package image to rockdev folder ===
+	cd $CURR_PATH/$ROOT_DIR
 }
 
 function prepare_images()
 {
     cd $CURR_PATH
 
-    echo "[ADV] clone rk3288 tools"
-    git clone https://github.com/ADVANTECH-Rockchip/rk3288_tools.git
-    cd rk3288_tools/Linux_rockdev
-    
-    chmod 777 afptool mkupdate.sh rkImageMaker unpack.sh
-    cp -a $CURR_PATH/$ROOT_DIR/rockdev/*/*.img ./Image
-    cp -a $CURR_PATH/$ROOT_DIR/kernel/*.img ./Image
-    cp -a $CURR_PATH/$ROOT_DIR/u-boot/RK3288UbootLoader_V2.30.10.bin ./
-    echo "[ADV] make update.img"
-    ./mkupdate.sh
-    
-    cd $CURR_PATH
-
-    IMAGE_DIR="AIV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
+    IMAGE_DIR="DI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
-	mkdir -p $IMAGE_DIR/rockdev/image
 
     # Copy image files to image directory
-	cp -a $CURR_PATH/$ROOT_DIR/rockdev/*/*.img $IMAGE_DIR/rockdev/image
-	cp -a $CURR_PATH/$ROOT_DIR/kernel/*.img $IMAGE_DIR/rockdev/image	
-	cp -a $CURR_PATH/$ROOT_DIR/u-boot/RK3288UbootLoader_V2.30.10.bin $IMAGE_DIR/rockdev
-	cp -a $CURR_PATH/rk3288_tools/Linux_rockdev/*.img $IMAGE_DIR/rockdev
 
-    build_android_OTA_images
-    cd $CURR_PATH
-        cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/*.zip $IMAGE_DIR/rockdev
-
+    cp -aRL $CURR_PATH/$ROOT_DIR/u-boot/*.bin $IMAGE_DIR
+	cp -aRL $CURR_PATH/$ROOT_DIR/u-boot/trust.img $IMAGE_DIR
+	cp -aRL $CURR_PATH/$ROOT_DIR/u-boot/uboot.img $IMAGE_DIR
+	cp -aRL $CURR_PATH/$ROOT_DIR/kernel/boot.img $IMAGE_DIR
+	cp -aRL $CURR_PATH/$ROOT_DIR/buildroot/output/rockchip_rk3399_recovery/images/recovery.img $IMAGE_DIR
+    cp -aRL $CURR_PATH/$ROOT_DIR/buildroot/output/rockchip_rk3399/images/rootfs.ext4 $IMAGE_DIR
+    cp -aRL $CURR_PATH/$ROOT_DIR/out/linaro-rootfs.img $IMAGE_DIR
+    cp -aRL $CURR_PATH/$ROOT_DIR/rockdev/oem* $IMAGE_DIR
+    cp -aRL $CURR_PATH/$ROOT_DIR/device/rockchip/rk3399/parameter* $IMAGE_DIR
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}.tgz
-    rm -rf $IMAGE_DIR
+    #rm -rf $IMAGE_DIR
 }
 
 function copy_image_to_storage()
@@ -371,38 +376,35 @@ function copy_image_to_storage()
     mkdir $ROOT_DIR
     get_source_code
 
-    echo "[ADV] add tag"
-    auto_add_tag $RK_UBOOT_URL $BRANCH uboot-rk
-    auto_add_tag $RK_KERNEL_URL $BRANCH kernel-rk
-    auto_add_tag $RK_DEVICE_URL $ANDROID_BRANCH android_rk_device
-    auto_add_tag $RK_VENDOR_URL $ANDROID_BRANCH android_rk_vendor
-    auto_add_tag $RK_HARDWARE_URL $ANDROID_BRANCH android_rk_hardware
-    auto_add_tag $RK_PACKAGES_URL $ANDROID_BRANCH android_rk_packages
-    auto_add_tag $RK_BUILD_URL $ANDROID_BRANCH android_rk_build
-    auto_add_tag $RK_FRAMEWORKS_URL $ANDROID_BRANCH android_rk_frameworks
-#    auto_add_tag $RK_MANIFEST_URL $BRANCH android-rk-manifest
-    auto_add_tag $RK_BOOTABLE_URL $ANDROID_BRANCH android_rk_bootable
-    auto_add_tag $RK_SYSTEM_URL $ANDROID_BRANCH android_rk_system
-    auto_add_tag $RK_EXTERNAL_URL $ANDROID_BRANCH android_rk_external
-    auto_add_tag $RK_PREBUILTS_URL $ANDROID_BRANCH android_rk_prebuilts
-    auto_add_tag $RK_RKST_URL $ANDROID_BRANCH android_rk_rkst
-    auto_add_tag $RK_BIONIC_URL $ANDROID_BRANCH android_rk_bionic
-    
+	echo "[ADV] check_tag_and_checkout"
+    check_tag_and_checkout $ANDROID_KERNEL_PATH
+    check_tag_and_checkout $ANDROID_UBOOT_PATH
+# Add git tag
+	echo "[ADV] Add tag"
+    auto_add_tag $CURR_PATH/$ROOT_DIR/kernel
+    auto_add_tag $CURR_PATH/$ROOT_DIR/u-boot
+
 
    # Create manifests xml and commit
 	echo "[ADV] create_xml_and_commit"
     create_xml_and_commit
 
 echo "[ADV] build images"
-	 build_android_images
-echo "[ADV] prepare_images"
-     prepare_images
-echo "[ADV] copy_image_to_storage"
-     copy_image_to_storage
-     save_temp_log
 
+for NEW_MACHINE in $MACHINE_LIST
+do
+echo "[ADV] NEW_MACHINE = $NEW_MACHINE"
+	build_linux_images
+echo "[ADV] prepare_images"
+	prepare_images
+echo "[ADV] copy_image_to_storage"
+	copy_image_to_storage
+	save_temp_log
+done
+
+fi
 cd $CURR_PATH
-rm -rf $ROOT_DIR
+#rm -rf $ROOT_DIR
 
 echo "[ADV] build script done!"
 

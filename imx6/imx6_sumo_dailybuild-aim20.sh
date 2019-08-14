@@ -554,19 +554,6 @@ function wrap_source_code()
 # ================
 define_cpu_type $PRODUCT
 
-case $BACKEND_TYPE in
-    "fsl-imx-wayland")
-    "fsl-imx-xwayland")
-    "fsl-imx-x11")
-    "fsl-imx-fb")
-        echo "[ADV] Set DISTRO to $BACKEND_TYPE ");
-        ;;
-    *)
-        echo "[ADV] $BACKEND_TYPE is not supported. Set fsl-imx-xwayland by default."
-        BACKEND_TYPE="fsl-imx-xwayland";
-        ;;
-esac
-
 if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 	mkdir $ROOT_DIR
         get_source_code

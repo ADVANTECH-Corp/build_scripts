@@ -1,7 +1,16 @@
 #!/bin/bash
-BUILD_SH="./imx6_sumo_dailybuild-aim20.sh"
-VERSION_NUM=${RELEASE_VERSION}
 PRODUCT=""
+if [ "x${Release_Note}" == "x" ]; then
+	# Dailybuild
+	BUILD_SH="./imx6_sumo_dailybuild-aim20.sh"
+	VERSION_NUM=${RELEASE_VERSION}
+else
+	NUM1=`expr $VERSION : 'V\([0-9]*\)'`
+	NUM2=`expr $VERSION : '.*[.]\([0-9A-Z]*\)'`
+	# Official release
+	BUILD_SH="./imx6_sumo_officialbuild-aim20.sh"
+	VERSION_NUM=$NUM1$NUM2
+fi
 
 #imx6_BSP
 $BUILD_SH imx6 imx6LBV"$VERSION_NUM" 1G

@@ -262,6 +262,7 @@ function building()
 		./make.sh evb-rk3399 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 	elif [ "$1" == "kernel" ]; then
 		echo "[ADV] build kernel  = $KERNEL_CONFIG"
+        echo "[ADV] build kernel dtb  = $KERNEL_DTB"
 		cd $CURR_PATH/$ROOT_DIR/kernel
 		#make distclean
 		make ARCH=arm64 $KERNEL_CONFIG
@@ -312,7 +313,6 @@ function building()
 	    ./mkfirmware.sh
 
 
-
     else
     echo "[ADV] pass building..."
     fi
@@ -334,7 +334,7 @@ function build_linux_images()
 	#set_environment
 	building uboot
 	building kernel
-	building recovery
+#	building recovery
 	building buildroot
 	building debian
 
@@ -363,6 +363,7 @@ function prepare_images()
     cp -aRL $CURR_PATH/$ROOT_DIR/device/rockchip/rk3399/parameter* $IMAGE_DIR
     cp -aRL $CURR_PATH/$ROOT_DIR/rootfs/linaro-rootfs.img $IMAGE_DIR
 	cp -aRL $CURR_PATH/out/u1604* $IMAGE_DIR
+	cp -aRL $CURR_PATH/u1604* $IMAGE_DIR
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}.tgz

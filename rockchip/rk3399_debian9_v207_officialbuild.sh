@@ -382,6 +382,8 @@ function copy_image_to_storage()
 
 }
 
+# u1604_aarch64_release_20190813.img
+
 function get_ubuntu_rootfs()
 {
 	cd $CURR_PATH
@@ -389,11 +391,11 @@ function get_ubuntu_rootfs()
     mkdir out
     pftp -v -n ${FTP_SITE} << EOF
 user "ftpuser" "P@ssw0rd"
-cd "Image/RK3399_Ubuntu/ubuntu1604_rootfs"
+cd "Image/RK3399_Ubuntu"
 prompt
 binary
 ls
-mget u1604_aarch64_release_20190813*
+mget u1604_aarch64_release_20190813.img
 close
 quit
 EOF

@@ -268,6 +268,7 @@ function build_yocto_images()
 	# Build full image
         building $DEPLOY_IMAGE_NAME
 }
+
 function rebuild_u-boot()
 {
         #rebuild u-boot because of different memory
@@ -298,6 +299,7 @@ function generate_mkspi_advboot()
         sudo cp $CURR_PATH/mkspi-advboot.sh $MOUNT_POINT/recovery/
         sudo chown 0.0 $MOUNT_POINT/recovery/mkspi-advboot.sh
 }
+
 function insert_image_file()
 {
 	IMAGE_TYPE=$1
@@ -389,9 +391,6 @@ function prepare_images()
         fi
 	
         case $IMAGE_TYPE in
-                "sdk")
-			cp $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/sdk/* $OUTPUT_DIR
-                        ;;
                 "ubuntu")
                         echo "[ADV]  Copy Ubuntu"
                         cp $DEPLOY_UBUNTU_PATH/zImage-${KERNEL_CPU_TYPE}*.dtb $OUTPUT_DIR
@@ -406,16 +405,6 @@ function prepare_images()
                         FILE_NAME="modules-imx6*.tgz"
                         cp $DEPLOY_MODULES_PATH/$FILE_NAME $OUTPUT_DIR
                         echo "[ADV]  Copy modules finish"
-                        ;;
-                "firmware")
-                        mkdir $OUTPUT_DIR/firmware_all
-                        mkdir $OUTPUT_DIR/firmware_product
-                        echo "[ADV]  Copy firmware"
-                        FILE_NAME="*.rpm"
-                        cp -rf $DEPLOY_FIRMWARE_PATH/$FILE_NAME $OUTPUT_DIR/firmware_all
-                        cp -rf $DEPLOY_FIRMWARE_PATH $OUTPUT_DIR/firmware_all
-                        echo "[ADV]  Copy firmware finish"
-                        cp -rf "$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/rpm/${KERNEL_CPU_TYPE}${PRODUCT}" $OUTPUT_DIR/firmware_product
                         ;;
                 "normal")
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
@@ -461,7 +450,7 @@ function prepare_images()
 
         # Package image file
         case $IMAGE_TYPE in
-                "sdk" | "modules" | "firmware" | "ubuntu")
+                "modules" | "ubuntu")
                         echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
 			tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
 			generate_md5 ${OUTPUT_DIR}.tgz
@@ -496,10 +485,6 @@ function copy_image_to_storage()
 	echo "[ADV] copy $1 images to $STORAGE_PATH"
 
 	case $1 in
-		"sdk")
-			mv -f ${ROOT_DIR}.tgz $STORAGE_PATH
-			mv -f ${SDK_DIR}.tgz $STORAGE_PATH
-		;;
 		"eng")
 			mv -f ${ENG_IMAGE_DIR}.img.gz $STORAGE_PATH
 		;;
@@ -508,9 +493,6 @@ function copy_image_to_storage()
 		;;
 		"modules")
 			mv -f ${MODULES_DIR}.tgz $STORAGE_PATH
-		;;
-		"firmware")
-			mv -f ${FIRMWARE_DIR}.tgz $STORAGE_PATH
 		;;
 		"normal")
 			generate_csv $IMAGE_DIR.img.gz
@@ -532,23 +514,6 @@ function copy_image_to_storage()
 	mv -f *.md5 $STORAGE_PATH
 }
 
-function wrap_source_code()
-{
-	SOURCE_URL=$1
-	SOURCE_TAG=$2
-	SOURCE_DIR=$3
-	git clone $SOURCE_URL
-	cd $SOURCE_DIR
-	git checkout $SOURCE_TAG 
-	cd ..
-	echo "[ADV] creating "$ROOT_DIR"_"$SOURCE_DIR".tgz ..."
-	tar czf "$ROOT_DIR"_"$SOURCE_DIR".tgz $SOURCE_DIR --exclude-vcs
-	generate_md5 "$ROOT_DIR"_"$SOURCE_DIR".tgz
-	rm -rf $SOURCE_DIR
-	mv -f "$ROOT_DIR"_"$SOURCE_DIR".tgz $STORAGE_PATH
-	mv -f "$ROOT_DIR"_"$SOURCE_DIR".tgz.md5 $STORAGE_PATH
-}
-
 # ================
 #  Main procedure
 # ================
@@ -558,17 +523,13 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 	mkdir $ROOT_DIR
         get_source_code
 
-                # BSP source code
-                echo "[ADV] tar $ROOT_DIR.tgz file"
-                rm $ROOT_DIR/setup-environment $ROOT_DIR/fsl-setup-release.sh
-                cp $ROOT_DIR/.repo/manifests/fsl-setup-release.sh $ROOT_DIR/fsl-setup-release.sh
-                cp $ROOT_DIR/.repo/manifests/setup-environment $ROOT_DIR/setup-environment
-                tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
-                generate_md5 $ROOT_DIR.tgz
-
-                # Package kernel & u-boot
-                wrap_source_code $KERNEL_URL $VER_TAG linux-imx6
-                wrap_source_code $U_BOOT_URL $VER_TAG uboot-imx6
+        # BSP source code
+        echo "[ADV] tar $ROOT_DIR.tgz file"
+        rm $ROOT_DIR/setup-environment $ROOT_DIR/fsl-setup-release.sh
+        cp $ROOT_DIR/.repo/manifests/fsl-setup-release.sh $ROOT_DIR/fsl-setup-release.sh
+        cp $ROOT_DIR/.repo/manifests/setup-environment $ROOT_DIR/setup-environment
+        tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
+        generate_md5 $ROOT_DIR.tgz
 
 else #"$PRODUCT" != "$VER_PREFIX"
         if [ ! -e $ROOT_DIR ]; then
@@ -599,12 +560,6 @@ else #"$PRODUCT" != "$VER_PREFIX"
         MODULES_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_modules
         prepare_images modules $MODULES_DIR
         copy_image_to_storage modules
-
-        echo "[ADV] create firmware"
-        DEPLOY_FIRMWARE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/rpm/all"
-        FIRMWARE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_firmware
-        prepare_images firmware $FIRMWARE_DIR
-        copy_image_to_storage firmware
 
         while [ "$MEMORY" != "$PRE_MEMORY" ]
         do

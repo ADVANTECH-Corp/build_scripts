@@ -239,17 +239,17 @@ function building()
 
 function set_environment()
 {
-        cd $CURR_PATH/$ROOT_DIR
+	cd $CURR_PATH/$ROOT_DIR
 	echo "[ADV] set environment"
 
-                if [ -e $BUILDALL_DIR/conf/local.conf ] ; then
-                        # Change MACHINE setting
-                        sed -i "s/MACHINE ??=.*/MACHINE ??= '${KERNEL_CPU_TYPE}${PRODUCT}'/g" $BUILDALL_DIR/conf/local.conf
-                        EULA=1 source setup-environment $BUILDALL_DIR
-                else
-                        # First build
-                        EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} source fsl-setup-release.sh -b $BUILDALL_DIR
-                fi
+	if [ -e $BUILDALL_DIR/conf/local.conf ] ; then
+		# Change MACHINE setting
+		sed -i "s/MACHINE ??=.*/MACHINE ??= '${KERNEL_CPU_TYPE}${PRODUCT}'/g" $BUILDALL_DIR/conf/local.conf
+		EULA=1 source setup-environment $BUILDALL_DIR
+	else
+		# First build
+		EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} source fsl-setup-release.sh -b $BUILDALL_DIR
+	fi
 }
 
 function build_yocto_images()
@@ -584,13 +584,7 @@ else #"$PRODUCT" != "$VER_PREFIX"
 	save_temp_log
 fi
 
-# Copy downloads to backup
-if [ ! -e $CURR_PATH/downloads ] ; then
-    echo "[ADV] backup 'downloads' directory"
-    cp -a $CURR_PATH/$ROOT_DIR/downloads $CURR_PATH
-fi
-
-cd $CURR_PATH
+#cd $CURR_PATH
 #rm -rf $ROOT_DIR
 
 echo "[ADV] build script done!"

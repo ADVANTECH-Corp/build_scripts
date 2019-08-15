@@ -17,10 +17,10 @@ echo "[ADV] KERNEL_DTB = ${KERNEL_DTB}"
 VER_TAG="${VER_PREFIX}3399LB"$(echo $RELEASE_VERSION | sed 's/[.]//')
 echo "[ADV] VER_TAG = $VER_TAG"
 CURR_PATH="$PWD"
-ROOT_DIR="${VER_PREFIX}AB${RELEASE_VERSION}"_"$DATE"
+ROOT_DIR="${VER_PREFIX}3399LB${RELEASE_VERSION}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
 
-#-- Advantech/rk3399 gitlab debian source code repository
+#-- Advantech/rk3399 github debian source code repository
 echo "[ADV-ROOT]  $ROOT_DIR"
 echo "[ADV] ANDROID_KERNEL_PATH = $CURR_PATH/$ROOT_DIR/kernel"
 echo "[ADV] ANDROID_UBOOT_PATH = $CURR_PATH/$ROOT_DIR/u-boot"

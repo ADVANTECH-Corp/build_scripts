@@ -362,6 +362,7 @@ function prepare_images()
     cp -aRL $CURR_PATH/$ROOT_DIR/rockdev/oem* $IMAGE_DIR
     cp -aRL $CURR_PATH/$ROOT_DIR/device/rockchip/rk3399/parameter* $IMAGE_DIR
     cp -aRL $CURR_PATH/$ROOT_DIR/rootfs/linaro-rootfs.img $IMAGE_DIR
+	cp -aRL $CURR_PATH/out/u1604* $IMAGE_DIR
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}.tgz
@@ -379,6 +380,24 @@ function copy_image_to_storage()
     mv -f *.md5 $OUTPUT_DIR
 
 }
+
+function get_ubuntu_rootfs()
+{
+	cd $CURR_PATH
+    echo "[ADV] get_ubuntu_rootfs"
+    mkdir out
+    pftp -v -n ${FTP_SITE} << EOF
+user "ftpuser" "P@ssw0rd"
+cd "Image/RK3399_Ubuntu/ubuntu1604_rootfs"
+prompt
+binary
+ls
+mget u1604_aarch64_release_20190813*
+close
+quit
+EOF
+}
+
 # ================
 #  Main procedure 
 # ================
@@ -404,6 +423,8 @@ for NEW_MACHINE in $MACHINE_LIST
 do
 echo "[ADV] NEW_MACHINE = $NEW_MACHINE"
 	build_linux_images
+echo "[ADV] get ubuntu rootfs"
+	get_ubuntu_rootfs
 echo "[ADV] prepare_images"
 	prepare_images
 echo "[ADV] copy_image_to_storage"

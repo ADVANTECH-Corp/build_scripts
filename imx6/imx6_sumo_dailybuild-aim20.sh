@@ -485,6 +485,9 @@ function copy_image_to_storage()
 	echo "[ADV] copy $1 images to $STORAGE_PATH"
 
 	case $1 in
+		"bsp")
+			mv -f ${ROOT_DIR}.tgz $STORAGE_PATH
+		;;
 		"eng")
 			mv -f ${ENG_IMAGE_DIR}.img.gz $STORAGE_PATH
 		;;
@@ -525,11 +528,10 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 
         # BSP source code
         echo "[ADV] tar $ROOT_DIR.tgz file"
-        rm $ROOT_DIR/setup-environment $ROOT_DIR/fsl-setup-release.sh
-        cp $ROOT_DIR/.repo/manifests/fsl-setup-release.sh $ROOT_DIR/fsl-setup-release.sh
-        cp $ROOT_DIR/.repo/manifests/setup-environment $ROOT_DIR/setup-environment
         tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
         generate_md5 $ROOT_DIR.tgz
+
+	copy_image_to_storage bsp
 
 else #"$PRODUCT" != "$VER_PREFIX"
         if [ ! -e $ROOT_DIR ]; then

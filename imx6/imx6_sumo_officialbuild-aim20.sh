@@ -178,17 +178,22 @@ function commit_tag_and_rollback()
 
         if [ -d "$ROOT_DIR/$FILE_PATH" ];then
                 cd $ROOT_DIR/$FILE_PATH
-                echo "[ADV] create tag $VER_TAG"
-                REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
-                git add .
-                git commit -m "[Official Release] $VER_TAG"
-                git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
-                git push --follow-tags
-                # Rollback
-                HEAD_HASH_ID=`git rev-parse HEAD`
-		git revert $HEAD_HASH_ID --no-edit
-		git push
-
+                META_TAG=`git tag | grep $VER_TAG`
+                if [ "$META_TAG" != "" ]; then
+                        echo "[ADV] meta-advantech has been tagged ($VER_TAG). Nothing to do."
+                else
+                        echo "[ADV] create tag $VER_TAG"
+                        REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+                        git add .
+                        git commit -m "[Official Release] $VER_TAG"
+                        git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
+                        git push --follow-tags
+                        # Rollback
+                        HEAD_HASH_ID=`git rev-parse HEAD`
+                        git revert $HEAD_HASH_ID --no-edit
+                        git push
+                        git reset --hard $HEAD_HASH_ID
+                fi
                 cd $CURR_PATH
         else
                 echo "[ADV] Directory $ROOT_DIR/$FILE_PATH doesn't exist"
@@ -240,6 +245,12 @@ function create_xml_and_commit()
                 cd $ROOT_DIR
                 # add revision into xml
                 repo manifest -o $VER_TAG.xml -r
+
+                # revise for new branch
+                BRANCH_SUFFIX=`echo $META_ADVANTECH_BRANCH | cut -d '_' -f 2`
+                BRANCH_ORI="${META_ADVANTECH_BRANCH/_$BRANCH_SUFFIX}"
+                sed -i "s/$BRANCH_ORI/$META_ADVANTECH_BRANCH/g" $VER_TAG.xml
+
                 mv $VER_TAG.xml .repo/manifests
                 cd .repo/manifests
 		git checkout $BSP_BRANCH

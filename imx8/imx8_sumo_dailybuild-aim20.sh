@@ -176,8 +176,8 @@ function generate_csv()
 
     HASH_BSP=$(cd $CURR_PATH/$ROOT_DIR/.repo/manifests && git rev-parse HEAD)
     HASH_ADV=$(cd $CURR_PATH/$ROOT_DIR/$META_ADVANTECH_PATH && git rev-parse HEAD)
-    HASH_KERNEL=$(cd $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux-gnueabi/linux-imx/$KERNEL_VERSION*/git && git rev-parse HEAD) 
-    HASH_UBOOT=$(cd $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux-gnueabi/u-boot-imx/$U_BOOT_VERSION*/git && git rev-parse HEAD) 
+    HASH_KERNEL=$(cd $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/linux-imx/$KERNEL_VERSION*/git && git rev-parse HEAD)
+    HASH_UBOOT=$(cd $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/u-boot-imx/$U_BOOT_VERSION*/git && git rev-parse HEAD)
     cd $CURR_PATH
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV
@@ -298,13 +298,13 @@ function prepare_images()
                         cp $DEPLOY_MODULES_PATH/$FILE_NAME $OUTPUT_DIR
                         ;;
                 "normal")
-                        FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.sdcard"
+                        FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
                         bunzip2 -f $DEPLOY_IMAGE_PATH/$FILE_NAME.bz2
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
 			cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
                         ;;
 		"ota")
-                        FILE_NAME=${OTA_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.sdcard"
+                        FILE_NAME=${OTA_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
 			cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
 			generate_OTA_update_package

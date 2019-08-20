@@ -82,8 +82,8 @@ function define_cpu_type()
                         CPU_TYPE="iMX8QM"
                         ;;
                 *)
-+                        # Do nothing
-+                        ;;
+                        # Do nothing
+                        ;;
         esac
 }
 
@@ -286,20 +286,16 @@ function prepare_images()
         fi
 	
         case $IMAGE_TYPE in
-                "ubuntu")
-                        echo "[ADV]  Copy Ubuntu"
-                        cp $DEPLOY_UBUNTU_PATH/Image-adv-${KERNEL_CPU_TYPE}*.dtb $OUTPUT_DIR
-                        cp $DEPLOY_UBUNTU_PATH/Image $OUTPUT_DIR
-                        cp $DEPLOY_UBUNTU_PATH/imx-boot-imx8* $OUTPUT_DIR
-                        cp $DEPLOY_UBUNTU_PATH/tee.bin $OUTPUT_DIR
-                        cp -a $DEPLOY_UBUNTU_PATH/imx-boot-tools $OUTPUT_DIR
-                        echo "[ADV]  Copy Ubuntu finish"
+                "misc")
+                        cp $DEPLOY_MISC_PATH/Image-adv-${KERNEL_CPU_TYPE}*.dtb $OUTPUT_DIR
+                        cp $DEPLOY_MISC_PATH/Image $OUTPUT_DIR
+                        cp $DEPLOY_MISC_PATH/imx-boot-imx8* $OUTPUT_DIR
+                        cp $DEPLOY_MISC_PATH/tee.bin $OUTPUT_DIR
+                        cp -a $DEPLOY_MISC_PATH/imx-boot-tools $OUTPUT_DIR
                         ;;
                 "modules")
-                        echo "[ADV]  Copy modules"
                         FILE_NAME="modules-imx8*.tgz"
                         cp $DEPLOY_MODULES_PATH/$FILE_NAME $OUTPUT_DIR
-                        echo "[ADV]  Copy modules finish"
                         ;;
                 "normal")
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.sdcard"
@@ -321,7 +317,7 @@ function prepare_images()
 
         # Package image file
         case $IMAGE_TYPE in
-                "modules" | "ubuntu")
+                "modules" | "misc")
                         echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
 			tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
 			generate_md5 ${OUTPUT_DIR}.tgz
@@ -359,8 +355,8 @@ function copy_image_to_storage()
 		"bsp")
 			mv -f ${ROOT_DIR}.tgz $STORAGE_PATH
 		;;
-		"ubuntu")
-			mv -f ${UBUNTU_DIR}.tgz $STORAGE_PATH
+		"misc")
+			mv -f ${MISC_DIR}.tgz $STORAGE_PATH
 		;;
 		"modules")
 			mv -f ${MODULES_DIR}.tgz $STORAGE_PATH
@@ -419,11 +415,11 @@ else #"$PRODUCT" != "$VER_PREFIX"
         prepare_images normal $IMAGE_DIR
         copy_image_to_storage normal
 
-        echo "[ADV] create ubuntu"
-        DEPLOY_UBUNTU_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
-        UBUNTU_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_ubuntu
-        prepare_images ubuntu $UBUNTU_DIR
-        copy_image_to_storage ubuntu
+        echo "[ADV] create misc files"
+        DEPLOY_MISC_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
+        MISC_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_misc
+        prepare_images misc $MISC_DIR
+        copy_image_to_storage misc
 
         echo "[ADV] create module"
         DEPLOY_MODULES_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"

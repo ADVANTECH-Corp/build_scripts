@@ -357,102 +357,10 @@ function build_yocto_sdk()
         set_environment sdk
 
         # Build imx6qrom7420a1 full image first
-        building $DEPLOY_IMAGE_NAME
+        ## building $DEPLOY_IMAGE_NAME
 
         # Generate sdk image
         building populate_sdk
-}
-
-function generate_mksd_linux()
-{
-	sudo mkdir $MOUNT_POINT/mk_inand
-	chmod 755 $CURR_PATH/mksd-linux.sh
-	sudo cp $CURR_PATH/mksd-linux.sh $MOUNT_POINT/mk_inand/
-	sudo chown 0.0 $MOUNT_POINT/mk_inand/mksd-linux.sh
-}
-
-function generate_mkspi_advboot()
-{
-        sudo mkdir $MOUNT_POINT/recovery
-        chmod 755 $CURR_PATH/mkspi-advboot.sh
-        sudo cp $CURR_PATH/mkspi-advboot.sh $MOUNT_POINT/recovery/
-        sudo chown 0.0 $MOUNT_POINT/recovery/mkspi-advboot.sh
-}
-
-function insert_image_file()
-{
-	IMAGE_TYPE=$1
-	OUTPUT_DIR=$2
-	FILE_NAME=$3
-	DO_RESIZE="no"
-
-	echo "[ADV] insert file to $IMAGE_TYPE image"
-	if [ "$IMAGE_TYPE" == "normal" ] || [ "$IMAGE_TYPE" == "ota" ]; then
-		DO_RESIZE="yes"
-	fi
-
-	# Maybe the loop device is occuppied, unmount it first
-	sudo umount $MOUNT_POINT
-	sudo losetup -d $LOOP_DEV
-
-	cd $OUTPUT_DIR
-
-	if [ "$DO_RESIZE" == "yes" ]; then
-		ORIGINAL_FILE_NAME="$FILE_NAME".original
-		mv $FILE_NAME $ORIGINAL_FILE_NAME
-		dd if=/dev/zero of=$FILE_NAME bs=1M count=$SDCARD_SIZE
-	fi
-
-	# Set up loop device
-	sudo losetup $LOOP_DEV $FILE_NAME
-
-	if [ "$DO_RESIZE" == "yes" ]; then
-		echo "[ADV] resize $FILE_NAME"
-		sudo dd if=$ORIGINAL_FILE_NAME of=$LOOP_DEV
-		sudo sync
-		rootfs_start=`sudo fdisk -u -l ${LOOP_DEV} | grep ${LOOP_DEV}p2 | awk '{print $2}'`
-sudo fdisk -u $LOOP_DEV << EOF &>/dev/null
-d
-2
-n
-p
-$rootfs_start
-$PARTITION_SIZE_LIMIT
-w
-EOF
-		sudo sync
-		sudo partprobe ${LOOP_DEV}
-		sudo e2fsck -f -y ${LOOP_DEV}p2
-		sudo resize2fs ${LOOP_DEV}p2
-	fi
-
-	sudo mount ${LOOP_DEV}p2 $MOUNT_POINT
-	sudo mkdir $MOUNT_POINT/image
-
-	# Insert specific image file
-	case $IMAGE_TYPE in
-		"normal")
-			sudo cp -a $ORIGINAL_FILE_NAME $MOUNT_POINT/image/$FILE_NAME
-			sudo cp $DEPLOY_IMAGE_PATH/u-boot_crc.bin* $MOUNT_POINT/image/
-			generate_mksd_linux
-			sudo rm $ORIGINAL_FILE_NAME
-			;;
-		"ota")
-			sudo cp -a $ORIGINAL_FILE_NAME $MOUNT_POINT/image/$FILE_NAME
-			generate_mksd_linux
-			sudo rm $ORIGINAL_FILE_NAME
-			;;
-		"eng")
-			sudo cp $DEPLOY_IMAGE_PATH/SPL-${KERNEL_CPU_TYPE}${PRODUCT}-${MEMORY} $MOUNT_POINT/image/SPL
-			generate_mkspi_advboot
-			;;
-	esac
-
-	sudo chown -R 0.0 $MOUNT_POINT/image
-	sudo umount $MOUNT_POINT
-	sudo losetup -d $LOOP_DEV
-
-	cd ..
 }
 
 function prepare_images()

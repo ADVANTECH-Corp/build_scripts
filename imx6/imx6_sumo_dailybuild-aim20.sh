@@ -284,97 +284,6 @@ function rebuild_u-boot()
         cd  $CURR_PATH
 }
 
-function generate_mksd_linux()
-{
-	sudo mkdir $MOUNT_POINT/mk_inand
-	chmod 755 $CURR_PATH/mksd-linux.sh
-	sudo cp $CURR_PATH/mksd-linux.sh $MOUNT_POINT/mk_inand/
-	sudo chown 0.0 $MOUNT_POINT/mk_inand/mksd-linux.sh
-}
-
-function generate_mkspi_advboot()
-{
-        sudo mkdir $MOUNT_POINT/recovery
-        chmod 755 $CURR_PATH/mkspi-advboot.sh
-        sudo cp $CURR_PATH/mkspi-advboot.sh $MOUNT_POINT/recovery/
-        sudo chown 0.0 $MOUNT_POINT/recovery/mkspi-advboot.sh
-}
-
-function insert_image_file()
-{
-	IMAGE_TYPE=$1
-	OUTPUT_DIR=$2
-	FILE_NAME=$3
-	DO_RESIZE="no"
-
-	echo "[ADV] insert file to $IMAGE_TYPE image"
-	if [ "$IMAGE_TYPE" == "normal" ] || [ "$IMAGE_TYPE" == "ota" ]; then
-		DO_RESIZE="yes"
-	fi
-
-	# Maybe the loop device is occuppied, unmount it first
-	sudo umount $MOUNT_POINT
-	sudo losetup -d $LOOP_DEV
-
-	cd $OUTPUT_DIR
-
-	if [ "$DO_RESIZE" == "yes" ]; then
-		ORIGINAL_FILE_NAME="$FILE_NAME".original
-		mv $FILE_NAME $ORIGINAL_FILE_NAME
-		dd if=/dev/zero of=$FILE_NAME bs=1M count=$SDCARD_SIZE
-	fi
-
-	# Set up loop device
-	sudo losetup $LOOP_DEV $FILE_NAME
-
-	if [ "$DO_RESIZE" == "yes" ]; then
-		echo "[ADV] resize $FILE_NAME"
-		sudo dd if=$ORIGINAL_FILE_NAME of=$LOOP_DEV
-		sudo sync
-		rootfs_start=`sudo fdisk -u -l ${LOOP_DEV} | grep ${LOOP_DEV}p2 | awk '{print $2}'`
-sudo fdisk -u $LOOP_DEV << EOF &>/dev/null
-d
-2
-n
-p
-$rootfs_start
-$PARTITION_SIZE_LIMIT
-w
-EOF
-		sudo sync
-		sudo partprobe ${LOOP_DEV}
-		sudo e2fsck -f -y ${LOOP_DEV}p2
-		sudo resize2fs ${LOOP_DEV}p2
-	fi
-
-	sudo mount ${LOOP_DEV}p2 $MOUNT_POINT
-	sudo mkdir $MOUNT_POINT/image
-
-	# Insert specific image file
-	case $IMAGE_TYPE in
-		"normal")
-			sudo cp -a $ORIGINAL_FILE_NAME $MOUNT_POINT/image/$FILE_NAME
-			sudo cp $DEPLOY_IMAGE_PATH/u-boot_crc.bin* $MOUNT_POINT/image/
-			generate_mksd_linux
-			sudo rm $ORIGINAL_FILE_NAME
-			;;
-		"ota")
-			sudo cp -a $ORIGINAL_FILE_NAME $MOUNT_POINT/image/$FILE_NAME
-			generate_mksd_linux
-			sudo rm $ORIGINAL_FILE_NAME
-			;;
-		"eng")
-			sudo cp $DEPLOY_IMAGE_PATH/SPL-${KERNEL_CPU_TYPE}${PRODUCT}-${MEMORY} $MOUNT_POINT/image/SPL
-			generate_mkspi_advboot
-			;;
-	esac
-
-	sudo chown -R 0.0 $MOUNT_POINT/image
-	sudo umount $MOUNT_POINT
-	sudo losetup -d $LOOP_DEV
-
-	cd ..
-}
 function prepare_images()
 {
         cd $CURR_PATH
@@ -391,43 +300,27 @@ function prepare_images()
         fi
 	
         case $IMAGE_TYPE in
-                "ubuntu")
-                        echo "[ADV]  Copy Ubuntu"
-                        cp $DEPLOY_UBUNTU_PATH/zImage-${KERNEL_CPU_TYPE}*.dtb $OUTPUT_DIR
-                        cp $DEPLOY_UBUNTU_PATH/zImage $OUTPUT_DIR
-                        cp $DEPLOY_UBUNTU_PATH/u-boot_crc.bin $OUTPUT_DIR
-                        cp $DEPLOY_UBUNTU_PATH/u-boot_crc.bin.crc $OUTPUT_DIR
-                        cp $DEPLOY_UBUNTU_PATH/u-boot.imx $OUTPUT_DIR
-                        echo "[ADV]  Copy Ubuntu finish"
+                "misc")
+                        cp $DEPLOY_MISC_PATH/zImage-${KERNEL_CPU_TYPE}*.dtb $OUTPUT_DIR
+                        cp $DEPLOY_MISC_PATH/zImage $OUTPUT_DIR
+                        cp $DEPLOY_MISC_PATH/u-boot_crc.bin $OUTPUT_DIR
+                        cp $DEPLOY_MISC_PATH/u-boot_crc.bin.crc $OUTPUT_DIR
+                        cp $DEPLOY_MISC_PATH/u-boot.imx $OUTPUT_DIR
                         ;;
                 "modules")
-                        echo "[ADV]  Copy modules"
                         FILE_NAME="modules-imx6*.tgz"
                         cp $DEPLOY_MODULES_PATH/$FILE_NAME $OUTPUT_DIR
-                        echo "[ADV]  Copy modules finish"
                         ;;
                 "normal")
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
                         bunzip2 -f $DEPLOY_IMAGE_PATH/$FILE_NAME.bz2
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
 			cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
-                        if [ -e $OUTPUT_DIR/$FILE_NAME ]; then
-                                FILE_NAME=`ls $OUTPUT_DIR | grep rootfs.sdcard | grep $DEPLOY_IMAGE_NAME`
-
-                                # Insert mksd-linux.sh for both normal
-                                insert_image_file "normal" $OUTPUT_DIR $FILE_NAME
-                        fi
                         ;;
 		"ota")
                         FILE_NAME=${OTA_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
 			cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
-                        if [ -e $OUTPUT_DIR/$FILE_NAME ]; then
-                                FILE_NAME=`ls $OUTPUT_DIR | grep rootfs.sdcard | grep $OTA_IMAGE_NAME`
-
-                                # Insert mksd-linux.sh for both normal
-                                insert_image_file "ota" $OUTPUT_DIR $FILE_NAME
-                        fi
 			generate_OTA_update_package
                         ;;
                 "eng")
@@ -437,10 +330,6 @@ function prepare_images()
                         FILE_NAME=`readlink $DEPLOY_IMAGE_PATH/"${DEPLOY_IMAGE_NAME}-${KERNEL_CPU_TYPE}${PRODUCT}.sdcard" | cut -d '.' -f 1`"*.rootfs.eng.sdcard"
                         echo "[ADV] Copy eng $FILE_NAME"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
-                        if [ -e $OUTPUT_DIR/$FILE_NAME ]; then
-                                FILE_NAME=`ls $OUTPUT_DIR | grep rootfs.eng.sdcard`
-                                insert_image_file "eng" $OUTPUT_DIR $FILE_NAME
-                        fi
                         ;;
                 *)
                         echo "[ADV] prepare_images: invalid parameter #1!"
@@ -450,7 +339,7 @@ function prepare_images()
 
         # Package image file
         case $IMAGE_TYPE in
-                "modules" | "ubuntu")
+                "modules" | "misc")
                         echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
 			tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
 			generate_md5 ${OUTPUT_DIR}.tgz
@@ -491,8 +380,8 @@ function copy_image_to_storage()
 		"eng")
 			mv -f ${ENG_IMAGE_DIR}.img.gz $STORAGE_PATH
 		;;
-		"ubuntu")
-			mv -f ${UBUNTU_DIR}.tgz $STORAGE_PATH
+		"misc")
+			mv -f ${MISC_DIR}.tgz $STORAGE_PATH
 		;;
 		"modules")
 			mv -f ${MODULES_DIR}.tgz $STORAGE_PATH
@@ -551,11 +440,11 @@ else #"$PRODUCT" != "$VER_PREFIX"
         prepare_images normal $IMAGE_DIR
         copy_image_to_storage normal
 
-        echo "[ADV] create ubuntu"
-        DEPLOY_UBUNTU_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
-        UBUNTU_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_ubuntu
-        prepare_images ubuntu $UBUNTU_DIR
-        copy_image_to_storage ubuntu
+        echo "[ADV] create misc files"
+        DEPLOY_MISC_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
+        MISC_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_misc
+        prepare_images misc $MISC_DIR
+        copy_image_to_storage misc
 
         echo "[ADV] create module"
         DEPLOY_MODULES_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"

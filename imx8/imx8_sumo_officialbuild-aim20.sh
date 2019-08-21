@@ -5,9 +5,9 @@ OFFICIAL_VER=$2
 MEMORY_TYPE=$3
 
 #--- [platform specific] ---
-VER_PREFIX="imx6"
+VER_PREFIX="imx8"
 TMP_DIR="tmp"
-DEFAULT_DEVICE="imx6qrom7420a1"
+DEFAULT_DEVICE="imx8qmrom7720a1"
 #---------------------------
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
@@ -30,6 +30,8 @@ echo "[ADV] KERNEL_VERSION = ${KERNEL_VERSION}"
 echo "[ADV] KERNEL_URL = ${KERNEL_URL}"
 echo "[ADV] KERNEL_BRANCH = ${KERNEL_BRANCH}"
 echo "[ADV] KERNEL_PATH = ${KERNEL_PATH}"
+
+SDCARD_SIZE=7200
 
 VER_TAG="${VER_PREFIX}LB"$(echo ${VERSION} | sed 's/[.]//')
 
@@ -69,22 +71,23 @@ function define_cpu_type()
 {
         CPU_TYPE=`expr $1 : '.*-\(.*\)$'`
         case $CPU_TYPE in
-                "solo")
+                "8X")
                         PRODUCT=`expr $1 : '\(.*\).*-'`
-                        UBOOT_CPU_TYPE="mx6dl"
-                        KERNEL_CPU_TYPE="imx6dl"
-                        CPU_TYPE="DualLiteSolo"
+                        KERNEL_CPU_TYPE="imx8qxp"
+                        CPU_TYPE="iMX8X"
                         ;;
-                "plus")
+                "8M")
                         PRODUCT=`expr $1 : '\(.*\).*-'`
-                        UBOOT_CPU_TYPE="mx6qp"
-                        KERNEL_CPU_TYPE="imx6qp"
-                        CPU_TYPE="DualQuadPlus"
+                        KERNEL_CPU_TYPE="imx8m"
+                        CPU_TYPE="iMX8M"
+                        ;;
+                "8QM")
+                        PRODUCT=`expr $1 : '\(.*\).*-'`
+                        KERNEL_CPU_TYPE="imx8qm"
+                        CPU_TYPE="iMX8QM"
                         ;;
                 *)
-                        UBOOT_CPU_TYPE="mx6q"
-                        KERNEL_CPU_TYPE="imx6q"
-                        CPU_TYPE="DualQuad"
+                        # Do nothing
                         ;;
         esac
 }
@@ -354,7 +357,7 @@ function build_yocto_sdk()
 {
         set_environment sdk
 
-        # Build imx6qrom7420a1 full image first
+        # Build default full image first
         ## building $DEPLOY_IMAGE_NAME
 
         # Generate sdk image
@@ -393,7 +396,7 @@ function prepare_images()
 			tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
 			generate_md5 ${OUTPUT_DIR}.tgz
                         ;;
-                *) # Normal, Eng images
+                *) # Normal images
                         echo "[ADV] creating ${OUTPUT_DIR}.img.gz ..."
                         gzip -c9 $OUTPUT_DIR/$FILE_NAME > $OUTPUT_DIR.img.gz
                         generate_md5 $OUTPUT_DIR.img.gz
@@ -409,11 +412,11 @@ function copy_image_to_storage()
 	case $1 in
 		"sdk")
 			mv -f ${SDK_DIR}.tgz $STORAGE_PATH
-		;;
+			;;
 		*)
-		echo "[ADV] copy_image_to_storage: invalid parameter #1!"
-		exit 1;
-		;;
+			echo "[ADV] copy_image_to_storage: invalid parameter #1!"
+			exit 1;
+			;;
 	esac
 
 	mv -f *.md5 $STORAGE_PATH

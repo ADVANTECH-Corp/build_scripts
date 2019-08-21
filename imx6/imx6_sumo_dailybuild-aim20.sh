@@ -29,8 +29,6 @@ echo "[ADV] KERNEL_URL = ${KERNEL_URL}"
 echo "[ADV] KERNEL_BRANCH = ${KERNEL_BRANCH}"
 echo "[ADV] KERNEL_PATH = ${KERNEL_PATH}"
 
-SDCARD_SIZE=7200
-
 VER_TAG="${VER_PREFIX}LBV${RELEASE_VERSION}"
 
 CURR_PATH="$PWD"
@@ -315,13 +313,13 @@ function prepare_images()
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
                         bunzip2 -f $DEPLOY_IMAGE_PATH/$FILE_NAME.bz2
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
-			cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
+                        cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
                         ;;
-		"ota")
+                "ota")
                         FILE_NAME=${OTA_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
-			cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
-			generate_OTA_update_package
+                        cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
+                        generate_OTA_update_package
                         ;;
                 "eng")
                         FILE_NAME="SPL-"${KERNEL_CPU_TYPE}${PRODUCT}"-"${MEMORY}
@@ -341,8 +339,8 @@ function prepare_images()
         case $IMAGE_TYPE in
                 "modules" | "misc")
                         echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
-			tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
-			generate_md5 ${OUTPUT_DIR}.tgz
+                        tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
+                        generate_md5 ${OUTPUT_DIR}.tgz
                         ;;
                 *) # Normal, Eng images
                         echo "[ADV] creating ${OUTPUT_DIR}.img.gz ..."
@@ -412,7 +410,7 @@ function copy_image_to_storage()
 define_cpu_type $PRODUCT
 
 if [ "$PRODUCT" == "$VER_PREFIX" ]; then
-	mkdir $ROOT_DIR
+        mkdir $ROOT_DIR
         get_source_code
 
         # BSP source code
@@ -420,7 +418,7 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
         tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
         generate_md5 $ROOT_DIR.tgz
 
-	copy_image_to_storage bsp
+        copy_image_to_storage bsp
 
 else #"$PRODUCT" != "$VER_PREFIX"
         if [ ! -e $ROOT_DIR ]; then
@@ -434,7 +432,7 @@ else #"$PRODUCT" != "$VER_PREFIX"
         build_yocto_images
 
         echo "[ADV] generate normal image"
-	DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
+        DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
 
         IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"
         prepare_images normal $IMAGE_DIR
@@ -455,7 +453,7 @@ else #"$PRODUCT" != "$VER_PREFIX"
         while [ "$MEMORY" != "$PRE_MEMORY" ]
         do
                 if [ "$PRE_MEMORY" != "" ]; then
-			rebuild_u-boot
+                        rebuild_u-boot
                 fi
 
                 #ENG image
@@ -472,7 +470,7 @@ else #"$PRODUCT" != "$VER_PREFIX"
                 fi
         done
 
-	save_temp_log
+        save_temp_log
 fi
 
 #cd $CURR_PATH

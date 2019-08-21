@@ -337,18 +337,41 @@ function build_android_images()
     ./mkimage.sh
 }
 
+function build_android_OTA_images()
+{
+    LOG_FILE_OTA="$NEW_MACHINE"_Build_OTA.log
+    cd $CURR_PATH/$ROOT_DIR
+    set_environment
+    ./mkimage.sh ota
+    make -j4 otapackage 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE_OTA
+}
+
 function prepare_images()
 {
+    UPDATE_TOOL_PATH="rk3288_tools/Linux_rockdev_android8.1/rockdev"
     cd $CURR_PATH
+    echo "[ADV] clone rk3288 tools"
+    git clone https://github.com/ADVANTECH-Rockchip/rk3288_tools.git
+    cd $UPDATE_TOOL_PATH
 
+    chmod 777 afptool mkupdate.sh rkImageMaker unpack.sh
+    cp -aRL $CURR_PATH/$ROOT_DIR/rockdev/Image-$TARGET_PRODUCT/* ./Image
+    echo "[ADV] make update.img"
+    ./mkupdate.sh
+
+    cd $CURR_PATH
     IMAGE_DIR="${VER_TAG}"_"$NEW_MACHINE"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
     mkdir -p $IMAGE_DIR/rockdev/image
 
     # Copy image files to image directory
-
     cp -aRL $CURR_PATH/$ROOT_DIR/rockdev/Image-$TARGET_PRODUCT/* $IMAGE_DIR/rockdev/image
+    cp -a $CURR_PATH/$UPDATE_TOOL_PATH/*.img $IMAGE_DIR/rockdev
+    build_android_OTA_images
+    cd $CURR_PATH
+    cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$TARGET_PRODUCT/*.zip $IMAGE_DIR/rockdev
+
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}.tgz

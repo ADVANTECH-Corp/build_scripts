@@ -138,14 +138,16 @@ function check_tag_and_checkout()
                 if [ "$META_TAG" != "" ]; then
                         echo "[ADV] meta-advantech has been tagged ($VER_TAG). Nothing to do."
                 else
-                        echo "[ADV] Checkout meta-advantech to '$META_BRANCH'"
-			git checkout $META_BRANCH
-			git pull
+			echo "[ADV] Set meta-advantech to $HASH_CSV"
 			BRANCH_SUFFIX=`echo $META_BRANCH | cut -d '_' -f 2`
 			BRANCH_ORI="${META_BRANCH/_$BRANCH_SUFFIX}"
-			echo "[ADV] Merge from '$BRANCH_ORI' and reset to $HASH_CSV"
-			git merge $BRANCH_ORI
+			git checkout $BRANCH_ORI
+			git pull
 			git reset --hard $HASH_CSV
+			echo "[ADV] Checkout to '$META_BRANCH' and merge from '$BRANCH_ORI'"
+			git checkout $META_BRANCH
+			git pull
+			git merge $BRANCH_ORI --no-edit --log
                 fi
                 cd $CURR_PATH
         else

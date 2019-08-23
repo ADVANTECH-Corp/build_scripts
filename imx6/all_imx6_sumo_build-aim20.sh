@@ -1,6 +1,6 @@
 #!/bin/bash
 PRODUCT=""
-if [ "x${Release_Note}" == "x" ]; then
+if [ "x${ALSO_BUILD_OFFICIAL_IMAGE}" != "x" ]; then
 	# Dailybuild
 	BUILD_SH="./imx6_sumo_dailybuild-aim20.sh"
 	VERSION_NUM=${RELEASE_VERSION}

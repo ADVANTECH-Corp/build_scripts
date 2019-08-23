@@ -78,7 +78,7 @@ function define_cpu_type()
                         ;;
                 "8M")
                         PRODUCT=`expr $1 : '\(.*\).*-'`
-                        KERNEL_CPU_TYPE="imx8m"
+                        KERNEL_CPU_TYPE="imx8mq"
                         CPU_TYPE="iMX8M"
                         ;;
                 "8QM")

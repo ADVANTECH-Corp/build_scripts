@@ -24,6 +24,9 @@ fi
 if [ "$ROM3310A1" == "true" ]; then
 	MACHINE_LIST="$MACHINE_LIST am335xrom3310a1"
 fi
+if [ "$EPCR3220A1" == "true" ]; then
+	MACHINE_LIST="$MACHINE_LIST am335xepcr3220a1"
+fi
 
 export MACHINE_LIST
 ./amxxxx_officialbuild.sh $VERSION_NUM

@@ -309,8 +309,8 @@ function build_yocto_images()
     building u-boot-ti-staging cleansstate
     building u-boot-ti-staging
 
-    building linux-processor-sdk cleansstate
-    building linux-processor-sdk
+    building linux-ti-staging cleansstate
+    building linux-ti-staging
 
     OLD_MACHINE=$NEW_MACHINE
     echo "[ADV] Replace OLD_MACHINE=$OLD_MACHINE"
@@ -467,7 +467,7 @@ if [ -z "$EXISTED_VERSION" ] ; then
     echo "[ADV] Add tag"
     commit_tag_and_rollback $META_ADVANTECH_PATH
     auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$BUILD_TMP_DIR/work/${NEW_MACHINE}-linux-gnueabi/u-boot-ti-staging
-    auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$BUILD_TMP_DIR/work/${NEW_MACHINE}-linux-gnueabi/linux-processor-sdk
+    auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$BUILD_TMP_DIR/work/${NEW_MACHINE}-linux-gnueabi/linux-ti-staging
 
     # Create manifests xml and commit
     create_xml_and_commit

@@ -452,7 +452,7 @@ do
     OFFICIAL_VER=${NEW_MACHINE:9}
     OFFICIAL_VER="${OFFICIAL_VER}${AIM_VERSION}LIV${RELEASE_VERSION}"
 
-    add_version
+#    add_version
     build_yocto_images
     prepare_images
     copy_image_to_storage

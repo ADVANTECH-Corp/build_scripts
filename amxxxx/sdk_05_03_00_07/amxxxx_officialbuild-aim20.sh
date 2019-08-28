@@ -18,7 +18,9 @@ echo "[ADV] FIRST_BUILD = ${FIRST_BUILD}"
 
 CURR_PATH="$PWD"
 
-ROOT_DIR="${VER_PREFIX}${AIM_VERSION}LBV${RELEASE_VERSION}"_"$DATE"
+#ROOT_DIR="${VER_PREFIX}${AIM_VERSION}LBV${RELEASE_VERSION}"_"$DATE"
+ROOT_DIR="TI"
+BSP_BAK="${VER_PREFIX}${AIM_VERSION}LBV${RELEASE_VERSION}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
 
 echo "[ADV] CURR_PATH = ${CURR_PATH}"
@@ -387,7 +389,7 @@ function prepare_images()
 function copy_image_to_storage()
 {
     echo "[ADV] copy BSP to $OUTPUT_DIR"
-    mv -f ${ROOT_DIR}.tgz $OUTPUT_DIR
+    mv -f ${BSP_BAK}.tgz $OUTPUT_DIR
 
     echo "[ADV] copy all images to $OUTPUT_DIR"
     echo "[ADV] copy ${IMAGE_DIR}_sdkimg.tgz to $OUTPUT_DIR"
@@ -429,8 +431,10 @@ rm -r $ROOT_DIR/configs $ROOT_DIR/oe-layertool-setup.sh $ROOT_DIR/sample-files
 cp -r $ROOT_DIR/.repo/manifests/configs $ROOT_DIR/configs
 cp -r $ROOT_DIR/.repo/manifests/sample-files $ROOT_DIR/sample-files
 cp $ROOT_DIR/.repo/manifests/oe-layertool-setup.sh $ROOT_DIR/oe-layertool-setup.sh
-tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
-generate_md5 $ROOT_DIR.tgz
+mv $ROOT_DIR $BSP_BAK
+tar czf $BSP_BAK.tgz $BSP_BAK --exclude-vcs --exclude .repo
+generate_md5 $BSP_BAK.tgz
+mv $BSP_BAK $ROOT_DIR
 
 #Create build folder
 echo "[ADV] Create build folder"

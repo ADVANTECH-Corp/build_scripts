@@ -263,6 +263,10 @@ function save_temp_log()
     tar czf $LOG_DIR.tgz $LOG_DIR
     generate_md5 $LOG_DIR.tgz
 
+# for debug
+    tar czf qtwebengine.tgz $BUILD_TMP_DIR/work/armv7ahf-neon-linux-gnueabi/qtwebengine
+    mv -f qtwebengine.tgz $OUTPUT_DIR
+
     mv -f $LOG_DIR.tgz $OUTPUT_DIR
     mv -f $LOG_DIR.tgz.md5 $OUTPUT_DIR
 
@@ -307,6 +311,8 @@ function build_yocto_images()
         echo "[ADV] Fisrt build: OLD_MACHINE=$OLD_MACHINE"
         FIRST_BUILD="0"
     fi
+
+    building qtwebengine
 
     building u-boot-ti-staging cleansstate
     building u-boot-ti-staging

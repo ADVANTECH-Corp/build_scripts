@@ -29,4 +29,4 @@ if [ "$EPCR3220A1" == "true" ]; then
 fi
 
 export MACHINE_LIST
-./amxxxx_officialbuild.sh $VERSION_NUM
+./amxxxx_officialbuild-aim20.sh $VERSION_NUM

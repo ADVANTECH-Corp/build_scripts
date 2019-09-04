@@ -1,6 +1,8 @@
 #!/bin/bash
 
-VER_PREFIX="RK3288"
+PLATFORM_PREFIX="RK3288"
+VER_PREFIX="DIV"
+
 
 idx=0
 isFirstMachine="true"
@@ -24,11 +26,13 @@ echo "[ADV] BSP_XML = ${BSP_XML}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] MACHINE_LIST= ${MACHINE_LIST}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
-VER_TAG="${VER_PREFIX}LIV"$(echo $RELEASE_VERSION | sed 's/[.]//')
+VER_TAG="${PLATFORM_PREFIX}${VER_PREFIX}"$(echo $RELEASE_VERSION | sed 's/[.]//')
 echo "[ADV] VER_TAG = $VER_TAG"
+OFFICIAL_VER="${MODEL_NAME}${HW_VER}${AIM_VERSION}${VER_PREFIX}"$(echo $RELEASE_VERSION | sed 's/[.]//')
+echo "[ADV] OFFICIAL_VER = $OFFICIAL_VER"
 echo "[ADV] isFirstMachine = $isFirstMachine"
 CURR_PATH="$PWD"
-ROOT_DIR="${VER_PREFIX}LIV${RELEASE_VERSION}"_"$DATE"
+ROOT_DIR="${PLATFORM_PREFIX}${VER_PREFIX}${RELEASE_VERSION}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
 
 echo "$Release_Note" > Release_Note
@@ -182,7 +186,7 @@ END_OF_CSV
 function generate_manifest()
 {
     cd $CURR_PATH/$ROOT_DIR/
-	repo manifest -o V${RELEASE_VERSION}.xml -r
+	repo manifest -o ${VER_TAG}.xml -r
 }
 
 function save_temp_log()
@@ -190,7 +194,7 @@ function save_temp_log()
     LOG_PATH="$CURR_PATH/$ROOT_DIR"
     cd $LOG_PATH
 
-    LOG_DIR="RK3288LIV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
+    LOG_DIR="${OFFICIAL_VER}"_"$DATE"_log
     echo "[ADV] mkdir $LOG_DIR"
     mkdir $LOG_DIR
 
@@ -304,7 +308,7 @@ function prepare_images()
 {
     cd $CURR_PATH
 
-    IMAGE_DIR="RK3288LIV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
+    IMAGE_DIR="${OFFICIAL_VER}"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
 	mkdir -p $IMAGE_DIR/rockdev/image
@@ -313,17 +317,19 @@ function prepare_images()
 
     cp -aRL $CURR_PATH/$ROOT_DIR/rockdev/* $IMAGE_DIR/rockdev/image
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
-    tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
-    generate_md5 ${IMAGE_DIR}.tgz
+    tar czf ${IMAGE_DIR}.img.tgz $IMAGE_DIR
+    generate_md5 ${IMAGE_DIR}.img.tgz
     #rm -rf $IMAGE_DIR
 }
 
 function copy_image_to_storage()
 {
     echo "[ADV] copy images to $OUTPUT_DIR"
+    cd $CURR_PATH
+    IMAGE_DIR="${OFFICIAL_VER}"_"$DATE"
 	if [ $isFirstMachine == "true" ]; then
 	    generate_manifest
-	    mv V${RELEASE_VERSION}.xml $OUTPUT_DIR
+	    mv ${VER_TAG}.xml $OUTPUT_DIR
 	fi
 
     generate_csv ${IMAGE_DIR}.tgz

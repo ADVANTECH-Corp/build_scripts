@@ -14,13 +14,13 @@ echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
 #echo "[ADV] SCRIPT_XML = ${SCRIPT_XML}"
 echo "[ADV] KERNEL_CONFIG = ${KERNEL_CONFIG}"
 echo "[ADV] KERNEL_DTB = ${KERNEL_DTB}"
-VER_TAG="${VER_PREFIX}AB"$(echo $RELEASE_VERSION | sed 's/[.]//')
+VER_TAG="${VER_PREFIX}3399LB"$(echo $RELEASE_VERSION | sed 's/[.]//')
 echo "[ADV] VER_TAG = $VER_TAG"
 CURR_PATH="$PWD"
-ROOT_DIR="${VER_PREFIX}AB${RELEASE_VERSION}"_"$DATE"
+ROOT_DIR="${VER_PREFIX}3399LB${RELEASE_VERSION}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
 
-#-- Advantech/rk3399 gitlab debian source code repository
+#-- Advantech/rk3399 github debian source code repository
 echo "[ADV-ROOT]  $ROOT_DIR"
 echo "[ADV] ANDROID_KERNEL_PATH = $CURR_PATH/$ROOT_DIR/kernel"
 echo "[ADV] ANDROID_UBOOT_PATH = $CURR_PATH/$ROOT_DIR/u-boot"
@@ -258,14 +258,16 @@ function building()
     if [ "$1" == "uboot" ]; then
         echo "[ADV] build uboot"
 		cd $CURR_PATH/$ROOT_DIR/u-boot
-		make clean
+		#make clean
 		./make.sh evb-rk3399 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 	elif [ "$1" == "kernel" ]; then
 		echo "[ADV] build kernel  = $KERNEL_CONFIG"
+        echo "[ADV] build kernel dtb  = $KERNEL_DTB"
 		cd $CURR_PATH/$ROOT_DIR/kernel
-		make distclean
+		#make distclean
 		make ARCH=arm64 $KERNEL_CONFIG
 		make ARCH=arm64 $KERNEL_DTB -j16 >> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
+        echo "[ADV] build kernel Finished"
     elif [ "$1" == "recovery" ]; then
 		echo "[ADV] build recovery"
 		cd $CURR_PATH/$ROOT_DIR
@@ -285,24 +287,30 @@ function building()
         sudo dpkg -i ubuntu-build-service/packages/*
         sudo apt-get install -f
         echo "[ADV]-------------FOR armhf  32-----------"
-        echo "[ADV] armhf mk-base-debian.sh"
-        RELEASE=stretch TARGET=desktop ARCH=armhf ./mk-base-debian.sh
-        echo "[ADV] mk-rootfs-stretch.sh"
-        VERSION=debug ARCH=armhf ./mk-rootfs-stretch.sh
+        #echo "[ADV] armhf mk-base-debian.sh"
+        #RELEASE=stretch TARGET=desktop ARCH=armhf ./mk-base-debian.sh
+        #echo "[ADV] mk-rootfs-stretch.sh"
+        #VERSION=debug ARCH=armhf ./mk-rootfs-stretch.sh
         #echo "[ADV] mk-image.sh armhf"
+        #./mk-image.sh
+        #echo "[ADV]---------------------------------"
+        echo "[ADV]-------------FOR arm64  64-----------"
+        echo "[ADV] arm64 mk-base-debian.sh"
+        RELEASE=stretch TARGET=desktop ARCH=arm64 ./mk-base-debian.sh
+        echo "[ADV] mk-rootfs-stretch-arm64.sh"
+        VERSION=debug ARCH=arm64 ./mk-rootfs-stretch-arm64.sh
+        echo "[ADV] add advantech "
+        cp -aRL $CURR_PATH/$ROOT_DIR/rootfs/adv/* $CURR_PATH/$ROOT_DIR/rootfs
+        ./mk-adv.sh ARCH=arm64
+        ./mk-adv-module.sh ARCH=arm64
+        ./mk-adv-word.sh ARCH=arm64
+	echo "[ADV] mk-image.sh arm64 "
         ./mk-image.sh
-#		echo "[ADV]---------------------------------"
-#		echo "[ADV]-------------FOR arm64  64-----------"
-#        echo "[ADV] arm64 mk-base-debian.sh"
-#        RELEASE=stretch TARGET=desktop ARCH=arm64 ./mk-base-debian.sh
-#        echo "[ADV] mk-rootfs-stretch-arm64.sh"
-#        VERSION=debug ARCH=arm64 ./mk-rootfs-stretch-arm64.sh
-#		echo "[ADV] mk-image.sh arm64 "
-#        ./mk-image.sh
-#		echo "[ADV]---------------------------------"
-	cd $CURR_PATH/$ROOT_DIR 
-	./build.sh BoardConfig_debian.mk
-	./mkfirmware.sh
+        sudo tar cvf binary.tgz $CURR_PATH/$ROOT_DIR/rootfs/binary
+	echo "[ADV]---------------------------------"
+    	cd $CURR_PATH/$ROOT_DIR 
+    	./build.sh BoardConfig_debian.mk
+	    ./mkfirmware.sh
 
 
     else
@@ -326,7 +334,7 @@ function build_linux_images()
 	#set_environment
 	building uboot
 	building kernel
-	building recovery
+#	building recovery
 	building buildroot
 	building debian
 
@@ -344,7 +352,7 @@ function prepare_images()
 
     # Copy image files to image directory
 
-    cp -aRL $CURR_PATH/$ROOT_DIR/u-boot/*.bin $IMAGE_DIR
+    cp -aRL $CURR_PATH/$ROOT_DIR/u-boot/rk*.bin $IMAGE_DIR
 	cp -aRL $CURR_PATH/$ROOT_DIR/u-boot/trust.img $IMAGE_DIR
 	cp -aRL $CURR_PATH/$ROOT_DIR/u-boot/uboot.img $IMAGE_DIR
 	cp -aRL $CURR_PATH/$ROOT_DIR/kernel/boot.img $IMAGE_DIR
@@ -353,6 +361,9 @@ function prepare_images()
     cp -aRL $CURR_PATH/$ROOT_DIR/out/linaro-rootfs.img $IMAGE_DIR
     cp -aRL $CURR_PATH/$ROOT_DIR/rockdev/oem* $IMAGE_DIR
     cp -aRL $CURR_PATH/$ROOT_DIR/device/rockchip/rk3399/parameter* $IMAGE_DIR
+    cp -aRL $CURR_PATH/$ROOT_DIR/rootfs/linaro-rootfs.img $IMAGE_DIR
+	cp -aRL $CURR_PATH/out/u1604* $IMAGE_DIR
+	cp -aRL $CURR_PATH/u1604* $IMAGE_DIR
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}.tgz
@@ -370,6 +381,26 @@ function copy_image_to_storage()
     mv -f *.md5 $OUTPUT_DIR
 
 }
+
+# u1604_aarch64_release_20190813.img
+
+function get_ubuntu_rootfs()
+{
+	cd $CURR_PATH
+    echo "[ADV] get_ubuntu_rootfs"
+    mkdir out
+    pftp -v -n ${FTP_SITE} << EOF
+user "ftpuser" "P@ssw0rd"
+cd "Image/RK3399_Ubuntu"
+prompt
+binary
+ls
+mget u1604_aarch64_release_20190813.img
+close
+quit
+EOF
+}
+
 # ================
 #  Main procedure 
 # ================
@@ -395,6 +426,8 @@ for NEW_MACHINE in $MACHINE_LIST
 do
 echo "[ADV] NEW_MACHINE = $NEW_MACHINE"
 	build_linux_images
+echo "[ADV] get ubuntu rootfs"
+	get_ubuntu_rootfs
 echo "[ADV] prepare_images"
 	prepare_images
 echo "[ADV] copy_image_to_storage"
@@ -402,7 +435,7 @@ echo "[ADV] copy_image_to_storage"
 	save_temp_log
 done
 
-fi
+
 cd $CURR_PATH
 #rm -rf $ROOT_DIR
 

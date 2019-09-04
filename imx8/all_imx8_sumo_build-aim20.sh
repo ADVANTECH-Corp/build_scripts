@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ "x${Release_Note}" == "x" ]; then
+if [ "x${ALSO_BUILD_OFFICIAL_IMAGE}" != "x" ]; then
 	# Dailybuild
 	BUILD_SH="./imx8_sumo_dailybuild-aim20.sh"
 	VERSION_NUM=${RELEASE_VERSION}

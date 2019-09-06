@@ -382,7 +382,7 @@ function copy_image_to_storage()
 
     mv -f ${IMAGE_DIR}.tgz $OUTPUT_DIR
     mv -f *.md5 $OUTPUT_DIR
-
+    sudo mv -f $CURR_PATH/$ROOT_DIR/rootfs/binary.tgz $OUTPUT_DIR
 }
 # ================
 #  Main procedure 

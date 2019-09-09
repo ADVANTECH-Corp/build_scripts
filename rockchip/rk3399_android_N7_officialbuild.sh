@@ -40,6 +40,7 @@ echo "[ADV] VER_TAG = $VER_TAG"
 echo "[ADV] isFirstMachine = $isFirstMachine"
 CURR_PATH="$PWD"
 ROOT_DIR="${VER_TAG}"_"$DATE"
+SUB_DIR="android"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
 
 #-- Advantech/rk3399 gitlab android source code repository
@@ -73,7 +74,7 @@ function check_tag_and_checkout()
 {
     for TEMP_PATH in ${ADV_PATH}
     do
-	    cd $CURR_PATH/$ROOT_DIR/
+	    cd $CURR_PATH/$ROOT_DIR/$SUB_DIR
         if [ -d "${TEMP_PATH}" ];then
             cd ${TEMP_PATH}
             RESPOSITORY_TAG=`git tag | grep $VER_TAG`
@@ -97,7 +98,7 @@ function auto_add_tag()
 {
     for TEMP_PATH in ${ADV_PATH}
     do
-	    cd $CURR_PATH/$ROOT_DIR/
+	    cd $CURR_PATH/$ROOT_DIR/$SUB_DIR
         if [ -d "${TEMP_PATH}" ];then
             cd ${TEMP_PATH}
             HEAD_HASH_ID=`git rev-parse HEAD`
@@ -147,7 +148,7 @@ function create_xml_and_commit()
 function uboot_version_commit()
 {
     cd $CURR_PATH
-    cd $ROOT_DIR/u-boot
+    cd $ROOT_DIR/$SUB_DIR/u-boot
 
     # push to github
     REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
@@ -201,7 +202,7 @@ END_OF_CSV
 
     for TEMP_PATH in ${ADV_PATH}
     do
-        HASH_ANDROID=$(cd $CURR_PATH/$ROOT_DIR/$TEMP_PATH && git rev-parse --short HEAD)
+        HASH_ANDROID=$(cd $CURR_PATH/$ROOT_DIR/$SUB_DIR/$TEMP_PATH && git rev-parse --short HEAD)
 	    echo "${TEMP_PATH}, ${HASH_ANDROID}" >> ${FILENAME%.*}.csv
     done
 	
@@ -216,7 +217,7 @@ function generate_manifest()
 
 function save_temp_log()
 {
-    LOG_PATH="$CURR_PATH/$ROOT_DIR"
+    LOG_PATH="$CURR_PATH/$ROOT_DIR/$SUB_DIR"
     cd $LOG_PATH
 
     LOG_DIR="${VER_TAG}"_"$NEW_MACHINE"_"$DATE"_log
@@ -255,7 +256,7 @@ function get_source_code()
 
     for TEMP_PATH in ${ADV_PATH}
     do
-        cd $CURR_PATH/$ROOT_DIR/
+        cd $CURR_PATH/$ROOT_DIR/$SUB_DIR/
         if [ -d "${TEMP_PATH}" ];then
             cd ${TEMP_PATH}
 		    REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
@@ -279,20 +280,20 @@ function building()
 
     if [ "$1" == "uboot" ]; then
         echo "[ADV] build uboot UBOOT_DEFCONFIG=$UBOOT_DEFCONFIG"
-        cd $CURR_PATH/$ROOT_DIR/u-boot
+        cd $CURR_PATH/$ROOT_DIR/$SUB_DIR/u-boot
         make clean
         echo " V$RELEASE_VERSION" > .scmversion
         make $UBOOT_DEFCONFIG >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_UBOOT
         make ARCHV=aarch64 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_UBOOT
 	elif [ "$1" == "kernel" ]; then
         echo "[ADV] build kernel KERNEL_DEFCONFIG = $KERNEL_DEFCONFIG KERNEL_DTB=$KERNEL_DTB"
-        cd $CURR_PATH/$ROOT_DIR/kernel
+        cd $CURR_PATH/$ROOT_DIR/$SUB_DIR/kernel
         make distclean
         make ARCH=arm64 $KERNEL_DEFCONFIG >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL
         make ARCH=arm64 $KERNEL_DTB -j8 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL
     elif [ "$1" == "android" ]; then
         echo "[ADV] build android ANDROID_PRODUCT=$ANDROID_PRODUCT"
-        cd $CURR_PATH/$ROOT_DIR
+        cd $CURR_PATH/$ROOT_DIR/$SUB_DIR/
         source build/envsetup.sh
         lunch $ANDROID_PRODUCT
         make clean
@@ -306,7 +307,7 @@ function building()
 function set_environment()
 {
     echo "[ADV] set environment"
-    cd $CURR_PATH/$ROOT_DIR
+    cd $CURR_PATH/$ROOT_DIR/$SUB_DIR/
     export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
     export PATH=$JAVA_HOME/bin:$PATH
     export CLASSPATH=.:$JAVA_HOME/lib:$JAVA_HOME/lib/tools.jar
@@ -314,7 +315,7 @@ function set_environment()
 
 function build_android_images()
 {
-    cd $CURR_PATH/$ROOT_DIR
+    cd $CURR_PATH/$ROOT_DIR/$SUB_DIR/
 
     set_environment
     building uboot
@@ -326,10 +327,10 @@ function build_android_images()
 function build_android_OTA_images()
 {
     LOG_FILE_OTA="$NEW_MACHINE"_Build_OTA.log
-    cd $CURR_PATH/$ROOT_DIR
+    cd $CURR_PATH/$ROOT_DIR/$SUB_DIR/
     set_environment
     ./mkimage.sh ota
-    make -j4 otapackage 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE_OTA
+    make -j4 otapackage 2>> $CURR_PATH/$ROOT_DIR/$SUB_DIR/$LOG_FILE_OTA
 }
 
 function prepare_images()
@@ -353,8 +354,8 @@ function prepare_images()
     mkdir -p $IMAGE_DIR/rockdev/image
 
     # Copy image files to image directory
-    cp -aRL $CURR_PATH/$ROOT_DIR/rockdev/Image-$TARGET_PRODUCT/* $IMAGE_DIR/rockdev/image
-    cp -a $CURR_PATH/$UPDATE_TOOL_PATH/*.img $IMAGE_DIR/rockdev
+    cp -aRL $CURR_PATH/$ROOT_DIR/$SUB_DIR/rockdev/Image-$TARGET_PRODUCT/* $IMAGE_DIR/rockdev/image
+    # cp -a $CURR_PATH/$UPDATE_TOOL_PATH/*.img $IMAGE_DIR/rockdev
 
     # OTA images
 #    build_android_OTA_images

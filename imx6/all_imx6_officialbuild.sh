@@ -57,7 +57,7 @@ if [ $RSB4411A1 == true ]; then
 fi
 if [ $RSB4411A1_SOLO == true ]; then
         PRODUCT="rsb4411a1-solo"
-        ./imx6_officialbuild.sh rsb4411a1-solo 4411A1LIV"$VERSION_NUM" 2G x11
+        ./imx6_officialbuild.sh rsb4411a1-solo 4411A1LIV"$VERSION_NUM" 1G-2G x11
         [ "$?" -ne 0 ] && exit 1
 fi
 if [ $EBCJF02A1 == true ]; then

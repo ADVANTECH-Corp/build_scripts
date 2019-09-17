@@ -106,9 +106,10 @@ function uboot_version_commit()
 	cd $ROOT_DIR/u-boot
 
 	# push to github
+	REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
 	git add .scmversion -f
 	git commit -m "[Official Release] ${VER_TAG}"
-	git push
+	git push $REMOTE_SERVER local:$BSP_BRANCH
 	cd $CURR_PATH
 
 }
@@ -335,7 +336,7 @@ function copy_image_to_storage()
     generate_csv ${IMAGE_DIR}.tgz
     mv ${IMAGE_DIR}.csv $OUTPUT_DIR
 
-    mv -f ${IMAGE_DIR}.tgz $OUTPUT_DIR
+    mv -f ${IMAGE_DIR}.img.tgz $OUTPUT_DIR
     mv -f *.md5 $OUTPUT_DIR
 
 }

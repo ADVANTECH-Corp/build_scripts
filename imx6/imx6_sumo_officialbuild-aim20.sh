@@ -163,7 +163,7 @@ function check_tag_and_replace()
         HASH_CSV=$3
 
         HASH_ID=`git ls-remote $REMOTE_URL $VER_TAG | awk '{print $1}'`
-        if [ "$HASH_ID" != "" ]; then
+        if [ "x$HASH_ID" != "x" ]; then
                 echo "[ADV] $REMOTE_URL has been tagged ,ID is $HASH_ID"
         else
 		HASH_ID=$HASH_CSV
@@ -179,7 +179,7 @@ function commit_tag_and_rollback()
         if [ -d "$ROOT_DIR/$FILE_PATH" ];then
                 cd $ROOT_DIR/$FILE_PATH
                 META_TAG=`git tag | grep $VER_TAG`
-                if [ "$META_TAG" != "" ]; then
+                if [ "x$META_TAG" != "x" ]; then
                         echo "[ADV] meta-advantech has been tagged ($VER_TAG). Nothing to do."
                 else
                         echo "[ADV] create tag $VER_TAG"
@@ -217,7 +217,7 @@ function commit_tag_and_package()
 
         # Add tag
         HASH_ID=`git tag -v $VER_TAG | grep object | cut -d ' ' -f 2`
-        if [ $HASH_ID != "" ] ; then
+        if [ "x$HASH_ID" != "x" ] ; then
                 echo "[ADV] tag exists! There is no need to add tag"
         else
                 echo "[ADV] Add tag $VER_TAG"
@@ -312,9 +312,9 @@ function building()
         LOG_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"_log
 
         if [ "$1" == "populate_sdk" ]; then
-                if [ "$DEPLOY_IMAGE_NAME" == "fsl-image-validation-imx" ]; then
-                        echo "[ADV] bitbake meta-toolchain"
-                        bitbake meta-toolchain
+                if [ "$DEPLOY_IMAGE_NAME" == "fsl-image-qt5" ]; then
+                        echo "[ADV] bitbake meta-toolchain-qt5"
+                        bitbake meta-toolchain-qt5
                 else
                         echo "[ADV] bitbake $DEPLOY_IMAGE_NAME -c populate_sdk"
                         bitbake $DEPLOY_IMAGE_NAME -c populate_sdk
@@ -356,7 +356,7 @@ function build_yocto_sdk()
 {
         set_environment sdk
 
-        # Build imx6qrom7420a1 full image first
+        # Build default full image first
         ## building $DEPLOY_IMAGE_NAME
 
         # Generate sdk image
@@ -370,7 +370,7 @@ function prepare_images()
         IMAGE_TYPE=$1
         OUTPUT_DIR=$2
 	echo "[ADV] prepare $IMAGE_TYPE image"
-        if [ "$OUTPUT_DIR" == "" ]; then
+        if [ "x$OUTPUT_DIR" == "x" ]; then
                 echo "[ADV] prepare_images: invalid parameter #2!"
                 exit 1;
         else
@@ -411,11 +411,11 @@ function copy_image_to_storage()
 	case $1 in
 		"sdk")
 			mv -f ${SDK_DIR}.tgz $STORAGE_PATH
-		;;
+			;;
 		*)
-		echo "[ADV] copy_image_to_storage: invalid parameter #1!"
-		exit 1;
-		;;
+			echo "[ADV] copy_image_to_storage: invalid parameter #1!"
+			exit 1;
+			;;
 	esac
 
 	mv -f *.md5 $STORAGE_PATH

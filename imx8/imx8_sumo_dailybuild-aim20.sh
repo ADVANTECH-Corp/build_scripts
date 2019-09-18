@@ -29,8 +29,6 @@ echo "[ADV] KERNEL_URL = ${KERNEL_URL}"
 echo "[ADV] KERNEL_BRANCH = ${KERNEL_BRANCH}"
 echo "[ADV] KERNEL_PATH = ${KERNEL_PATH}"
 
-SDCARD_SIZE=7200
-
 VER_TAG="${VER_PREFIX}LBV${RELEASE_VERSION}"
 
 CURR_PATH="$PWD"
@@ -301,13 +299,14 @@ function prepare_images()
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
                         bunzip2 -f $DEPLOY_IMAGE_PATH/$FILE_NAME.bz2
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
-			cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
                         ;;
-		"ota")
-                        FILE_NAME=${OTA_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
-                        cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
-			cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
-			generate_OTA_update_package
+                "flash")
+                        mkdir $OUTPUT_DIR/image $OUTPUT_DIR/mk_inand
+                        # normal image
+                        FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
+                        cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR/image
+                        chmod 755 $CURR_PATH/mksd-linux.sh
+                        sudo cp $CURR_PATH/mksd-linux.sh $OUTPUT_DIR/mk_inand/
                         ;;
                 *)
                         echo "[ADV] prepare_images: invalid parameter #1!"
@@ -317,10 +316,10 @@ function prepare_images()
 
         # Package image file
         case $IMAGE_TYPE in
-                "modules" | "misc")
+                "flash" | "modules" | "misc")
                         echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
-			tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
-			generate_md5 ${OUTPUT_DIR}.tgz
+                        tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
+                        generate_md5 ${OUTPUT_DIR}.tgz
                         ;;
                 *) # Normal images
                         echo "[ADV] creating ${OUTPUT_DIR}.img.gz ..."
@@ -331,22 +330,6 @@ function prepare_images()
         rm -rf $OUTPUT_DIR
 }
 
-function generate_OTA_update_package()
-{
-	echo "[ADV] generate OTA update package"
-	cp ota-package.sh $DEPLOY_IMAGE_PATH
-	cd $DEPLOY_IMAGE_PATH
-	cp zImage-${KERNEL_CPU_TYPE}*.dtb `ls zImage-${KERNEL_CPU_TYPE}*.dtb | cut -d '-' -f 2-`	
-	echo "[ADV] creating ${IMAGE_DIR}_kernel.zip for OTA package ..."
-	./ota-package.sh -k zImage -d ${KERNEL_CPU_TYPE}*.dtb -o update_${IMAGE_DIR}_kernel.zip
-	echo "[ADV] creating ${IMAGE_DIR}_rootfs.zip for OTA package ..."
-	./ota-package.sh -r $OTA_IMAGE_NAME-${KERNEL_CPU_TYPE}${PRODUCT}.ext4 -o update_${IMAGE_DIR}_rootfs.zip
-	echo "[ADV] creating ${IMAGE_DIR}_kernel_rootfs.zip for OTA package ..."
-	./ota-package.sh -k zImage -d ${KERNEL_CPU_TYPE}*.dtb -r $OTA_IMAGE_NAME-${KERNEL_CPU_TYPE}${PRODUCT}.ext4 -o update_${IMAGE_DIR}_kernel_rootfs.zip
-	mv update*.zip $CURR_PATH
-	cd $CURR_PATH	
-}
-
 function copy_image_to_storage()
 {
 	echo "[ADV] copy $1 images to $STORAGE_PATH"
@@ -354,6 +337,9 @@ function copy_image_to_storage()
 	case $1 in
 		"bsp")
 			mv -f ${ROOT_DIR}.tgz $STORAGE_PATH
+		;;
+		"flash")
+			mv -f ${FLASH_DIR}.tgz $STORAGE_PATH
 		;;
 		"misc")
 			mv -f ${MISC_DIR}.tgz $STORAGE_PATH
@@ -365,12 +351,6 @@ function copy_image_to_storage()
 			generate_csv $IMAGE_DIR.img.gz
 			mv ${IMAGE_DIR}.img.csv $STORAGE_PATH
 			mv -f $IMAGE_DIR.img.gz $STORAGE_PATH
-		;;
-		"ota")
-			generate_csv $OTA_IMAGE_DIR.img.gz
-			mv ${OTA_IMAGE_DIR}.img.csv $STORAGE_PATH
-			mv -f $OTA_IMAGE_DIR.img.gz $STORAGE_PATH
-			mv -f update*.zip $STORAGE_PATH
 		;;
 		*)
 		echo "[ADV] copy_image_to_storage: invalid parameter #1!"
@@ -387,7 +367,7 @@ function copy_image_to_storage()
 define_cpu_type $PRODUCT
 
 if [ "$PRODUCT" == "$VER_PREFIX" ]; then
-	mkdir $ROOT_DIR
+        mkdir $ROOT_DIR
         get_source_code
 
         # BSP source code
@@ -395,7 +375,7 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
         tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
         generate_md5 $ROOT_DIR.tgz
 
-	copy_image_to_storage bsp
+        copy_image_to_storage bsp
 
 else #"$PRODUCT" != "$VER_PREFIX"
         if [ ! -e $ROOT_DIR ]; then
@@ -409,11 +389,15 @@ else #"$PRODUCT" != "$VER_PREFIX"
         build_yocto_images
 
         echo "[ADV] generate normal image"
-	DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
-
+        DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
         IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"
         prepare_images normal $IMAGE_DIR
         copy_image_to_storage normal
+
+        echo "[ADV] create flash tool"
+        FLASH_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_flash_tool
+        prepare_images flash $FLASH_DIR
+        copy_image_to_storage flash
 
         echo "[ADV] create misc files"
         DEPLOY_MISC_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
@@ -427,7 +411,7 @@ else #"$PRODUCT" != "$VER_PREFIX"
         prepare_images modules $MODULES_DIR
         copy_image_to_storage modules
 
-	save_temp_log
+        save_temp_log
 fi
 
 #cd $CURR_PATH

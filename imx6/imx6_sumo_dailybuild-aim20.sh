@@ -267,21 +267,6 @@ function build_yocto_images()
         building $DEPLOY_IMAGE_NAME
 }
 
-function rebuild_u-boot()
-{
-        #rebuild u-boot because of different memory
-        echo "[ADV] rebuild u-boot for DDR $MEMORY"
-	echo "[ADV] rebuild u-boot PRE_MEMORY $PRE_MEMORY"
-	#sed -i "s/${PRE_MEMORY}/${MEMORY}/g" $ROOT_DIR/$META_ADVANTECH_PATH/meta-fsl-imx6/conf/machine/${KERNEL_CPU_TYPE}${PRODUCT}.conf
-        cd  $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR
-        building u-boot-imx cleansstate
-        building u-boot-imx
-	ln -sf ${DEPLOY_IMAGE_PATH}/u-boot-${MEMORY}-*.imx ${DEPLOY_IMAGE_PATH}/u-boot-${KERNEL_CPU_TYPE}${PRODUCT}.imx
-        bitbake $DEPLOY_IMAGE_NAME -c rootfs -f
-        bitbake $DEPLOY_IMAGE_NAME -c image_sdcard -f
-        cd  $CURR_PATH
-}
-
 function prepare_images()
 {
         cd $CURR_PATH
@@ -313,18 +298,31 @@ function prepare_images()
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
                         bunzip2 -f $DEPLOY_IMAGE_PATH/$FILE_NAME.bz2
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
-                        cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
                         ;;
-                "ota")
-                        FILE_NAME=${OTA_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
-                        cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
-                        cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
-                        generate_OTA_update_package
+                "flash")
+                        mkdir $OUTPUT_DIR/image $OUTPUT_DIR/mk_inand $OUTPUT_DIR/recovery
+                        # normal image
+                        FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
+                        cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR/image
+                        chmod 755 $CURR_PATH/mksd-linux.sh
+                        sudo cp $CURR_PATH/mksd-linux.sh $OUTPUT_DIR/mk_inand/
+                        # SPL
+                        while [ "$MEMORY" != "$PRE_MEMORY" ]
+                        do
+                                FILE_NAME="SPL-"${KERNEL_CPU_TYPE}${PRODUCT}"-"${MEMORY}
+                                cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR/image
+
+                                PRE_MEMORY=$MEMORY
+                                MEMORY_COUT=$(($MEMORY_COUT+1))
+                                MEMORY=`echo $MEMORY_TYPE | cut -d '-' -f $MEMORY_COUT`
+                                if [ "$MEMORY" == "" ]; then
+                                        break
+                                fi
+                        done
+                        chmod 755 $CURR_PATH/mkspi-advboot.sh
+                        sudo cp $CURR_PATH/mkspi-advboot.sh $OUTPUT_DIR/recovery/
                         ;;
                 "eng")
-                        FILE_NAME="SPL-"${KERNEL_CPU_TYPE}${PRODUCT}"-"${MEMORY}
-                        echo "[ADV] Copy eng $FILE_NAME"
-                        cp $DEPLOY_IMAGE_PATH/$FILE_NAME $STORAGE_PATH
                         FILE_NAME=`readlink $DEPLOY_IMAGE_PATH/"${DEPLOY_IMAGE_NAME}-${KERNEL_CPU_TYPE}${PRODUCT}.sdcard" | cut -d '.' -f 1`"*.rootfs.eng.sdcard"
                         echo "[ADV] Copy eng $FILE_NAME"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
@@ -337,7 +335,7 @@ function prepare_images()
 
         # Package image file
         case $IMAGE_TYPE in
-                "modules" | "misc")
+                "flash" | "modules" | "misc")
                         echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
                         tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
                         generate_md5 ${OUTPUT_DIR}.tgz
@@ -351,22 +349,6 @@ function prepare_images()
         rm -rf $OUTPUT_DIR
 }
 
-function generate_OTA_update_package()
-{
-	echo "[ADV] generate OTA update package"
-	cp ota-package.sh $DEPLOY_IMAGE_PATH
-	cd $DEPLOY_IMAGE_PATH
-	cp zImage-${KERNEL_CPU_TYPE}*.dtb `ls zImage-${KERNEL_CPU_TYPE}*.dtb | cut -d '-' -f 2-`	
-	echo "[ADV] creating ${IMAGE_DIR}_kernel.zip for OTA package ..."
-	./ota-package.sh -k zImage -d ${KERNEL_CPU_TYPE}*.dtb -o update_${IMAGE_DIR}_kernel.zip
-	echo "[ADV] creating ${IMAGE_DIR}_rootfs.zip for OTA package ..."
-	./ota-package.sh -r $OTA_IMAGE_NAME-${KERNEL_CPU_TYPE}${PRODUCT}.ext4 -o update_${IMAGE_DIR}_rootfs.zip
-	echo "[ADV] creating ${IMAGE_DIR}_kernel_rootfs.zip for OTA package ..."
-	./ota-package.sh -k zImage -d ${KERNEL_CPU_TYPE}*.dtb -r $OTA_IMAGE_NAME-${KERNEL_CPU_TYPE}${PRODUCT}.ext4 -o update_${IMAGE_DIR}_kernel_rootfs.zip
-	mv update*.zip $CURR_PATH
-	cd $CURR_PATH	
-}
-
 function copy_image_to_storage()
 {
 	echo "[ADV] copy $1 images to $STORAGE_PATH"
@@ -378,6 +360,9 @@ function copy_image_to_storage()
 		"eng")
 			mv -f ${ENG_IMAGE_DIR}.img.gz $STORAGE_PATH
 		;;
+		"flash")
+			mv -f ${FLASH_DIR}.tgz $STORAGE_PATH
+		;;
 		"misc")
 			mv -f ${MISC_DIR}.tgz $STORAGE_PATH
 		;;
@@ -388,12 +373,6 @@ function copy_image_to_storage()
 			generate_csv $IMAGE_DIR.img.gz
 			mv ${IMAGE_DIR}.img.csv $STORAGE_PATH
 			mv -f $IMAGE_DIR.img.gz $STORAGE_PATH
-		;;
-		"ota")
-			generate_csv $OTA_IMAGE_DIR.img.gz
-			mv ${OTA_IMAGE_DIR}.img.csv $STORAGE_PATH
-			mv -f $OTA_IMAGE_DIR.img.gz $STORAGE_PATH
-			mv -f update*.zip $STORAGE_PATH
 		;;
 		*)
 		echo "[ADV] copy_image_to_storage: invalid parameter #1!"
@@ -433,10 +412,14 @@ else #"$PRODUCT" != "$VER_PREFIX"
 
         echo "[ADV] generate normal image"
         DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
-
         IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"
         prepare_images normal $IMAGE_DIR
         copy_image_to_storage normal
+
+        echo "[ADV] create flash tool"
+        FLASH_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_flash_tool
+        prepare_images flash $FLASH_DIR
+        copy_image_to_storage flash
 
         echo "[ADV] create misc files"
         DEPLOY_MISC_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
@@ -450,25 +433,10 @@ else #"$PRODUCT" != "$VER_PREFIX"
         prepare_images modules $MODULES_DIR
         copy_image_to_storage modules
 
-        while [ "$MEMORY" != "$PRE_MEMORY" ]
-        do
-                if [ "$PRE_MEMORY" != "" ]; then
-                        rebuild_u-boot
-                fi
-
-                #ENG image
-                echo "[ADV] generate $MEMORY eng image"
-                ENG_IMAGE_DIR="$IMAGE_DIR"_"$MEMORY"_eng
-                prepare_images eng $ENG_IMAGE_DIR
-                copy_image_to_storage eng
-
-                PRE_MEMORY=$MEMORY
-                MEMORY_COUT=$(($MEMORY_COUT+1))
-                MEMORY=`echo $MEMORY_TYPE | cut -d '-' -f $MEMORY_COUT`
-                if [ "$MEMORY" == "" ]; then
-                        break
-                fi
-        done
+        echo "[ADV] generate $MEMORY eng image"
+        ENG_IMAGE_DIR="$IMAGE_DIR"_"$MEMORY"_eng
+        prepare_images eng $ENG_IMAGE_DIR
+        copy_image_to_storage eng
 
         save_temp_log
 fi

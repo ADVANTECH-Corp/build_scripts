@@ -18,9 +18,9 @@ echo "[ADV] FIRST_BUILD = ${FIRST_BUILD}"
 
 CURR_PATH="$PWD"
 
-#ROOT_DIR="${VER_PREFIX}${AIM_VERSION}LBV${RELEASE_VERSION}"_"$DATE"
 ROOT_DIR="T"
 BSP_BAK="${VER_PREFIX}${AIM_VERSION}LBV${RELEASE_VERSION}"_"$DATE"
+#ROOT_DIR="${VER_PREFIX}${AIM_VERSION}LBV${RELEASE_VERSION}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
 
 echo "[ADV] CURR_PATH = ${CURR_PATH}"
@@ -151,25 +151,27 @@ function remove_version()
 
 function auto_add_tag()
 {
-        FILE_PATH=$1
-        DIR=`ls $FILE_PATH`
-        if [ -d "$FILE_PATH/$DIR/git" ];then
-                cd $FILE_PATH/$DIR/git
-                HEAD_HASH_ID=`git rev-parse HEAD`
-                TAG_HASH_ID=`git tag -v $VER_TAG | grep object | cut -d ' ' -f 2`
-                if [ "$HEAD_HASH_ID" == "$TAG_HASH_ID" ]; then
-                        echo "[ADV] tag exists! There is no need to add tag"
-                else
-                        echo "[ADV] Add tag $VER_TAG"
-                        REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
-                        git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
-                        git push $REMOTE_SERVER $VER_TAG
-                fi
-                cd $CURR_PATH
+        REMOTE_URL=$1
+        META_BRANCH=$2
+
+		# Get source
+        git clone $REMOTE_URL
+        SOURCE_DIR=${REMOTE_URL##*/}
+        SOURCE_DIR=${SOURCE_DIR/.git}
+        cd $SOURCE_DIR
+        git checkout $META_BRANCH
+
+		HEAD_HASH_ID=`git rev-parse HEAD`
+        TAG_HASH_ID=`git tag -v $VER_TAG | grep object | cut -d ' ' -f 2`
+        if [ "$HEAD_HASH_ID" == "$TAG_HASH_ID" ]; then
+                echo "[ADV] tag exists! There is no need to add tag"
         else
-                echo "[ADV] Directory $FILE_PATH doesn't exist"
-                exit 1
+                echo "[ADV] Add tag $VER_TAG"
+                REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+                git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
+                git push $REMOTE_SERVER $VER_TAG
         fi
+        cd $CURR_PATH
 }
 
 function commit_tag_and_rollback()
@@ -186,13 +188,9 @@ function commit_tag_and_rollback()
                         REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
                         git add .
                         git commit -m "[Official Release] $VER_TAG"
+						git push
                         git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
-                        git push --follow-tags
-                        # Rollback
-                        HEAD_HASH_ID=`git rev-parse HEAD`
-                        git revert $HEAD_HASH_ID --no-edit
-                        git push
-                        git reset --hard $HEAD_HASH_ID
+						git push $REMOTE_SERVER $VER_TAG
                 fi
                 cd $CURR_PATH
         else
@@ -263,10 +261,6 @@ function save_temp_log()
     tar czf $LOG_DIR.tgz $LOG_DIR
     generate_md5 $LOG_DIR.tgz
 
-# for debug
-    tar czf qtwebengine.tgz $BUILD_TMP_DIR/work/armv7ahf-neon-linux-gnueabi/qtwebengine
-    mv -f qtwebengine.tgz $OUTPUT_DIR
-
     mv -f $LOG_DIR.tgz $OUTPUT_DIR
     mv -f $LOG_DIR.tgz.md5 $OUTPUT_DIR
 
@@ -311,9 +305,7 @@ function build_yocto_images()
         echo "[ADV] Fisrt build: OLD_MACHINE=$OLD_MACHINE"
         FIRST_BUILD="0"
     fi
-
-    building qtwebengine
-
+    
     building u-boot-ti-staging cleansstate
     building u-boot-ti-staging
 
@@ -395,6 +387,7 @@ function prepare_images()
 function copy_image_to_storage()
 {
     echo "[ADV] copy BSP to $OUTPUT_DIR"
+#     mv -f ${ROOT_DIR}.tgz $OUTPUT_DIR
     mv -f ${BSP_BAK}.tgz $OUTPUT_DIR
 
     echo "[ADV] copy all images to $OUTPUT_DIR"
@@ -476,8 +469,8 @@ if [ -z "$EXISTED_VERSION" ] ; then
     # Add git tag
     echo "[ADV] Add tag"
     commit_tag_and_rollback $META_ADVANTECH_PATH
-    auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$BUILD_TMP_DIR/work/${NEW_MACHINE}-linux-gnueabi/u-boot-ti-staging
-    auto_add_tag $ROOT_DIR/$BUILDALL_DIR/$BUILD_TMP_DIR/work/${NEW_MACHINE}-linux-gnueabi/linux-ti-staging
+    auto_add_tag  $U_BOOT_URL $U_BOOT_BRANCH
+    auto_add_tag $KERNEL_URL $KERNEL_BRANCH
 
     # Create manifests xml and commit
     create_xml_and_commit

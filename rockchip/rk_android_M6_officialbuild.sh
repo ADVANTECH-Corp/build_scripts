@@ -61,6 +61,10 @@ function get_source_code()
     repo sync
 
     cd $CURR_PATH
+    cd $ROOT_DIR/u-boot
+    REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+    git checkout -b local --track $REMOTE_SERVER/$BSP_BRANCH
+    cd $CURR_PATH
 }
 
 function check_tag_and_checkout()

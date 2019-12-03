@@ -169,8 +169,6 @@ function set_environment()
 
 	if [ "$1" == "sdk" ]; then
 		lunch sdk-userdebug
-	elif [ "$NEW_MACHINE" == "imx6" ]; then
-		lunch rsb_4411_a1-userdebug
 	else
 		if [ "$TYPE" == "" ]; then
 			lunch $NEW_MACHINE-userdebug
@@ -199,16 +197,21 @@ function prepare_images()
 	mkdir $IMAGE_DIR/image
 
 	# Copy image files to image directory
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/obj/UBOOT_OBJ/u-boot_crc.bin $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/obj/UBOOT_OBJ/u-boot_crc.bin.crc $IMAGE_DIR/image
+	if [ "${SOC_NAME}" == "imx6q" ]; then
+		cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/obj/UBOOT_OBJ/u-boot_crc.bin $IMAGE_DIR/image
+		cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/obj/UBOOT_OBJ/u-boot_crc.bin.crc $IMAGE_DIR/image
+	else
+		cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/u-boot-$SOC_NAME.imx $IMAGE_DIR/image
+	fi
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/boot.img $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/dtbo-imx6q.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/partition-table.img $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/recovery-imx6q.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/system.img $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/vbmeta-imx6q.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/vendor.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/fsl-sdcard-partition.sh $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/dtbo-$SOC_NAME.img $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/recovery-$SOC_NAME.img $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/vbmeta-$SOC_NAME.img $IMAGE_DIR/image
+
 	cp -a /usr/bin/simg2img $IMAGE_DIR/image
 
 	echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
@@ -238,7 +241,7 @@ elif [ "$BSP_XML" == "" ] ; then
 else
     repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
 fi
-repo sync
+repo sync -j8
 
 echo "[ADV] patches android source code"
 patches_android_code

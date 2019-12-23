@@ -271,6 +271,13 @@ function build_yocto_images()
 
 	# Build full image
         building $DEPLOY_IMAGE_NAME
+
+	# Re-build qspi U-Boot
+	if [ "$PRODUCT" == "rom7720a1" ] || [ "$PRODUCT" == "rom5620a1" ]; then
+		echo "[ADV] build_yocto_image: build qspi u-boot"
+		echo "UBOOT_CONFIG = \"fspi\"" >> $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf
+		building imx-boot
+	fi
 }
 
 function prepare_images()

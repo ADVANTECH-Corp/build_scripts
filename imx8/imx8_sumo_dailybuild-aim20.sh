@@ -277,6 +277,7 @@ function build_yocto_images()
 		echo "[ADV] build_yocto_image: build qspi u-boot"
 		echo "UBOOT_CONFIG = \"fspi\"" >> $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf
 		building imx-boot
+		sed -i "/UBOOT_CONFIG/d" $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf
 	fi
 }
 

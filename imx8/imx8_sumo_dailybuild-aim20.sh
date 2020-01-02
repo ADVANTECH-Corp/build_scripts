@@ -269,6 +269,9 @@ function build_yocto_images()
         building linux-imx cleansstate
         building linux-imx
 
+        # Clean package to avoid build error
+        building gstreamer1.0-rtsp-server cleansstate
+
 	# Build full image
         building $DEPLOY_IMAGE_NAME
 

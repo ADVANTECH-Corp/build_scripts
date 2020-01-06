@@ -61,6 +61,10 @@ function get_source_code()
     repo sync
 
     cd $CURR_PATH
+    cd $ROOT_DIR/u-boot
+    REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+    git checkout -b local --track $REMOTE_SERVER/$BSP_BRANCH
+    cd $CURR_PATH
 }
 
 function check_tag_and_checkout()
@@ -268,6 +272,7 @@ function building()
     if [ "$1" == "uboot" ]; then
 		cd $CURR_PATH/$ROOT_DIR/u-boot
 		echo "[ADV] UBOOT_DEFCONFIG=$UBOOT_DEFCONFIG"
+		echo " V$RELEASE_VERSION" > .scmversion
 		make $UBOOT_DEFCONFIG
 		make 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 	elif [ "$1" == "kernel" ]; then
@@ -365,6 +370,19 @@ function copy_image_to_storage()
     mv -f *.md5 $OUTPUT_DIR
 
 }
+
+function uboot_version_commit()
+{
+    cd $CURR_PATH
+    cd $ROOT_DIR/u-boot
+
+    # push to github
+    REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+    git add .scmversion -f
+    git commit -m "[Official Release] ${VER_TAG}"
+    git push $REMOTE_SERVER local:$BSP_BRANCH
+    cd $CURR_PATH
+}
 # ================
 #  Main procedure 
 # ================
@@ -401,6 +419,7 @@ echo "[ADV] copy_image_to_storage"
      copy_image_to_storage
      save_temp_log
 
+    uboot_version_commit
 cd $CURR_PATH
 rm -rf $ROOT_DIR
 

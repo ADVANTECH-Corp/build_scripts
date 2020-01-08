@@ -270,7 +270,20 @@ function build_yocto_images()
         building linux-imx
 
         # Clean package to avoid build error
+	echo "[ADV] build_yocto_image: clean virtual_libg2d"
+	building imx-qtapplications cleansstate
         building gstreamer1.0-rtsp-server cleansstate
+	building gst-examples cleansstate
+	building freerdp cleansstate
+	building imx-gpu-apitrace cleansstate
+	building gstreamer1.0-plugins-good cleansstate
+	building gstreamer1.0-plugins-base cleansstate
+	building gstreamer1.0-plugins-bad cleansstate
+	building kmscube cleansstate
+	building imx-gpu-sdk cleansstate
+	building opencv cleansstate
+	building imx-gst1.0-plugin cleansstate
+	building weston cleansstate
 
 	# Build full image
         building $DEPLOY_IMAGE_NAME

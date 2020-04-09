@@ -193,6 +193,10 @@ fi
 if [ "$ROM3310A1" == "true" ]; then
         MACHINE_LIST="$MACHINE_LIST am335xrom3310a1"
 fi
+if [ "$EPCR3220A1" == "true" ]; then
+        MACHINE_LIST="$MACHINE_LIST am335xepcr3220a1"
+fi
+
 
 NUM1=`expr $VERSION : 'V\([0-9]*\)'`
 NUM2=`expr $VERSION : '.*[.]\([0-9A-Z]*\)'`

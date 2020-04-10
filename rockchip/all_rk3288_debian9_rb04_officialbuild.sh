@@ -14,7 +14,7 @@ if [ "$EBCRB04A1" == "true" ]; then
 	KERNEL_DEFCONFIG=rk3288_adv_defconfig
 	KERNEL_DTB=rk3288-ebcrb04-a1.img
 	MACHINE_LIST="$MACHINE_LIST ebcrb04"
-	MODEL_NAME="rb04"
+	MODEL_NAME="RB04"
 	HW_VER="A1"
 
 	export UBOOT_DEFCONFIG

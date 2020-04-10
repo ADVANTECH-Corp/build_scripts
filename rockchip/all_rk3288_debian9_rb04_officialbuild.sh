@@ -9,13 +9,13 @@ VERSION_NUM=${RELEASE_VERSION}
 MACHINE_LIST=""
 
 #rk3288_projects
-if [ "$RSB4680A3" == "true" ]; then
+if [ "$EBCRB04A1" == "true" ]; then
 	UBOOT_DEFCONFIG=ebcrb04a1-2G-rk3288
 	KERNEL_DEFCONFIG=rk3288_adv_defconfig
 	KERNEL_DTB=rk3288-ebcrb04-a1.img
 	MACHINE_LIST="$MACHINE_LIST ebcrb04"
 	MODEL_NAME="rb04"
-	HW_VER="A3"
+	HW_VER="A1"
 
 	export UBOOT_DEFCONFIG
 	export KERNEL_DEFCONFIG

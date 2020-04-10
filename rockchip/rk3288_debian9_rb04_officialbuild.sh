@@ -263,6 +263,7 @@ function building()
 		echo "[ADV] build kernel make ARCH=arm $KERNEL_DTB -j12"
 		make ARCH=arm $KERNEL_DTB -j12 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL
     elif [ "$1" == "recovery" ]; then
+		sudo apt-get update
 		sudo apt-get install -y expect-dev
 		echo "[ADV] build recovery"
 		cd $CURR_PATH/$ROOT_DIR

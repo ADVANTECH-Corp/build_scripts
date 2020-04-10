@@ -278,7 +278,7 @@ function building()
 		sudo dpkg -i ubuntu-build-service/packages/*
 		sudo apt-get install -f 
 		cd $CURR_PATH/$ROOT_DIR/
-		./mk-debian.sh TRUE >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
+		./mk-debian.sh >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
 
 	else
         echo "[ADV] pass building..."

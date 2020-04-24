@@ -6,7 +6,7 @@ VERSION_NUM=$NUM1$NUM2
 MACHINE_LIST=""
 
 #rk3399_projects
-if [ "$RSB4710A1" == "true" ]; then
+if [ "$RSB4710A2" == "true" ]; then
 	UBOOT_DEFCONFIG=rk3399_rsb4710a1_2G_defconfig
 	KERNEL_DEFCONFIG=rk3399_adv_defconfig
 	KERNEL_DTB=rk3399-rsb4710-a2.img

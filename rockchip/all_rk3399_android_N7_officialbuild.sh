@@ -9,7 +9,7 @@ MACHINE_LIST=""
 if [ "$RSB4710A1" == "true" ]; then
 	UBOOT_DEFCONFIG=rk3399_rsb4710a1_2G_defconfig
 	KERNEL_DEFCONFIG=rk3399_adv_defconfig
-	KERNEL_DTB=rk3399-rsb4710-a1.img
+	KERNEL_DTB=rk3399-rsb4710-a2.img
 	ANDROID_PRODUCT=rk3399_rsb4710-userdebug
 	MACHINE_LIST="$MACHINE_LIST rsb_4710"
 

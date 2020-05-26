@@ -320,6 +320,13 @@ function prepare_images()
                         cp $DEPLOY_MISC_PATH/tee.bin $OUTPUT_DIR
                         cp -a $DEPLOY_MISC_PATH/imx-boot-tools $OUTPUT_DIR
                         ;;
+                "imx-boot")
+                        cp -a $DEPLOY_IMX_BOOT_PATH/* $OUTPUT_DIR
+                        chmod 755 $CURR_PATH/cp_uboot.sh
+                        chmod 755 $CURR_PATH/mk_imx-boot.sh
+                        sudo cp $CURR_PATH/cp_uboot.sh $OUTPUT_DIR
+                        sudo cp $CURR_PATH/mk_imx-boot.sh $OUTPUT_DIR
+                        ;;
                 "modules")
                         FILE_NAME="modules-imx8*.tgz"
                         cp $DEPLOY_MODULES_PATH/$FILE_NAME $OUTPUT_DIR
@@ -345,7 +352,7 @@ function prepare_images()
 
         # Package image file
         case $IMAGE_TYPE in
-                "flash" | "modules" | "misc")
+                "flash" | "modules" | "misc" | "imx-boot")
                         echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
                         tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
                         generate_md5 ${OUTPUT_DIR}.tgz
@@ -373,6 +380,9 @@ function copy_image_to_storage()
 		"misc")
 			mv -f ${MISC_DIR}.tgz $STORAGE_PATH
 		;;
+                "imx-boot")
+                        mv -f ${IMX_BOOT_DIR}.tgz $STORAGE_PATH
+                ;;
 		"modules")
 			mv -f ${MODULES_DIR}.tgz $STORAGE_PATH
 		;;
@@ -427,6 +437,12 @@ else #"$PRODUCT" != "$VER_PREFIX"
         FLASH_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_flash_tool
         prepare_images flash $FLASH_DIR
         copy_image_to_storage flash
+
+        echo "[ADV] create imx-boot files"
+        DEPLOY_IMX_BOOT_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/imx-boot/*/git"
+        IMX_BOOT_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_imx-boot
+        prepare_images imx-boot $IMX_BOOT_DIR
+        copy_image_to_storage imx-boot
 
         echo "[ADV] create misc files"
         DEPLOY_MISC_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"

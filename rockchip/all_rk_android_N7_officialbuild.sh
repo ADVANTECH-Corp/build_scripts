@@ -34,4 +34,15 @@ if [ "$DS211" == "true" ]; then
         ./rk_android_N7_officialbuild.sh $VERSION_NUM
         [ "$?" -ne 0 ] && exit 1
 fi
+#DS100_DeviceOn_projects
+if [ "$DS100_DeviceOn" == "true" ]; then
+	KERNEL_DTB=rk3399-ds100.img
+	KERNEL_CONFIG=rockchip_ds100_defconfig
+	MACHINE_LIST="$MACHINE_LIST ds100_DeviceOn"
+	export KERNEL_DTB
+	export KERNEL_CONFIG
+	export MACHINE_LIST
+	./rk_android_N7_officialbuild.sh $VERSION_NUM
+	[ "$?" -ne 0 ] && exit 1
+fi
 echo "[ADV] All done!"

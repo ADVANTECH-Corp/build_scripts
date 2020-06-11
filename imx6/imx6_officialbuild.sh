@@ -64,6 +64,12 @@ else
 	mkdir $MOUNT_POINT
 fi
 
+# Loop device
+LOOP_DEV=`sudo losetup -f`
+if [ -z $LOOP_DEV ]; then
+	echo "loop device busy!"
+	exit 1
+fi
 
 # ===========
 #  Functions

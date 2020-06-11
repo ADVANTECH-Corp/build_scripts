@@ -140,7 +140,9 @@ function add_version()
 	
 	# Set Linux version
 	sed -i "/KERNEL_LOCALVERSION_append/d" $ROOT_DIR/$KERNEL_PATH
-	echo "KERNEL_LOCALVERSION_append = \"_$OFFICIAL_VER\"" >> $ROOT_DIR/$KERNEL_PATH
+	typeset -l OFFICIAL_VER_lowercase
+	OFFICIAL_VER_lowercase=$OFFICIAL_VER
+	echo "KERNEL_LOCALVERSION_append = \"-$OFFICIAL_VER_lowercase\"" >> $ROOT_DIR/$KERNEL_PATH
 }
 
 function remove_version()

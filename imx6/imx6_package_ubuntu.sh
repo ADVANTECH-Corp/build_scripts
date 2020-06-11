@@ -22,6 +22,13 @@ else
 	mkdir -p $MOUNT_POINT
 fi
 
+# Loop device
+LOOP_DEV=`sudo losetup -f`
+if [ -z $LOOP_DEV ]; then
+	echo "loop device busy!"
+	exit 1
+fi
+
 function get_ubuntu_rootfs()
 {
     echo "[ADV] get_ubuntu_rootfs"

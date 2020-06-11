@@ -4,6 +4,7 @@ echo "[ADV] FTP_SITE = ${FTP_SITE}"
 echo "[ADV] FTP_DIR = ${FTP_DIR}"
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] VERSION = ${VERSION}"
+echo "[ADV] AIM_VERSION = ${AIM_VERSION}"
 echo "[ADV] STORED = ${STORED}"
 
 echo "[ADV] UBUNTU_VERSION = ${UBUNTU_VERSION}"
@@ -91,10 +92,11 @@ END_OF_CSV
 
 function generate_mksd_linux()
 {
-    sudo mkdir $MOUNT_POINT/mk_inand
+    OUTPUT_DIR=$1
+    sudo mkdir $OUTPUT_DIR/mk_inand
     chmod 755 $CURR_PATH/mksd-linux.sh
-    sudo cp $CURR_PATH/mksd-linux.sh $MOUNT_POINT/mk_inand/
-    sudo chown 0.0 $MOUNT_POINT/mk_inand/mksd-linux.sh
+    sudo cp $CURR_PATH/mksd-linux.sh $OUTPUT_DIR/mk_inand/
+    sudo chown 0.0 $OUTPUT_DIR/mk_inand/mksd-linux.sh
 }
 
 function create_ubuntu_image()
@@ -125,6 +127,7 @@ EOF
     if [ ${FTP_DIR} != "imx6_yocto_bsp_2.1_2.0.0" ]; then
 	tar zxf ${YOCTO_IMAGE_TGZ}
 	mv image/*.sdcard .
+	YOCTO_IMAGE=${YOCTO_IMAGE_SDCARD}
     fi
 
     # Maybe the loop device is occuppied, unmount it first
@@ -145,6 +148,7 @@ EOF
     sudo umount $MOUNT_POINT
     sudo losetup -d ${LOOP_DEV}
 
+    if [ ${FTP_DIR} == "imx6_yocto_bsp_2.1_2.0.0" ]; then
     # resize
     sudo mv ${UBUNTU_IMAGE} ${UBUNTU_IMAGE/.img}.sdcard
     sudo dd if=/dev/zero of=${UBUNTU_IMAGE} bs=1M count=$SDCARD_SIZE
@@ -173,9 +177,21 @@ EOF
     sudo mkdir -p $MOUNT_POINT/image
     sudo mv ${UBUNTU_IMAGE/.img}.sdcard $MOUNT_POINT/image/
     sudo chown -R 0.0 $MOUNT_POINT/image
-    generate_mksd_linux
+    generate_mksd_linux $MOUNT_POINT
     sudo umount $MOUNT_POINT
     sudo losetup -d $LOOP_DEV
+    else
+        # generate flash_tool
+        FLASH_DIR=${UBUNTU_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool
+        sudo mkdir -p $FLASH_DIR/image
+        sudo cp ${UBUNTU_IMAGE/.img}.sdcard $FLASH_DIR/image/
+        sudo chown -R 0.0 $FLASH_DIR/image
+        generate_mksd_linux $FLASH_DIR
+
+        tar czf ${FLASH_DIR}.tgz $FLASH_DIR
+        generate_md5 ${FLASH_DIR}.tgz
+        sudo mv ${FLASH_DIR}.tgz* $STORAGE_PATH
+    fi
 
     # output file
     gzip -c9 ${UBUNTU_IMAGE} > ${UBUNTU_IMAGE}.gz
@@ -249,10 +265,11 @@ do
 
     if [ ${FTP_DIR} == "imx6_yocto_bsp_2.1_2.0.0" ]; then
         PRODUCT="${PROD}LI"
+        UBUNTU_PRODUCT="${PROD}${OS_PREFIX}I"
     else
         PRODUCT="${PROD}${AIM_VERSION}LI"
+        UBUNTU_PRODUCT="${PROD}${AIM_VERSION}${OS_PREFIX}I"
     fi
-    UBUNTU_PRODUCT="${PROD}${OS_PREFIX}I"
 
     create_ubuntu_image
 done

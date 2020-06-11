@@ -101,7 +101,15 @@ function create_ubuntu_image()
 {
     SDCARD_SIZE=7200
 
-    YOCTO_IMAGE="fsl-image-qt5-${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
+    YOCTO_IMAGE_SDCARD="fsl-image-*${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
+    YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool.tgz"
+
+    if [ ${FTP_DIR} == "imx6_yocto_bsp_2.1_2.0.0" ]; then
+        YOCTO_IMAGE=${YOCTO_IMAGE_SDCARD}
+    else
+        YOCTO_IMAGE=${YOCTO_IMAGE_TGZ}
+    fi
+
     UBUNTU_IMAGE="${UBUNTU_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_${DATE}.img"
     pftp -v -n ${FTP_SITE} << EOF
 user "ftpuser" "P@ssw0rd"
@@ -113,6 +121,11 @@ mget ${YOCTO_IMAGE}
 close
 quit
 EOF
+    #  Yocto image
+    if [ ${FTP_DIR} != "imx6_yocto_bsp_2.1_2.0.0" ]; then
+	tar zxf ${YOCTO_IMAGE_TGZ}
+	mv image/*.sdcard .
+    fi
 
     # Maybe the loop device is occuppied, unmount it first
     sudo umount $MOUNT_POINT
@@ -234,7 +247,11 @@ do
     *) echo "cannot handle \"$NEW_MACHINE\""; exit 1 ;;
     esac
 
-    PRODUCT="${PROD}LI"
+    if [ ${FTP_DIR} == "imx6_yocto_bsp_2.1_2.0.0" ]; then
+        PRODUCT="${PROD}LI"
+    else
+        PRODUCT="${PROD}${AIM_VERSION}LI"
+    fi
     UBUNTU_PRODUCT="${PROD}${OS_PREFIX}I"
 
     create_ubuntu_image

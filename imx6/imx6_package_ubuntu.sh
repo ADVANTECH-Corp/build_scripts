@@ -126,7 +126,7 @@ EOF
     #  Yocto image
     if [ ${FTP_DIR} != "imx6_yocto_bsp_2.1_2.0.0" ]; then
 	tar zxf ${YOCTO_IMAGE_TGZ}
-	mv image/*.sdcard .
+	mv ${YOCTO_IMAGE_TGZ/.tgz}/image/*.sdcard .
 	YOCTO_IMAGE=${YOCTO_IMAGE_SDCARD}
     fi
 

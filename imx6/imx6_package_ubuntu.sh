@@ -170,7 +170,7 @@ EOF
     sudo mv $MOUNT_POINT/.modules/* $MOUNT_POINT/lib/modules/
     sudo rmdir $MOUNT_POINT/.modules
     sudo umount $MOUNT_POINT
-    sudo losetup -d $LOOP_DEV
+    sudo losetup -d ${LOOP_DEV}
     sudo rm ${UBUNTU_IMAGE/.img}.sdcard
 
     # generate flash_tool

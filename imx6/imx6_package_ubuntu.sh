@@ -101,7 +101,7 @@ function generate_mksd_linux()
 
 function create_ubuntu_image()
 {
-    SDCARD_SIZE=7200
+    SDCARD_SIZE=3100
 
     YOCTO_IMAGE_SDCARD="fsl-image-*${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
     YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool.tgz"
@@ -136,19 +136,7 @@ EOF
 
     echo "[ADV] rename yocto image file to ubuntu image file"
     sudo mv ${YOCTO_IMAGE} ${UBUNTU_IMAGE}
-    sudo losetup ${LOOP_DEV} ${UBUNTU_IMAGE}
-    sudo mount ${LOOP_DEV}p2 $MOUNT_POINT/
-    sudo mkdir -p $MOUNT_POINT/.modules
-    sudo mv $MOUNT_POINT/lib/modules/* $MOUNT_POINT/.modules/
-    sudo rm -rf $MOUNT_POINT/*
-    sudo tar zxf ${UBUNTU_ROOTFS} -C $MOUNT_POINT/
-    sudo mkdir -p $MOUNT_POINT/lib/modules
-    sudo mv $MOUNT_POINT/.modules/* $MOUNT_POINT/lib/modules/
-    sudo rmdir $MOUNT_POINT/.modules
-    sudo umount $MOUNT_POINT
-    sudo losetup -d ${LOOP_DEV}
 
-    if [ ${FTP_DIR} == "imx6_yocto_bsp_2.1_2.0.0" ]; then
     # resize
     sudo mv ${UBUNTU_IMAGE} ${UBUNTU_IMAGE/.img}.sdcard
     sudo dd if=/dev/zero of=${UBUNTU_IMAGE} bs=1M count=$SDCARD_SIZE
@@ -172,26 +160,29 @@ EOF
     sudo e2fsck -f -y ${LOOP_DEV}p2
     sudo resize2fs ${LOOP_DEV}p2
 
-    # insert mksd-linux.sh & sdcard image
-    sudo mount ${LOOP_DEV}p2 $MOUNT_POINT
-    sudo mkdir -p $MOUNT_POINT/image
-    sudo mv ${UBUNTU_IMAGE/.img}.sdcard $MOUNT_POINT/image/
-    sudo chown -R 0.0 $MOUNT_POINT/image
-    generate_mksd_linux $MOUNT_POINT
+    # Update Ubuntu rootfs
+    sudo mount ${LOOP_DEV}p2 $MOUNT_POINT/
+    sudo mkdir -p $MOUNT_POINT/.modules
+    sudo mv $MOUNT_POINT/lib/modules/* $MOUNT_POINT/.modules/
+    sudo rm -rf $MOUNT_POINT/*
+    sudo tar zxf ${UBUNTU_ROOTFS} -C $MOUNT_POINT/
+    sudo mkdir -p $MOUNT_POINT/lib/modules
+    sudo mv $MOUNT_POINT/.modules/* $MOUNT_POINT/lib/modules/
+    sudo rmdir $MOUNT_POINT/.modules
     sudo umount $MOUNT_POINT
     sudo losetup -d $LOOP_DEV
-    else
-        # generate flash_tool
-        FLASH_DIR=${UBUNTU_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool
-        sudo mkdir -p $FLASH_DIR/image
-        sudo cp ${UBUNTU_IMAGE/.img}.sdcard $FLASH_DIR/image/
-        sudo chown -R 0.0 $FLASH_DIR/image
-        generate_mksd_linux $FLASH_DIR
+    sudo rm ${UBUNTU_IMAGE/.img}.sdcard
 
-        tar czf ${FLASH_DIR}.tgz $FLASH_DIR
-        generate_md5 ${FLASH_DIR}.tgz
-        sudo mv ${FLASH_DIR}.tgz* $STORAGE_PATH
-    fi
+    # generate flash_tool
+    FLASH_DIR=${UBUNTU_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool
+    sudo mkdir -p $FLASH_DIR/image
+    sudo cp ${UBUNTU_IMAGE} $FLASH_DIR/image/${UBUNTU_IMAGE/.img}.sdcard
+    sudo chown -R 0.0 $FLASH_DIR/image
+    generate_mksd_linux $FLASH_DIR
+
+    tar czf ${FLASH_DIR}.tgz $FLASH_DIR
+    generate_md5 ${FLASH_DIR}.tgz
+    sudo mv ${FLASH_DIR}.tgz* $STORAGE_PATH
 
     # output file
     gzip -c9 ${UBUNTU_IMAGE} > ${UBUNTU_IMAGE}.gz

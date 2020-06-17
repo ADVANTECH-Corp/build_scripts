@@ -144,8 +144,10 @@ d
 2
 n
 p
+2
 $rootfs_start
-$PARTITION_SIZE_LIMIT
+
+Y
 w
 EOF
     sudo sync
@@ -167,8 +169,8 @@ EOF
     sudo mkdir -p $MOUNT_POINT/lib/firmware
     sudo mv $MOUNT_POINT/.firmware/* $MOUNT_POINT/lib/firmware/
     sudo rmdir $MOUNT_POINT/.firmware
-    sudo sed -i "s/arm64/${NEW_MACHINE}/g" /etc/hostname
-    sudo sed -i "s/arm64/${NEW_MACHINE}/g" /etc/hosts
+    sudo sed -i "s/arm64/${CPU_TYPE_Module}${NEW_MACHINE}/g" $MOUNT_POINT/etc/hostname
+    sudo sed -i "s/arm64/${CPU_TYPE_Module}${NEW_MACHINE}/g" $MOUNT_POINT/etc/hosts
     sudo umount $MOUNT_POINT
     sudo losetup -d ${LOOP_DEV}
     sudo rm ${UBUNTU_IMAGE/.img}.sdcard

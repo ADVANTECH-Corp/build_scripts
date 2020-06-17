@@ -136,8 +136,10 @@ EOF
     sudo dd if=${UBUNTU_IMAGE/.img}.sdcard of=$LOOP_DEV
     sudo sync
 
+    fdisk_ver=`sudo fdisk -v`
+    echo "fdisk version: ${fdisk_ver}"
     rootfs_start=`sudo fdisk -u -l ${LOOP_DEV} | grep ${LOOP_DEV}p2 | awk '{print $2}'`
-    sudo fdisk -u $LOOP_DEV << EOF &>/dev/null
+    sudo fdisk -u $LOOP_DEV << EOF
 d
 2
 n

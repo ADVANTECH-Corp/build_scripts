@@ -7,8 +7,8 @@ echo "[ADV] VERSION = ${VERSION}"
 echo "[ADV] AIM_VERSION = ${AIM_VERSION}"
 echo "[ADV] STORED = ${STORED}"
 
-echo "[ADV] DEBIAN_VERSION = ${DEBIAN_VERSION}"
-echo "[ADV] DEBIAN_ROOTFS = ${DEBIAN_ROOTFS}"
+echo "[ADV] UBUNTU_VERSION = ${UBUNTU_VERSION}"
+echo "[ADV] UBUNTU_ROOTFS = ${UBUNTU_ROOTFS}"
 
 VERSION_TAG=$(echo $VERSION | sed 's/[.]//')
 
@@ -30,17 +30,17 @@ if [ -z $LOOP_DEV ]; then
 	exit 1
 fi
 
-function get_debian_rootfs()
+function get_ubuntu_rootfs()
 {
-    echo "[ADV] get_debian_rootfs"
+    echo "[ADV] get_ubuntu_rootfs"
     mkdir out
     pftp -v -n ${FTP_SITE} << EOF
 user "ftpuser" "P@ssw0rd"
-cd "Image/imx6/debian/${DEBIAN_VERSION}"
+cd "Image/imx8/ubuntu/${UBUNTU_VERSION}"
 prompt
 binary
 ls
-mget ${DEBIAN_ROOTFS}
+mget ${UBUNTU_ROOTFS}
 close
 quit
 EOF
@@ -73,11 +73,11 @@ function generate_csv()
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV
 ESSD Software/OS Update News
-OS,Debian ${DEBIAN_VERSION}
+OS,Ubuntu ${UBUNTU_VERSION}
 Part Number,N/A
 Author,
 Date,${DATE}
-Version,${DEBIAN_PRODUCT}${VERSION_TAG}
+Version,${UBUNTU_PRODUCT}${VERSION_TAG}
 Build Number,${BUILD_NUMBER}
 TAG,
 Tested Platform,${CPU_TYPE_Module}${NEW_MACHINE}
@@ -85,8 +85,8 @@ MD5 Checksum,GZ: ${MD5_SUM}
 Image Size,${FILE_SIZE}B (${FILE_SIZE_BYTE} bytes)
 Issue description, N/A
 Function Addition,
-Yocto Kernel,imx6LB${VERSION_TAG}_${DATE}
-Debian Rootfs,${DEBIAN_ROOTFS}
+Yocto Kernel,imx8LB${VERSION_TAG}_${DATE}
+Ubuntu Rootfs,${UBUNTU_ROOTFS}
 END_OF_CSV
 }
 
@@ -99,50 +99,41 @@ function generate_mksd_linux()
     sudo chown 0.0 $OUTPUT_DIR/mk_inand/mksd-linux.sh
 }
 
-function create_debian_image()
+function create_ubuntu_image()
 {
     SDCARD_SIZE=3100
 
     YOCTO_IMAGE_SDCARD="fsl-image-*${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
     YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool.tgz"
+    UBUNTU_IMAGE="${UBUNTU_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_${DATE}.img"
 
-    if [ ${FTP_DIR} == "imx6_yocto_bsp_2.1_2.0.0" ]; then
-        YOCTO_IMAGE=${YOCTO_IMAGE_SDCARD}
-    else
-        YOCTO_IMAGE=${YOCTO_IMAGE_TGZ}
-    fi
-
-    DEBIAN_IMAGE="${DEBIAN_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_${DATE}.img"
     pftp -v -n ${FTP_SITE} << EOF
 user "ftpuser" "P@ssw0rd"
 cd "officialbuild/${FTP_DIR}/${DATE}/"
 prompt
 binary
 ls
-mget ${YOCTO_IMAGE}
+mget ${YOCTO_IMAGE_TGZ}
 close
 quit
 EOF
     #  Yocto image
-    if [ ${FTP_DIR} != "imx6_yocto_bsp_2.1_2.0.0" ]; then
-	tar zxf ${YOCTO_IMAGE_TGZ}
-	mv ${YOCTO_IMAGE_TGZ/.tgz}/image/*.sdcard .
-	YOCTO_IMAGE=${YOCTO_IMAGE_SDCARD}
-    fi
+    tar zxf ${YOCTO_IMAGE_TGZ}
+    mv ${YOCTO_IMAGE_TGZ/.tgz}/image/*.sdcard .
 
     # Maybe the loop device is occuppied, unmount it first
     sudo umount $MOUNT_POINT
     sudo losetup -d $LOOP_DEV
 
-    echo "[ADV] rename yocto image file to debian image file"
-    sudo mv ${YOCTO_IMAGE} ${DEBIAN_IMAGE}
+    echo "[ADV] rename yocto image file to ubuntu image file"
+    sudo mv ${YOCTO_IMAGE_SDCARD} ${UBUNTU_IMAGE}
 
     # resize
-    sudo mv ${DEBIAN_IMAGE} ${DEBIAN_IMAGE/.img}.sdcard
-    sudo dd if=/dev/zero of=${DEBIAN_IMAGE} bs=1M count=$SDCARD_SIZE
-    sudo losetup ${LOOP_DEV} ${DEBIAN_IMAGE}
-    echo "[ADV] resize ${DEBIAN_IMAGE} to ${SDCARD_SIZE}MB"
-    sudo dd if=${DEBIAN_IMAGE/.img}.sdcard of=$LOOP_DEV
+    sudo mv ${UBUNTU_IMAGE} ${UBUNTU_IMAGE/.img}.sdcard
+    sudo dd if=/dev/zero of=${UBUNTU_IMAGE} bs=1M count=$SDCARD_SIZE
+    sudo losetup ${LOOP_DEV} ${UBUNTU_IMAGE}
+    echo "[ADV] resize ${UBUNTU_IMAGE} to ${SDCARD_SIZE}MB"
+    sudo dd if=${UBUNTU_IMAGE/.img}.sdcard of=$LOOP_DEV
     sudo sync
 
     rootfs_start=`sudo fdisk -u -l ${LOOP_DEV} | grep ${LOOP_DEV}p2 | awk '{print $2}'`
@@ -160,27 +151,23 @@ EOF
     sudo e2fsck -f -y ${LOOP_DEV}p2
     sudo resize2fs ${LOOP_DEV}p2
 
-    # Update Debian rootfs
+    # Update Ubuntu rootfs
     sudo mount ${LOOP_DEV}p2 $MOUNT_POINT/
     sudo mkdir -p $MOUNT_POINT/.modules
     sudo mv $MOUNT_POINT/lib/modules/* $MOUNT_POINT/.modules/
     sudo rm -rf $MOUNT_POINT/*
-    sudo tar jxf ${DEBIAN_ROOTFS} -C $MOUNT_POINT/
+    sudo tar zxf ${UBUNTU_ROOTFS} -C $MOUNT_POINT/
     sudo mkdir -p $MOUNT_POINT/lib/modules
     sudo mv $MOUNT_POINT/.modules/* $MOUNT_POINT/lib/modules/
     sudo rmdir $MOUNT_POINT/.modules
-
-    # additional operations
-    sudo chmod o+x $MOUNT_POINT/usr/lib/dbus-1.0/dbus-daemon-launch-helper
-
     sudo umount $MOUNT_POINT
     sudo losetup -d ${LOOP_DEV}
-    sudo rm ${DEBIAN_IMAGE/.img}.sdcard
+    sudo rm ${UBUNTU_IMAGE/.img}.sdcard
 
     # generate flash_tool
-    FLASH_DIR=${DEBIAN_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool
+    FLASH_DIR=${UBUNTU_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool
     sudo mkdir -p $FLASH_DIR/image
-    sudo cp ${DEBIAN_IMAGE} $FLASH_DIR/image/${DEBIAN_IMAGE/.img}.sdcard
+    sudo cp ${UBUNTU_IMAGE} $FLASH_DIR/image/${UBUNTU_IMAGE/.img}.sdcard
     sudo chown -R 0.0 $FLASH_DIR/image
     generate_mksd_linux $FLASH_DIR
 
@@ -189,46 +176,35 @@ EOF
     sudo mv ${FLASH_DIR}.tgz* $STORAGE_PATH
 
     # output file
-    gzip -c9 ${DEBIAN_IMAGE} > ${DEBIAN_IMAGE}.gz
-    generate_md5 ${DEBIAN_IMAGE}.gz
-    generate_csv ${DEBIAN_IMAGE}.gz
-    sudo mv ${DEBIAN_IMAGE}.csv $STORAGE_PATH
-    sudo mv ${DEBIAN_IMAGE}.gz $STORAGE_PATH
-    sudo mv ${DEBIAN_IMAGE}.gz.md5 $STORAGE_PATH
+    gzip -c9 ${UBUNTU_IMAGE} > ${UBUNTU_IMAGE}.gz
+    generate_md5 ${UBUNTU_IMAGE}.gz
+    generate_csv ${UBUNTU_IMAGE}.gz
+    sudo mv ${UBUNTU_IMAGE}.csv $STORAGE_PATH
+    sudo mv ${UBUNTU_IMAGE}.gz $STORAGE_PATH
+    sudo mv ${UBUNTU_IMAGE}.gz.md5 $STORAGE_PATH
 }
 
 # === [Main] List Official Build Version ============================================================
 TOTAL_LIST=" \
-    RSB4410A1 \
-    RSB4411A1 \
-    UBC220A1_SOLO \
-    UBC220A1 \
-    UBCDS31A1 \
-    ROM5420A1 \
-    ROM5420B1 \
-    ROM7420A1 \
-    ROM3420A1 \
-    ROM7421A1_PLUS \
-    ROM7421A1_SOLO \
-    RSB6410A2 \
-    RSB3430A1_SOLO \
-    RSB3430A1 \
-    EBCRS03A1
+    ROM7720A1_8QM \
+    ROM5720A1_8M \
+    ROM5620A1_8X \
+    ROM5721A1_8MM
 "
 MACHINE_LIST=""
 
 for M in $TOTAL_LIST; do
-  VAR_NAME=$M
+  VAR_NAME=${M/_*}
   M=${M,,}
   eval [[ \$${VAR_NAME} == true ]] && MACHINE_LIST="$MACHINE_LIST${M//_/-} "
 done
 
 # echo MACHINE_LIST=\"$MACHINE_LIST\"
 
-# DEBIAN
-OS_PREFIX="D"
+# UBUNTU
+OS_PREFIX="U"
 
-get_debian_rootfs
+get_ubuntu_rootfs
 
 for NEW_MACHINE in $MACHINE_LIST
 do
@@ -236,35 +212,23 @@ do
     #RELEASE_VERSION="${NEW_MACHINE}${OS_PREFIX}IV${VERSION_NUM}"
 
     case ${NEW_MACHINE/*-} in
-    solo) CPU_TYPE="DualLiteSolo"; CPU_TYPE_Module="imx6dl" ;;
-    plus) CPU_TYPE="DualQuadPlus"; CPU_TYPE_Module="imx6qp" ;;
-    *)    CPU_TYPE="DualQuad";     CPU_TYPE_Module="imx6q"  ;;
+    8X)  CPU_TYPE="iMX8X";  CPU_TYPE_Module="imx8qxp" ;;
+    8M)  CPU_TYPE="iMX8M";  CPU_TYPE_Module="imx8mq"  ;;
+    8MM) CPU_TYPE="iMX8MM"; CPU_TYPE_Module="imx8mm"  ;;
+    8QM) CPU_TYPE="iMX8QM"; CPU_TYPE_Module="imx8qm"  ;;
     esac
 
     NEW_MACHINE=${NEW_MACHINE/-*}
     case $NEW_MACHINE in
-    rsb4411a1) PROD="4411A1" ;;
-    rsb4410a1) PROD="4410A1" ;;
-    ubc220a1)  PROD="U220A1" ;;
-    ubcds31a1) PROD="DS31A1" ;;
-    rom5420a1) PROD="5420A1" ;;
-    rom5420b1) PROD="5420B1" ;;
-    rom7420a1) PROD="7420A1" ;;
-    rom3420a1) PROD="3420A1" ;;
-    rom7421a1) PROD="7421A1" ;;
-    rsb6410a2) PROD="6410A2" ;;
-    rsb3430a1) PROD="3430A1" ;;
-    ebcrs03a1) PROD="RS03A1" ;;
+    rom7720a1) PROD="7720A1" ;;
+    rom5720a1) PROD="5720A1" ;;
+    rom5620a1) PROD="5620A1" ;;
+    rom5721a1) PROD="5721A1" ;;
     *) echo "cannot handle \"$NEW_MACHINE\""; exit 1 ;;
     esac
 
-    if [ ${FTP_DIR} == "imx6_yocto_bsp_2.1_2.0.0" ]; then
-        PRODUCT="${PROD}LI"
-        DEBIAN_PRODUCT="${PROD}${OS_PREFIX}I"
-    else
-        PRODUCT="${PROD}${AIM_VERSION}LI"
-        DEBIAN_PRODUCT="${PROD}${AIM_VERSION}${OS_PREFIX}I"
-    fi
+    PRODUCT="${PROD}${AIM_VERSION}LI"
+    UBUNTU_PRODUCT="${PROD}${AIM_VERSION}${OS_PREFIX}I"
 
-    create_debian_image
+    create_ubuntu_image
 done

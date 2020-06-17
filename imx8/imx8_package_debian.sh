@@ -137,13 +137,15 @@ EOF
     sudo sync
 
     rootfs_start=`sudo fdisk -u -l ${LOOP_DEV} | grep ${LOOP_DEV}p2 | awk '{print $2}'`
-    sudo fdisk -u $LOOP_DEV << EOF &>/dev/null
+    sudo fdisk -u $LOOP_DEV << EOF
 d
 2
 n
 p
+2
 $rootfs_start
-$PARTITION_SIZE_LIMIT
+
+Y
 w
 EOF
     sudo sync
@@ -152,6 +154,7 @@ EOF
     sudo resize2fs ${LOOP_DEV}p2
 
     # Update Debian rootfs
+    echo "[ADV] update rootfs"
     sudo mount ${LOOP_DEV}p2 $MOUNT_POINT/
     sudo mkdir -p $MOUNT_POINT/.modules
     sudo mkdir -p $MOUNT_POINT/.firmware
@@ -165,8 +168,8 @@ EOF
     sudo mkdir -p $MOUNT_POINT/lib/firmware
     sudo mv $MOUNT_POINT/.firmware/* $MOUNT_POINT/lib/firmware/
     sudo rmdir $MOUNT_POINT/.firmware
-    sudo sed -i "s/arm64/${NEW_MACHINE}/g" /etc/hostname
-    sudo sed -i "s/arm64/${NEW_MACHINE}/g" /etc/hosts
+    sudo sed -i "s/arm64/${CPU_TYPE_Module}${NEW_MACHINE}/g" $MOUNT_POINT/etc/hostname
+    sudo sed -i "s/arm64/${CPU_TYPE_Module}${NEW_MACHINE}/g" $MOUNT_POINT/etc/hosts
 
     # additional operations
     sudo chmod o+x $MOUNT_POINT/usr/lib/dbus-1.0/dbus-daemon-launch-helper
@@ -176,6 +179,7 @@ EOF
     sudo rm ${DEBIAN_IMAGE/.img}.sdcard
 
     # generate flash_tool
+    echo "[ADV] generate flash tool"
     FLASH_DIR=${DEBIAN_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool
     sudo mkdir -p $FLASH_DIR/image
     sudo cp ${DEBIAN_IMAGE} $FLASH_DIR/image/${DEBIAN_IMAGE/.img}.sdcard
@@ -187,6 +191,7 @@ EOF
     sudo mv ${FLASH_DIR}.tgz* $STORAGE_PATH
 
     # output file
+    echo "[ADV] output files"
     gzip -c9 ${DEBIAN_IMAGE} > ${DEBIAN_IMAGE}.gz
     generate_md5 ${DEBIAN_IMAGE}.gz
     generate_csv ${DEBIAN_IMAGE}.gz

@@ -156,6 +156,7 @@ EOF
     sudo resize2fs ${LOOP_DEV}p2
 
     # Update Ubuntu rootfs
+    echo "[ADV] update rootfs"
     sudo mount ${LOOP_DEV}p2 $MOUNT_POINT/
     sudo mkdir -p $MOUNT_POINT/.modules
     sudo mkdir -p $MOUNT_POINT/.firmware
@@ -176,6 +177,7 @@ EOF
     sudo rm ${UBUNTU_IMAGE/.img}.sdcard
 
     # generate flash_tool
+    echo "[ADV] generate flash tool"
     FLASH_DIR=${UBUNTU_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool
     sudo mkdir -p $FLASH_DIR/image
     sudo cp ${UBUNTU_IMAGE} $FLASH_DIR/image/${UBUNTU_IMAGE/.img}.sdcard
@@ -187,6 +189,7 @@ EOF
     sudo mv ${FLASH_DIR}.tgz* $STORAGE_PATH
 
     # output file
+    echo "[ADV] output files"
     gzip -c9 ${UBUNTU_IMAGE} > ${UBUNTU_IMAGE}.gz
     generate_md5 ${UBUNTU_IMAGE}.gz
     generate_csv ${UBUNTU_IMAGE}.gz

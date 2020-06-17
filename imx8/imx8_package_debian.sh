@@ -216,10 +216,11 @@ do
     #RELEASE_VERSION="${NEW_MACHINE}${OS_PREFIX}IV${VERSION_NUM}"
 
     case ${NEW_MACHINE/*-} in
-    8X)  CPU_TYPE="iMX8X";  CPU_TYPE_Module="imx8qxp" ;;
-    8M)  CPU_TYPE="iMX8M";  CPU_TYPE_Module="imx8mq"  ;;
-    8MM) CPU_TYPE="iMX8MM"; CPU_TYPE_Module="imx8mm"  ;;
-    8QM) CPU_TYPE="iMX8QM"; CPU_TYPE_Module="imx8qm"  ;;
+    8x)  CPU_TYPE="iMX8X";  CPU_TYPE_Module="imx8qxp" ;;
+    8m)  CPU_TYPE="iMX8M";  CPU_TYPE_Module="imx8mq"  ;;
+    8mm) CPU_TYPE="iMX8MM"; CPU_TYPE_Module="imx8mm"  ;;
+    8qm) CPU_TYPE="iMX8QM"; CPU_TYPE_Module="imx8qm"  ;;
+    *) echo "cannot read CPU type from \"$NEW_MACHINE\""; exit 1 ;;
     esac
 
     NEW_MACHINE=${NEW_MACHINE/-*}

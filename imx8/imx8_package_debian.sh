@@ -154,12 +154,19 @@ EOF
     # Update Debian rootfs
     sudo mount ${LOOP_DEV}p2 $MOUNT_POINT/
     sudo mkdir -p $MOUNT_POINT/.modules
+    sudo mkdir -p $MOUNT_POINT/.firmware
     sudo mv $MOUNT_POINT/lib/modules/* $MOUNT_POINT/.modules/
+    sudo mv $MOUNT_POINT/lib/firmware/* $MOUNT_POINT/.firmware/
     sudo rm -rf $MOUNT_POINT/*
     sudo tar zxf ${DEBIAN_ROOTFS} -C $MOUNT_POINT/
     sudo mkdir -p $MOUNT_POINT/lib/modules
     sudo mv $MOUNT_POINT/.modules/* $MOUNT_POINT/lib/modules/
     sudo rmdir $MOUNT_POINT/.modules
+    sudo mkdir -p $MOUNT_POINT/lib/firmware
+    sudo mv $MOUNT_POINT/.firmware/* $MOUNT_POINT/lib/firmware/
+    sudo rmdir $MOUNT_POINT/.firmware
+    sudo sed -i "s/arm64/${NEW_MACHINE}/g" /etc/hostname
+    sudo sed -i "s/arm64/${NEW_MACHINE}/g" /etc/hosts
 
     # additional operations
     sudo chmod o+x $MOUNT_POINT/usr/lib/dbus-1.0/dbus-daemon-launch-helper

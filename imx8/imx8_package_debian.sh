@@ -101,7 +101,7 @@ function generate_mksd_linux()
 
 function create_debian_image()
 {
-    SDCARD_SIZE=3100
+    SDCARD_SIZE=6400
 
     YOCTO_IMAGE_SDCARD="fsl-image-*${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
     YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool.tgz"

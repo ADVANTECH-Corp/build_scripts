@@ -101,7 +101,7 @@ function generate_mksd_linux()
 
 function create_debian_image()
 {
-    SDCARD_SIZE=3100
+    SDCARD_SIZE=3700
 
     YOCTO_IMAGE_SDCARD="fsl-image-*${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
     YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool.tgz"
@@ -146,7 +146,7 @@ EOF
     sudo sync
 
     rootfs_start=`sudo fdisk -u -l ${LOOP_DEV} | grep ${LOOP_DEV}p2 | awk '{print $2}'`
-    sudo fdisk -u $LOOP_DEV << EOF &>/dev/null
+    sudo fdisk -u $LOOP_DEV << EOF
 d
 2
 n
@@ -161,15 +161,20 @@ EOF
     sudo resize2fs ${LOOP_DEV}p2
 
     # Update Debian rootfs
-    sudo losetup ${LOOP_DEV} ${DEBIAN_IMAGE}
+    echo "[ADV] update rootfs"
     sudo mount ${LOOP_DEV}p2 $MOUNT_POINT/
-    sudo mkdir -p $MOUNT_POINT/.modules
-    sudo mv $MOUNT_POINT/lib/modules/* $MOUNT_POINT/.modules/
+    sudo mv $MOUNT_POINT/lib/modules $MOUNT_POINT/.modules
+    sudo mv $MOUNT_POINT/lib/firmware $MOUNT_POINT/.firmware
     sudo rm -rf $MOUNT_POINT/*
     sudo tar jxf ${DEBIAN_ROOTFS} -C $MOUNT_POINT/
     sudo mkdir -p $MOUNT_POINT/lib/modules
     sudo mv $MOUNT_POINT/.modules/* $MOUNT_POINT/lib/modules/
     sudo rmdir $MOUNT_POINT/.modules
+    sudo mkdir -p $MOUNT_POINT/lib/firmware
+    sudo mv $MOUNT_POINT/.firmware/* $MOUNT_POINT/lib/firmware/
+    sudo rmdir $MOUNT_POINT/.firmware
+    sudo sed -i "s/armhf/${CPU_TYPE_Module}${NEW_MACHINE}/g" $MOUNT_POINT/etc/hostname
+    sudo sed -i "s/armhf/${CPU_TYPE_Module}${NEW_MACHINE}/g" $MOUNT_POINT/etc/hosts
 
     # additional operations
     sudo chmod o+x $MOUNT_POINT/usr/lib/dbus-1.0/dbus-daemon-launch-helper
@@ -179,9 +184,10 @@ EOF
     sudo rm ${DEBIAN_IMAGE/.img}.sdcard
 
     # generate flash_tool
+    echo "[ADV] generate flash tool"
     FLASH_DIR=${DEBIAN_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool
     sudo mkdir -p $FLASH_DIR/image
-    sudo mv ${DEBIAN_IMAGE/.img}.sdcard $FLASH_DIR/image/
+    sudo cp ${DEBIAN_IMAGE} $FLASH_DIR/image/${DEBIAN_IMAGE/.img}.sdcard
     sudo chown -R 0.0 $FLASH_DIR/image
     generate_mksd_linux $FLASH_DIR
 
@@ -190,6 +196,7 @@ EOF
     sudo mv ${FLASH_DIR}.tgz* $STORAGE_PATH
 
     # output file
+    echo "[ADV] output files"
     gzip -c9 ${DEBIAN_IMAGE} > ${DEBIAN_IMAGE}.gz
     generate_md5 ${DEBIAN_IMAGE}.gz
     generate_csv ${DEBIAN_IMAGE}.gz

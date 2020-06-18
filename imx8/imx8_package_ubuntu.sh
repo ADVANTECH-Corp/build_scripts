@@ -36,7 +36,7 @@ function get_ubuntu_rootfs()
     mkdir out
     pftp -v -n ${FTP_SITE} << EOF
 user "ftpuser" "P@ssw0rd"
-cd "Image/imx6/ubuntu/${UBUNTU_VERSION}"
+cd "Image/imx8/ubuntu/${UBUNTU_VERSION}"
 prompt
 binary
 ls
@@ -85,7 +85,7 @@ MD5 Checksum,GZ: ${MD5_SUM}
 Image Size,${FILE_SIZE}B (${FILE_SIZE_BYTE} bytes)
 Issue description, N/A
 Function Addition,
-Yocto Kernel,imx6LB${VERSION_TAG}_${DATE}
+Yocto Kernel,imx8LB${VERSION_TAG}_${DATE}
 Ubuntu Rootfs,${UBUNTU_ROOTFS}
 END_OF_CSV
 }
@@ -105,37 +105,28 @@ function create_ubuntu_image()
 
     YOCTO_IMAGE_SDCARD="fsl-image-*${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
     YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool.tgz"
-
-    if [ ${FTP_DIR} == "imx6_yocto_bsp_2.1_2.0.0" ]; then
-        YOCTO_IMAGE=${YOCTO_IMAGE_SDCARD}
-    else
-        YOCTO_IMAGE=${YOCTO_IMAGE_TGZ}
-    fi
-
     UBUNTU_IMAGE="${UBUNTU_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_${DATE}.img"
+
     pftp -v -n ${FTP_SITE} << EOF
 user "ftpuser" "P@ssw0rd"
 cd "officialbuild/${FTP_DIR}/${DATE}/"
 prompt
 binary
 ls
-mget ${YOCTO_IMAGE}
+mget ${YOCTO_IMAGE_TGZ}
 close
 quit
 EOF
     #  Yocto image
-    if [ ${FTP_DIR} != "imx6_yocto_bsp_2.1_2.0.0" ]; then
-	tar zxf ${YOCTO_IMAGE_TGZ}
-	mv ${YOCTO_IMAGE_TGZ/.tgz}/image/*.sdcard .
-	YOCTO_IMAGE=${YOCTO_IMAGE_SDCARD}
-    fi
+    tar zxf ${YOCTO_IMAGE_TGZ}
+    mv ${YOCTO_IMAGE_TGZ/.tgz}/image/*.sdcard .
 
     # Maybe the loop device is occuppied, unmount it first
     sudo umount $MOUNT_POINT
     sudo losetup -d $LOOP_DEV
 
     echo "[ADV] rename yocto image file to ubuntu image file"
-    sudo mv ${YOCTO_IMAGE} ${UBUNTU_IMAGE}
+    sudo mv ${YOCTO_IMAGE_SDCARD} ${UBUNTU_IMAGE}
 
     # resize
     sudo mv ${UBUNTU_IMAGE} ${UBUNTU_IMAGE/.img}.sdcard
@@ -151,8 +142,10 @@ d
 2
 n
 p
+2
 $rootfs_start
-$PARTITION_SIZE_LIMIT
+
+Y
 w
 EOF
     sudo sync
@@ -173,8 +166,8 @@ EOF
     sudo mkdir -p $MOUNT_POINT/lib/firmware
     sudo mv $MOUNT_POINT/.firmware/* $MOUNT_POINT/lib/firmware/
     sudo rmdir $MOUNT_POINT/.firmware
-    sudo sed -i "s/armhf/${CPU_TYPE_Module}${NEW_MACHINE}/g" $MOUNT_POINT/etc/hostname
-    sudo sed -i "s/armhf/${CPU_TYPE_Module}${NEW_MACHINE}/g" $MOUNT_POINT/etc/hosts
+    sudo sed -i "s/arm64/${CPU_TYPE_Module}${NEW_MACHINE}/g" $MOUNT_POINT/etc/hostname
+    sudo sed -i "s/arm64/${CPU_TYPE_Module}${NEW_MACHINE}/g" $MOUNT_POINT/etc/hosts
     sudo umount $MOUNT_POINT
     sudo losetup -d ${LOOP_DEV}
     sudo rm ${UBUNTU_IMAGE/.img}.sdcard
@@ -203,26 +196,15 @@ EOF
 
 # === [Main] List Official Build Version ============================================================
 TOTAL_LIST=" \
-    RSB4410A1 \
-    RSB4411A1 \
-    UBC220A1_SOLO \
-    UBC220A1 \
-    UBCDS31A1 \
-    ROM5420A1 \
-    ROM5420B1 \
-    ROM7420A1 \
-    ROM3420A1 \
-    ROM7421A1_PLUS \
-    ROM7421A1_SOLO \
-    RSB6410A2 \
-    RSB3430A1_SOLO \
-    RSB3430A1 \
-    EBCRS03A1
+    ROM7720A1_8QM \
+    ROM5720A1_8M \
+    ROM5620A1_8X \
+    ROM5721A1_8MM
 "
 MACHINE_LIST=""
 
 for M in $TOTAL_LIST; do
-  VAR_NAME=$M
+  VAR_NAME=${M/_*}
   M=${M,,}
   eval [[ \$${VAR_NAME} == true ]] && MACHINE_LIST="$MACHINE_LIST${M//_/-} "
 done
@@ -240,35 +222,24 @@ do
     #RELEASE_VERSION="${NEW_MACHINE}${OS_PREFIX}IV${VERSION_NUM}"
 
     case ${NEW_MACHINE/*-} in
-    solo) CPU_TYPE="DualLiteSolo"; CPU_TYPE_Module="imx6dl" ;;
-    plus) CPU_TYPE="DualQuadPlus"; CPU_TYPE_Module="imx6qp" ;;
-    *)    CPU_TYPE="DualQuad";     CPU_TYPE_Module="imx6q"  ;;
+    8x)  CPU_TYPE="iMX8X";  CPU_TYPE_Module="imx8qxp" ;;
+    8m)  CPU_TYPE="iMX8M";  CPU_TYPE_Module="imx8mq"  ;;
+    8mm) CPU_TYPE="iMX8MM"; CPU_TYPE_Module="imx8mm"  ;;
+    8qm) CPU_TYPE="iMX8QM"; CPU_TYPE_Module="imx8qm"  ;;
+    *) echo "cannot read CPU type from \"$NEW_MACHINE\""; exit 1 ;;
     esac
 
     NEW_MACHINE=${NEW_MACHINE/-*}
     case $NEW_MACHINE in
-    rsb4411a1) PROD="4411A1" ;;
-    rsb4410a1) PROD="4410A1" ;;
-    ubc220a1)  PROD="U220A1" ;;
-    ubcds31a1) PROD="DS31A1" ;;
-    rom5420a1) PROD="5420A1" ;;
-    rom5420b1) PROD="5420B1" ;;
-    rom7420a1) PROD="7420A1" ;;
-    rom3420a1) PROD="3420A1" ;;
-    rom7421a1) PROD="7421A1" ;;
-    rsb6410a2) PROD="6410A2" ;;
-    rsb3430a1) PROD="3430A1" ;;
-    ebcrs03a1) PROD="RS03A1" ;;
+    rom7720a1) PROD="7720A1" ;;
+    rom5720a1) PROD="5720A1" ;;
+    rom5620a1) PROD="5620A1" ;;
+    rom5721a1) PROD="5721A1" ;;
     *) echo "cannot handle \"$NEW_MACHINE\""; exit 1 ;;
     esac
 
-    if [ ${FTP_DIR} == "imx6_yocto_bsp_2.1_2.0.0" ]; then
-        PRODUCT="${PROD}LI"
-        UBUNTU_PRODUCT="${PROD}${OS_PREFIX}I"
-    else
-        PRODUCT="${PROD}${AIM_VERSION}LI"
-        UBUNTU_PRODUCT="${PROD}${AIM_VERSION}${OS_PREFIX}I"
-    fi
+    PRODUCT="${PROD}${AIM_VERSION}LI"
+    UBUNTU_PRODUCT="${PROD}${AIM_VERSION}${OS_PREFIX}I"
 
     create_ubuntu_image
 done

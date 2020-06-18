@@ -101,7 +101,7 @@ function generate_mksd_linux()
 
 function create_ubuntu_image()
 {
-    SDCARD_SIZE=3100
+    SDCARD_SIZE=3700
 
     YOCTO_IMAGE_SDCARD="fsl-image-*${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
     YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool.tgz"
@@ -136,8 +136,6 @@ EOF
     sudo dd if=${UBUNTU_IMAGE/.img}.sdcard of=$LOOP_DEV
     sudo sync
 
-    fdisk_ver=`sudo fdisk -v`
-    echo "fdisk version: ${fdisk_ver}"
     rootfs_start=`sudo fdisk -u -l ${LOOP_DEV} | grep ${LOOP_DEV}p2 | awk '{print $2}'`
     sudo fdisk -u $LOOP_DEV << EOF
 d
@@ -158,18 +156,12 @@ EOF
     # Update Ubuntu rootfs
     echo "[ADV] update rootfs"
     sudo mount ${LOOP_DEV}p2 $MOUNT_POINT/
-    sudo mkdir -p $MOUNT_POINT/.modules
-    sudo mkdir -p $MOUNT_POINT/.firmware
-    sudo mv $MOUNT_POINT/lib/modules/* $MOUNT_POINT/.modules/
-    sudo mv $MOUNT_POINT/lib/firmware/* $MOUNT_POINT/.firmware/
+    sudo mv $MOUNT_POINT/lib/modules $MOUNT_POINT/.modules
+    sudo mv $MOUNT_POINT/lib/firmware $MOUNT_POINT/.firmware
     sudo rm -rf $MOUNT_POINT/*
     sudo tar zxf ${UBUNTU_ROOTFS} -C $MOUNT_POINT/
-    sudo mkdir -p $MOUNT_POINT/lib/modules
-    sudo mv $MOUNT_POINT/.modules/* $MOUNT_POINT/lib/modules/
-    sudo rmdir $MOUNT_POINT/.modules
-    sudo mkdir -p $MOUNT_POINT/lib/firmware
-    sudo mv $MOUNT_POINT/.firmware/* $MOUNT_POINT/lib/firmware/
-    sudo rmdir $MOUNT_POINT/.firmware
+    sudo mv $MOUNT_POINT/.modules $MOUNT_POINT/lib/modules
+    sudo mv $MOUNT_POINT/.firmware $MOUNT_POINT/lib/firmware
     sudo sed -i "s/arm64/${CPU_TYPE_Module}${NEW_MACHINE}/g" $MOUNT_POINT/etc/hostname
     sudo sed -i "s/arm64/${CPU_TYPE_Module}${NEW_MACHINE}/g" $MOUNT_POINT/etc/hosts
     sudo umount $MOUNT_POINT

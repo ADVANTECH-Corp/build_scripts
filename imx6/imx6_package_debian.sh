@@ -168,13 +168,13 @@ EOF
     sudo rm -rf $MOUNT_POINT/*
     sudo tar jxf ${DEBIAN_ROOTFS} -C $MOUNT_POINT/
     sudo mkdir -p $MOUNT_POINT/lib/modules
-    sudo mv $MOUNT_POINT/.modules/* $MOUNT_POINT/lib/modules/
-    sudo rmdir $MOUNT_POINT/.modules
+    sudo cp -a $MOUNT_POINT/.modules/* $MOUNT_POINT/lib/modules/
+    sudo rm -rf $MOUNT_POINT/.modules
     sudo mkdir -p $MOUNT_POINT/lib/firmware
-    sudo mv $MOUNT_POINT/.firmware/* $MOUNT_POINT/lib/firmware/
-    sudo rmdir $MOUNT_POINT/.firmware
-    sudo sed -i "s/armhf/${CPU_TYPE_Module}${NEW_MACHINE}/g" $MOUNT_POINT/etc/hostname
-    sudo sed -i "s/armhf/${CPU_TYPE_Module}${NEW_MACHINE}/g" $MOUNT_POINT/etc/hosts
+    sudo cp -a $MOUNT_POINT/.firmware/* $MOUNT_POINT/lib/firmware/
+    sudo rm -rf $MOUNT_POINT/.firmware
+    sudo sh -c "echo ${CPU_TYPE_Module}${NEW_MACHINE} > $MOUNT_POINT/etc/hostname"
+    sudo sed -i "s/\(127\.0\.1\.1 *\).*/\1${CPU_TYPE_Module}${NEW_MACHINE}/" $MOUNT_POINT/etc/hosts
 
     # additional operations
     sudo chmod o+x $MOUNT_POINT/usr/lib/dbus-1.0/dbus-daemon-launch-helper

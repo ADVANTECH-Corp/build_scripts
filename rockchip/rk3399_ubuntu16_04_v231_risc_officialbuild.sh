@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PLATFORM_PREFIX="RK3399_RISC_"
-VER_PREFIX="DUV"
+VER_PREFIX="UIV"
 
 
 idx=0

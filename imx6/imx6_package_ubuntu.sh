@@ -101,7 +101,7 @@ function generate_mksd_linux()
 
 function create_ubuntu_image()
 {
-    SDCARD_SIZE=3100
+    SDCARD_SIZE=3700
 
     YOCTO_IMAGE_SDCARD="fsl-image-*${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
     YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool.tgz"
@@ -146,7 +146,7 @@ EOF
     sudo sync
 
     rootfs_start=`sudo fdisk -u -l ${LOOP_DEV} | grep ${LOOP_DEV}p2 | awk '{print $2}'`
-    sudo fdisk -u $LOOP_DEV << EOF &>/dev/null
+    sudo fdisk -u $LOOP_DEV << EOF
 d
 2
 n
@@ -161,19 +161,26 @@ EOF
     sudo resize2fs ${LOOP_DEV}p2
 
     # Update Ubuntu rootfs
+    echo "[ADV] update rootfs"
     sudo mount ${LOOP_DEV}p2 $MOUNT_POINT/
-    sudo mkdir -p $MOUNT_POINT/.modules
-    sudo mv $MOUNT_POINT/lib/modules/* $MOUNT_POINT/.modules/
+    sudo mv $MOUNT_POINT/lib/modules $MOUNT_POINT/.modules
+    sudo mv $MOUNT_POINT/lib/firmware $MOUNT_POINT/.firmware
     sudo rm -rf $MOUNT_POINT/*
     sudo tar zxf ${UBUNTU_ROOTFS} -C $MOUNT_POINT/
     sudo mkdir -p $MOUNT_POINT/lib/modules
-    sudo mv $MOUNT_POINT/.modules/* $MOUNT_POINT/lib/modules/
-    sudo rmdir $MOUNT_POINT/.modules
+    sudo cp -a $MOUNT_POINT/.modules/* $MOUNT_POINT/lib/modules/
+    sudo rm -rf $MOUNT_POINT/.modules
+    sudo mkdir -p $MOUNT_POINT/lib/firmware
+    sudo cp -a $MOUNT_POINT/.firmware/* $MOUNT_POINT/lib/firmware/
+    sudo rm -rf $MOUNT_POINT/.firmware
+    sudo sh -c "echo ${CPU_TYPE_Module}${NEW_MACHINE} > $MOUNT_POINT/etc/hostname"
+    sudo sed -i "s/\(127\.0\.1\.1 *\).*/\1${CPU_TYPE_Module}${NEW_MACHINE}/" $MOUNT_POINT/etc/hosts
     sudo umount $MOUNT_POINT
     sudo losetup -d ${LOOP_DEV}
     sudo rm ${UBUNTU_IMAGE/.img}.sdcard
 
     # generate flash_tool
+    echo "[ADV] generate flash tool"
     FLASH_DIR=${UBUNTU_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool
     sudo mkdir -p $FLASH_DIR/image
     sudo cp ${UBUNTU_IMAGE} $FLASH_DIR/image/${UBUNTU_IMAGE/.img}.sdcard
@@ -185,6 +192,7 @@ EOF
     sudo mv ${FLASH_DIR}.tgz* $STORAGE_PATH
 
     # output file
+    echo "[ADV] output files"
     gzip -c9 ${UBUNTU_IMAGE} > ${UBUNTU_IMAGE}.gz
     generate_md5 ${UBUNTU_IMAGE}.gz
     generate_csv ${UBUNTU_IMAGE}.gz

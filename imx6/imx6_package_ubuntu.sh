@@ -173,14 +173,14 @@ EOF
     echo "[ADV] update rootfs"
     sudo mount ${LOOP_DEV}p2 $MOUNT_POINT/
     sudo mv $MOUNT_POINT/etc/modprobe.d $MOUNT_POINT/.modprobe.d
-    sudo mv $MOUNT_POINT/etc/module-load.d $MOUNT_POINT/.module-load.d
+    sudo mv $MOUNT_POINT/etc/modules-load.d $MOUNT_POINT/.modules-load.d
     sudo mv $MOUNT_POINT/etc/udev $MOUNT_POINT/.udev
     sudo mv $MOUNT_POINT/lib/modules $MOUNT_POINT/.modules
     sudo mv $MOUNT_POINT/lib/firmware $MOUNT_POINT/.firmware
     sudo rm -rf $MOUNT_POINT/*
     sudo tar zxf ${UBUNTU_ROOTFS} -C $MOUNT_POINT/
     copy_folder .modprobe.d etc/modprobe.d
-    copy_folder .module-load.d etc/module-load.d
+    copy_folder .modules-load.d etc/modules-load.d
     copy_folder .udev etc/udev
     copy_folder .modules lib/modules
     copy_folder .firmware lib/firmware

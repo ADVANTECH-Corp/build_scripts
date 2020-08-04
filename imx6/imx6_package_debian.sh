@@ -99,6 +99,15 @@ function generate_mksd_linux()
     sudo chown 0.0 $OUTPUT_DIR/mk_inand/mksd-linux.sh
 }
 
+function copy_folder()
+{
+    SRC_DIR=$1
+    DEST_DIR=$2
+    sudo mkdir -p $MOUNT_POINT/${DEST_DIR}
+    sudo cp -a $MOUNT_POINT/${SRC_DIR}/* $MOUNT_POINT/${DEST_DIR}/
+    sudo rm -rf $MOUNT_POINT/${SRC_DIR}
+}
+
 function create_debian_image()
 {
     SDCARD_SIZE=3700
@@ -163,16 +172,23 @@ EOF
     # Update Debian rootfs
     echo "[ADV] update rootfs"
     sudo mount ${LOOP_DEV}p2 $MOUNT_POINT/
+    sudo mv $MOUNT_POINT/etc/modprobe.d $MOUNT_POINT/.modprobe.d
+    sudo mv $MOUNT_POINT/etc/modules-load.d $MOUNT_POINT/.modules-load.d
+    sudo mv $MOUNT_POINT/etc/udev $MOUNT_POINT/.udev
     sudo mv $MOUNT_POINT/lib/modules $MOUNT_POINT/.modules
     sudo mv $MOUNT_POINT/lib/firmware $MOUNT_POINT/.firmware
     sudo rm -rf $MOUNT_POINT/*
-    sudo tar jxf ${DEBIAN_ROOTFS} -C $MOUNT_POINT/
-    sudo mkdir -p $MOUNT_POINT/lib/modules
-    sudo cp -a $MOUNT_POINT/.modules/* $MOUNT_POINT/lib/modules/
-    sudo rm -rf $MOUNT_POINT/.modules
-    sudo mkdir -p $MOUNT_POINT/lib/firmware
-    sudo cp -a $MOUNT_POINT/.firmware/* $MOUNT_POINT/lib/firmware/
-    sudo rm -rf $MOUNT_POINT/.firmware
+    if [ ${DEBIAN_ROOTFS/*.} == "bz2" ] ; then
+        sudo tar jxf ${DEBIAN_ROOTFS} -C $MOUNT_POINT/
+    else
+        sudo tar zxf ${DEBIAN_ROOTFS} -C $MOUNT_POINT/
+    fi
+    copy_folder .modprobe.d etc/modprobe.d
+    copy_folder .modules-load.d etc/modules-load.d
+    copy_folder .udev etc/udev
+    copy_folder .modules lib/modules
+    copy_folder .firmware lib/firmware
+
     sudo sh -c "echo ${CPU_TYPE_Module}${NEW_MACHINE} > $MOUNT_POINT/etc/hostname"
     sudo sed -i "s/\(127\.0\.1\.1 *\).*/\1${CPU_TYPE_Module}${NEW_MACHINE}/" $MOUNT_POINT/etc/hosts
 

@@ -79,6 +79,11 @@ function define_cpu_type()
                         KERNEL_CPU_TYPE="imx8mq"
                         CPU_TYPE="iMX8M"
                         ;;
+                "8MM")
+                        PRODUCT=`expr $1 : '\(.*\).*-'`
+                        KERNEL_CPU_TYPE="imx8mm"
+                        CPU_TYPE="iMX8MM"
+                        ;;
                 "8QM")
                         PRODUCT=`expr $1 : '\(.*\).*-'`
                         KERNEL_CPU_TYPE="imx8qm"

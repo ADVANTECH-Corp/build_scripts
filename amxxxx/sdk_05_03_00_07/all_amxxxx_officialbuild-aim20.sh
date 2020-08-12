@@ -27,6 +27,9 @@ fi
 if [ "$EPCR3220A1" == "true" ]; then
 	MACHINE_LIST="$MACHINE_LIST am335xepcr3220a1"
 fi
+if [ "$AM335x_EVM" == "true" ]; then
+	MACHINE_LIST="$MACHINE_LIST am335x-evm"
+fi
 
 export MACHINE_LIST
 ./amxxxx_officialbuild-aim20.sh $VERSION_NUM

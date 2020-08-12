@@ -74,6 +74,9 @@ function building()
         echo "[ADV] build uboot"
 		cd $CURR_PATH/$ROOT_DIR/u-boot
 		#make clean
+		if [ "$NEW_MACHINE" == "dmssa53" ]; then
+			git checkout -b rk3399_linux_v220_dmssa53 remotes/advantech-github/rk3399_linux_v220_dmssa53
+		fi
 		./make.sh rk3399 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 	elif [ "$1" == "kernel" ]; then
 		echo "[ADV] build kernel  = $KERNEL_CONFIG"
@@ -96,6 +99,10 @@ function building()
 		./build.sh rootfs
     elif [ "$1" == "debian" ]; then
         cd $CURR_PATH/$ROOT_DIR/rootfs
+        if [ "$NEW_MACHINE" == "dmssa53" ]; then
+            #git checkout -b rk3399_v220_dmssa53 remotes/m/rk3399_v220_dmssa53
+			git checkout -b rk3399_linux_v220_dmssa53 remotes/origin/rk3399_linux_v220_dmssa53
+        fi
         echo "[ADV] install tools for build debian"
         sudo apt-get install -y binfmt-support
         sudo apt-get install -y qemu-user-static
@@ -115,25 +122,22 @@ function building()
         echo "[ADV]-------------FOR arm64  64-----------"
         echo "[ADV] arm64 mk-base-debian.sh"
         RELEASE=stretch TARGET=desktop ARCH=arm64 ./mk-base-debian.sh
-        echo "[ADV] mk-rootfs-stretch-arm64.sh"
-        VERSION=debug ARCH=arm64 ./mk-rootfs-stretch-arm64.sh
-        echo "[ADV] add advantech "
-        cp -aRL $CURR_PATH/$ROOT_DIR/rootfs/adv/* $CURR_PATH/$ROOT_DIR/rootfs
-        ./mk-adv.sh ARCH=arm64
-        ./mk-adv-module.sh ARCH=arm64
-        ./mk-adv-word.sh ARCH=arm64
-		echo "[ADV] check MACHINE is dms53"
-	if [ "$NEW_MACHINE" == "dmssa53" ]; then
-		echo "[ADV] mk-adv-dms53 shell script"
-		./mk-adv-dms53.sh ARCH=arm64
-	fi
-	echo "[ADV] mk-image.sh arm64 "
+        echo "[ADV] mk-rootfs-stretch.sh"
+        VERSION=debug ARCH=arm64 ./mk-rootfs-stretch.sh
+        if [ "$NEW_MACHINE" != "dmssa53" ]; then
+            echo "[ADV] add advantech "
+            cp -aRL $CURR_PATH/$ROOT_DIR/rootfs/adv/* $CURR_PATH/$ROOT_DIR/rootfs
+            ./mk-adv.sh ARCH=arm64
+            ./mk-adv-module.sh ARCH=arm64
+            ./mk-adv-word.sh ARCH=arm64
+        fi
+        echo "[ADV] mk-image.sh arm64 "
         ./mk-image.sh
         sudo tar cvf binary.tgz $CURR_PATH/$ROOT_DIR/rootfs/binary
-	echo "[ADV]---------------------------------"
-    	cd $CURR_PATH/$ROOT_DIR 
-    	./build.sh BoardConfig_debian.mk
-	    ./mkfirmware.sh
+        echo "[ADV]---------------------------------"
+        cd $CURR_PATH/$ROOT_DIR 
+        ./build.sh BoardConfig_debian.mk
+        ./mkfirmware.sh
 
 
     else

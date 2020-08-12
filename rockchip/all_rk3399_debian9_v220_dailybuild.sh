@@ -31,7 +31,7 @@ if [ "$DMSSA53" == "true" ]; then
 export KERNEL_DTB
 export KERNEL_CONFIG
 export MACHINE_LIST
-./rk3399_debian9_v210_dailybuild.sh dmssa53 $VERSION_NUM
+./rk3399_debian9_v220_dailybuild.sh dmssa53 $VERSION_NUM
 fi
 echo "[ADV] All done!"
 

@@ -192,7 +192,11 @@ function building()
 		echo "[ADV] build android"
 		cd $CURR_PATH/$ROOT_DIR
 		source build/envsetup.sh
-		lunch rk3399_box-userdebug
+		if [ ${MACHINE_LIST} == "ds211" ]; then
+			lunch ds211_box-userdebug
+		else
+			lunch rk3399_box-userdebug
+		fi
 		make clean
 		make -j4 2>> $CURR_PATH/$ROOT_DIR/$LOG3_FILE
 	else

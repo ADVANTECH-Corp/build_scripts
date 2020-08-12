@@ -4,6 +4,7 @@ echo "[ADV] FTP_SITE = ${FTP_SITE}"
 echo "[ADV] FTP_DIR = ${FTP_DIR}"
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] VERSION = ${VERSION}"
+echo "[ADV] AIM_VERSION = ${AIM_VERSION}"
 echo "[ADV] STORED = ${STORED}"
 
 echo "[ADV] UBUNTU_VERSION = ${UBUNTU_VERSION}"
@@ -20,6 +21,13 @@ if [ -e $MOUNT_POINT ]; then
 else
 	echo "[ADV] mkdir $MOUNT_POINT"
 	mkdir -p $MOUNT_POINT
+fi
+
+# Loop device
+LOOP_DEV=`sudo losetup -f`
+if [ -z $LOOP_DEV ]; then
+	echo "loop device busy!"
+	exit 1
 fi
 
 function get_ubuntu_rootfs()
@@ -84,17 +92,35 @@ END_OF_CSV
 
 function generate_mksd_linux()
 {
-    sudo mkdir $MOUNT_POINT/mk_inand
+    OUTPUT_DIR=$1
+    sudo mkdir $OUTPUT_DIR/mk_inand
     chmod 755 $CURR_PATH/mksd-linux.sh
-    sudo cp $CURR_PATH/mksd-linux.sh $MOUNT_POINT/mk_inand/
-    sudo chown 0.0 $MOUNT_POINT/mk_inand/mksd-linux.sh
+    sudo cp $CURR_PATH/mksd-linux.sh $OUTPUT_DIR/mk_inand/
+    sudo chown 0.0 $OUTPUT_DIR/mk_inand/mksd-linux.sh
+}
+
+function copy_folder()
+{
+    SRC_DIR=$1
+    DEST_DIR=$2
+    sudo mkdir -p $MOUNT_POINT/${DEST_DIR}
+    sudo cp -a $MOUNT_POINT/${SRC_DIR}/* $MOUNT_POINT/${DEST_DIR}/
+    sudo rm -rf $MOUNT_POINT/${SRC_DIR}
 }
 
 function create_ubuntu_image()
 {
-    SDCARD_SIZE=7200
+    SDCARD_SIZE=3700
 
-    YOCTO_IMAGE="fsl-image-qt5-${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
+    YOCTO_IMAGE_SDCARD="fsl-image-*${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
+    YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool.tgz"
+
+    if [ ${FTP_DIR} == "imx6_yocto_bsp_2.1_2.0.0" ]; then
+        YOCTO_IMAGE=${YOCTO_IMAGE_SDCARD}
+    else
+        YOCTO_IMAGE=${YOCTO_IMAGE_TGZ}
+    fi
+
     UBUNTU_IMAGE="${UBUNTU_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_${DATE}.img"
     pftp -v -n ${FTP_SITE} << EOF
 user "ftpuser" "P@ssw0rd"
@@ -106,6 +132,12 @@ mget ${YOCTO_IMAGE}
 close
 quit
 EOF
+    #  Yocto image
+    if [ ${FTP_DIR} != "imx6_yocto_bsp_2.1_2.0.0" ]; then
+	tar zxf ${YOCTO_IMAGE_TGZ}
+	mv ${YOCTO_IMAGE_TGZ/.tgz}/image/*.sdcard .
+	YOCTO_IMAGE=${YOCTO_IMAGE_SDCARD}
+    fi
 
     # Maybe the loop device is occuppied, unmount it first
     sudo umount $MOUNT_POINT
@@ -113,17 +145,6 @@ EOF
 
     echo "[ADV] rename yocto image file to ubuntu image file"
     sudo mv ${YOCTO_IMAGE} ${UBUNTU_IMAGE}
-    sudo losetup ${LOOP_DEV} ${UBUNTU_IMAGE}
-    sudo mount ${LOOP_DEV}p2 $MOUNT_POINT/
-    sudo mkdir -p $MOUNT_POINT/.modules
-    sudo mv $MOUNT_POINT/lib/modules/* $MOUNT_POINT/.modules/
-    sudo rm -rf $MOUNT_POINT/*
-    sudo tar zxf ${UBUNTU_ROOTFS} -C $MOUNT_POINT/
-    sudo mkdir -p $MOUNT_POINT/lib/modules
-    sudo mv $MOUNT_POINT/.modules/* $MOUNT_POINT/lib/modules/
-    sudo rmdir $MOUNT_POINT/.modules
-    sudo umount $MOUNT_POINT
-    sudo losetup -d ${LOOP_DEV}
 
     # resize
     sudo mv ${UBUNTU_IMAGE} ${UBUNTU_IMAGE/.img}.sdcard
@@ -134,7 +155,7 @@ EOF
     sudo sync
 
     rootfs_start=`sudo fdisk -u -l ${LOOP_DEV} | grep ${LOOP_DEV}p2 | awk '{print $2}'`
-    sudo fdisk -u $LOOP_DEV << EOF &>/dev/null
+    sudo fdisk -u $LOOP_DEV << EOF
 d
 2
 n
@@ -148,16 +169,42 @@ EOF
     sudo e2fsck -f -y ${LOOP_DEV}p2
     sudo resize2fs ${LOOP_DEV}p2
 
-    # insert mksd-linux.sh & sdcard image
-    sudo mount ${LOOP_DEV}p2 $MOUNT_POINT
-    sudo mkdir -p $MOUNT_POINT/image
-    sudo mv ${UBUNTU_IMAGE/.img}.sdcard $MOUNT_POINT/image/
-    sudo chown -R 0.0 $MOUNT_POINT/image
-    generate_mksd_linux
+    # Update Ubuntu rootfs
+    echo "[ADV] update rootfs"
+    sudo mount ${LOOP_DEV}p2 $MOUNT_POINT/
+    sudo mv $MOUNT_POINT/etc/modprobe.d $MOUNT_POINT/.modprobe.d
+    sudo mv $MOUNT_POINT/etc/modules-load.d $MOUNT_POINT/.modules-load.d
+    sudo mv $MOUNT_POINT/etc/udev $MOUNT_POINT/.udev
+    sudo mv $MOUNT_POINT/lib/modules $MOUNT_POINT/.modules
+    sudo mv $MOUNT_POINT/lib/firmware $MOUNT_POINT/.firmware
+    sudo rm -rf $MOUNT_POINT/*
+    sudo tar zxf ${UBUNTU_ROOTFS} -C $MOUNT_POINT/
+    copy_folder .modprobe.d etc/modprobe.d
+    copy_folder .modules-load.d etc/modules-load.d
+    copy_folder .udev etc/udev
+    copy_folder .modules lib/modules
+    copy_folder .firmware lib/firmware
+
+    sudo sh -c "echo ${CPU_TYPE_Module}${NEW_MACHINE} > $MOUNT_POINT/etc/hostname"
+    sudo sed -i "s/\(127\.0\.1\.1 *\).*/\1${CPU_TYPE_Module}${NEW_MACHINE}/" $MOUNT_POINT/etc/hosts
     sudo umount $MOUNT_POINT
-    sudo losetup -d $LOOP_DEV
+    sudo losetup -d ${LOOP_DEV}
+    sudo rm ${UBUNTU_IMAGE/.img}.sdcard
+
+    # generate flash_tool
+    echo "[ADV] generate flash tool"
+    FLASH_DIR=${UBUNTU_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool
+    sudo mkdir -p $FLASH_DIR/image
+    sudo cp ${UBUNTU_IMAGE} $FLASH_DIR/image/${UBUNTU_IMAGE/.img}.sdcard
+    sudo chown -R 0.0 $FLASH_DIR/image
+    generate_mksd_linux $FLASH_DIR
+
+    tar czf ${FLASH_DIR}.tgz $FLASH_DIR
+    generate_md5 ${FLASH_DIR}.tgz
+    sudo mv ${FLASH_DIR}.tgz* $STORAGE_PATH
 
     # output file
+    echo "[ADV] output files"
     gzip -c9 ${UBUNTU_IMAGE} > ${UBUNTU_IMAGE}.gz
     generate_md5 ${UBUNTU_IMAGE}.gz
     generate_csv ${UBUNTU_IMAGE}.gz
@@ -227,8 +274,13 @@ do
     *) echo "cannot handle \"$NEW_MACHINE\""; exit 1 ;;
     esac
 
-    PRODUCT="${PROD}LI"
-    UBUNTU_PRODUCT="${PROD}${OS_PREFIX}I"
+    if [ ${FTP_DIR} == "imx6_yocto_bsp_2.1_2.0.0" ]; then
+        PRODUCT="${PROD}LI"
+        UBUNTU_PRODUCT="${PROD}${OS_PREFIX}I"
+    else
+        PRODUCT="${PROD}${AIM_VERSION}LI"
+        UBUNTU_PRODUCT="${PROD}${AIM_VERSION}${OS_PREFIX}I"
+    fi
 
     create_ubuntu_image
 done

@@ -375,13 +375,11 @@ function generate_OTA_update_package()
         cp ota-package.sh $DEPLOY_IMAGE_PATH
         cd $DEPLOY_IMAGE_PATH
 
-        echo "[ADV] creating ${IMAGE_DIR}_kernel.zip for OTA package ..."
-        DTB_FILE_IN="Image-adv-${KERNEL_CPU_TYPE}*[0-9].dtb"
-        DTB_FILE_OUT=`ls $DTB_FILE | cut -d '-' -f 2-`
-        cp $DTB_FILE_IN $DTB_FILE_OUT
-        ./ota-package.sh -k Image -d ${DTB_FILE_OUT} -m modules-${KERNEL_CPU_TYPE}${PRODUCT}.tgz -o update_${IMAGE_DIR}_kernel
+        echo "[ADV] creating update_${IMAGE_DIR}_kernel.zip for OTA package ..."
+        DTB_FILE=`ls adv-${KERNEL_CPU_TYPE}-${PRODUCT/[ab][0-9]}-[ab][0-9].dtb`
+        ./ota-package.sh -k Image -d ${DTB_FILE} -m modules-${KERNEL_CPU_TYPE}${PRODUCT}.tgz -o update_${IMAGE_DIR}_kernel
 
-        echo "[ADV] creating ${IMAGE_DIR}_rootfs.zip for OTA package ..."
+        echo "[ADV] creating update_${IMAGE_DIR}_rootfs.zip for OTA package ..."
         ./ota-package.sh -r $DEPLOY_IMAGE_NAME-${KERNEL_CPU_TYPE}${PRODUCT}.ext4 -o update_${IMAGE_DIR}_rootfs
 
         mv update*.zip $CURR_PATH

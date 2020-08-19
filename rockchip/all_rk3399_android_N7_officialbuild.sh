@@ -26,7 +26,7 @@ if [ "$RSB4710A2LITE" == "true" ]; then
 	KERNEL_DEFCONFIG=rk3399_adv_defconfig
 	KERNEL_DTB=rk3399-rsb4710-a2-lite.img
 	ANDROID_PRODUCT=rk3399_rsb4710li-userdebug
-	MACHINE_LIST="$MACHINE_LIST rsb_4710"
+	MACHINE_LIST="$MACHINE_LIST rsb_4710li"
 
 	export UBOOT_DEFCONFIG
 	export KERNEL_DEFCONFIG

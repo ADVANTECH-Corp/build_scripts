@@ -7,7 +7,7 @@ MACHINE_LIST=""
 
 #rk3399_projects
 if [ "$RSB4710A2" == "true" ]; then
-	UBOOT_DEFCONFIG=rk3399_rsb4710a1_2G_defconfig
+	UBOOT_DEFCONFIG=rk3399_rsb4710a2_2G_defconfig
 	KERNEL_DEFCONFIG=rk3399_adv_defconfig
 	KERNEL_DTB=rk3399-rsb4710-a2.img
 	ANDROID_PRODUCT=rk3399_rsb4710-userdebug
@@ -16,7 +16,22 @@ if [ "$RSB4710A2" == "true" ]; then
 	export UBOOT_DEFCONFIG
 	export KERNEL_DEFCONFIG
 	export KERNEL_DTB
-	export ANDROID_PRODUCT	
+	export ANDROID_PRODUCT
+	export MACHINE_LIST
+	./rk3399_android_N7_officialbuild.sh $VERSION_NUM
+fi
+
+if [ "$RSB4710A2LITE" == "true" ]; then
+	UBOOT_DEFCONFIG=rk3399_rsb4710a2_2G_defconfig
+	KERNEL_DEFCONFIG=rk3399_adv_defconfig
+	KERNEL_DTB=rk3399-rsb4710-a2-lite.img
+	ANDROID_PRODUCT=rk3399_rsb4710li-userdebug
+	MACHINE_LIST="$MACHINE_LIST rsb_4710"
+
+	export UBOOT_DEFCONFIG
+	export KERNEL_DEFCONFIG
+	export KERNEL_DTB
+	export ANDROID_PRODUCT
 	export MACHINE_LIST
 	./rk3399_android_N7_officialbuild.sh $VERSION_NUM
 fi
@@ -31,7 +46,7 @@ if [ "$RK3399DEMO" == "true" ]; then
 	export UBOOT_DEFCONFIG
 	export KERNEL_DEFCONFIG
 	export KERNEL_DTB
-	export ANDROID_PRODUCT	
+	export ANDROID_PRODUCT
 	export MACHINE_LIST
 	./rk3399_android_N7_officialbuild.sh $VERSION_NUM
 fi

@@ -263,6 +263,9 @@ function build_yocto_images()
         building linux-imx cleansstate
         building linux-imx
 
+        echo "[ADV] Build recovery image!"
+        building initramfs-debug-image
+
 	# Build full image
         building $DEPLOY_IMAGE_NAME
 }
@@ -349,6 +352,23 @@ function prepare_images()
         rm -rf $OUTPUT_DIR
 }
 
+function generate_OTA_update_package()
+{
+        echo "[ADV] generate OTA update package"
+        cp ota-package.sh $DEPLOY_IMAGE_PATH
+        cd $DEPLOY_IMAGE_PATH
+
+        echo "[ADV] creating update_${IMAGE_DIR}_kernel.zip for OTA package ..."
+        DTB_FILE=`ls zImage-${KERNEL_CPU_TYPE}-${PRODUCT/[ab][0-9]}-[ab][0-9].dtb | cut -d '-' -f 2-`
+        ./ota-package.sh -k Image -d ${DTB_FILE} -m modules-${KERNEL_CPU_TYPE}${PRODUCT}.tgz -o update_${IMAGE_DIR}_kernel
+
+        echo "[ADV] creating update_${IMAGE_DIR}_rootfs.zip for OTA package ..."
+        ./ota-package.sh -r $DEPLOY_IMAGE_NAME-${KERNEL_CPU_TYPE}${PRODUCT}.ext4 -o update_${IMAGE_DIR}_rootfs
+
+        mv update*.zip $CURR_PATH
+        cd $CURR_PATH
+}
+
 function copy_image_to_storage()
 {
 	echo "[ADV] copy $1 images to $STORAGE_PATH"
@@ -373,6 +393,9 @@ function copy_image_to_storage()
 			generate_csv $IMAGE_DIR.img.gz
 			mv ${IMAGE_DIR}.img.csv $STORAGE_PATH
 			mv -f $IMAGE_DIR.img.gz $STORAGE_PATH
+		;;
+		"ota")
+			mv -f update*.zip $STORAGE_PATH
 		;;
 		*)
 		echo "[ADV] copy_image_to_storage: invalid parameter #1!"
@@ -427,7 +450,7 @@ else #"$PRODUCT" != "$VER_PREFIX"
         prepare_images misc $MISC_DIR
         copy_image_to_storage misc
 
-        echo "[ADV] create module"
+        echo "[ADV] create module files"
         DEPLOY_MODULES_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
         MODULES_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_modules
         prepare_images modules $MODULES_DIR
@@ -437,6 +460,10 @@ else #"$PRODUCT" != "$VER_PREFIX"
         ENG_IMAGE_DIR="$IMAGE_DIR"_"$MEMORY"_eng
         prepare_images eng $ENG_IMAGE_DIR
         copy_image_to_storage eng
+
+        echo "[ADV] generate ota packages"
+        generate_OTA_update_package
+        copy_image_to_storage ota
 
         save_temp_log
 fi

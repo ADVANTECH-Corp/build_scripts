@@ -3,7 +3,7 @@
 ADV_PATH="\
 u-boot \
 kernel \
-\ \
+. \
 "
 
 VER_PREFIX="RK3399_N7_"

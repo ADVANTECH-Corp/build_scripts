@@ -360,7 +360,7 @@ function generate_OTA_update_package()
 
         echo "[ADV] creating update_${IMAGE_DIR}_kernel.zip for OTA package ..."
         DTB_FILE=`ls zImage-${KERNEL_CPU_TYPE}-${PRODUCT/[ab][0-9]}-[ab][0-9].dtb | cut -d '-' -f 2-`
-        ./ota-package.sh -k Image -d ${DTB_FILE} -m modules-${KERNEL_CPU_TYPE}${PRODUCT}.tgz -o update_${IMAGE_DIR}_kernel
+        ./ota-package.sh -k zImage -d ${DTB_FILE} -m modules-${KERNEL_CPU_TYPE}${PRODUCT}.tgz -o update_${IMAGE_DIR}_kernel
 
         echo "[ADV] creating update_${IMAGE_DIR}_rootfs.zip for OTA package ..."
         ./ota-package.sh -r $DEPLOY_IMAGE_NAME-${KERNEL_CPU_TYPE}${PRODUCT}.ext4 -o update_${IMAGE_DIR}_rootfs

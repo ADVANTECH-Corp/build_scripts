@@ -64,7 +64,7 @@ UPDATE_DIR="ota-update"
 UPDATE_SCRIPT="updater-script"
 
 # Main
-mkdir ${UPDATE_DIR}
+mkdir -p ${UPDATE_DIR}
 
 if [ ! -z ${BOOTLOADER} ] ; then
     cp ${BOOTLOADER} ${UPDATE_DIR}

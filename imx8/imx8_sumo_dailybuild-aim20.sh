@@ -256,6 +256,33 @@ function set_environment()
 	fi
 }
 
+function clean_yocto_packages()
+{
+        echo "[ADV] build_yocto_image: clean for virtual_libg2d"
+        PACKAGE_LIST=" \
+		imx-qtapplications gstreamer1.0-rtsp-server gst-examples freerdp \
+		imx-gpu-apitrace gstreamer1.0-plugins-good gstreamer1.0-plugins-base \
+		gstreamer1.0-plugins-bad kmscube imx-gpu-sdk opencv imx-gst1.0-plugin \
+		weston "
+        for PACKAGE in ${PACKAGE_LIST}
+        do
+                building ${PACKAGE} cleansstate
+        done
+
+        if [ -z ${DEPLOY_IMAGE_NAME##*qt*} ] ; then
+        echo "[ADV] build_yocto_image: clean for qt5"
+        PACKAGE_LIST=" \
+		qtbase-native qtbase qtdeclarative qtxmlpatterns qtwayland qtmultimedia \
+		qt3d qtgraphicaleffects qt5nmapcarousedemo qt5everywheredemo quitbattery \
+		qtsmarthome qtsensors cinematicexperience qt5nmapper quitindicators qtlocation \
+		qtwebkit qtwebkit-examples qtwebengine chromium-ozone-wayland "
+        for PACKAGE in ${PACKAGE_LIST}
+        do
+                building ${PACKAGE} cleansstate
+        done
+        fi
+}
+
 function build_yocto_images()
 {
         set_environment
@@ -270,20 +297,7 @@ function build_yocto_images()
         building linux-imx
 
         # Clean package to avoid build error
-	echo "[ADV] build_yocto_image: clean virtual_libg2d"
-	building imx-qtapplications cleansstate
-        building gstreamer1.0-rtsp-server cleansstate
-	building gst-examples cleansstate
-	building freerdp cleansstate
-	building imx-gpu-apitrace cleansstate
-	building gstreamer1.0-plugins-good cleansstate
-	building gstreamer1.0-plugins-base cleansstate
-	building gstreamer1.0-plugins-bad cleansstate
-	building kmscube cleansstate
-	building imx-gpu-sdk cleansstate
-	building opencv cleansstate
-	building imx-gst1.0-plugin cleansstate
-	building weston cleansstate
+        clean_yocto_packages
 
         echo "[ADV] Build recovery image!"
         building initramfs-debug-image

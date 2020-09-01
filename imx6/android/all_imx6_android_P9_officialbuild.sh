@@ -17,6 +17,10 @@ if  [ $ROM7720A1 == true ]; then
 	MACHINE_LIST="$MACHINE_LIST rom7720_a1"
 	SOC_NAME="imx8qm"
 fi
+if  [ $ROM5721A1 == true ]; then
+        MACHINE_LIST="$MACHINE_LIST rom5721_a1"
+        SOC_NAME="imx8mm"
+fi
 
 export MACHINE_LIST
 export SOC_NAME

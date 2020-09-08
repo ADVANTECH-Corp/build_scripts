@@ -7,7 +7,7 @@ MEMORY_TYPE=$3
 #--- [platform specific] ---
 VER_PREFIX="imx8"
 TMP_DIR="tmp"
-DEFAULT_DEVICE="imx8qmrom7720a1"
+DEFAULT_DEVICE="imx8mprsb3720a1"
 #---------------------------
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
@@ -84,7 +84,7 @@ function define_cpu_type()
                         KERNEL_CPU_TYPE="imx8mm"
                         CPU_TYPE="iMX8MM"
                         ;;
-				"8MP")
+                "8MP")
                         PRODUCT=`expr $1 : '\(.*\).*-'`
                         KERNEL_CPU_TYPE="imx8mp"
                         CPU_TYPE="iMX8MP"

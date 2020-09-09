@@ -79,7 +79,7 @@ function define_cpu_type()
                         KERNEL_CPU_TYPE="imx8mm"
                         CPU_TYPE="iMX8MM"
                         ;;
-				"8MP")
+		"8MP")
                         PRODUCT=`expr $1 : '\(.*\).*-'`
                         KERNEL_CPU_TYPE="imx8mp"
                         CPU_TYPE="iMX8MP"
@@ -294,7 +294,7 @@ function build_yocto_images()
         building $DEPLOY_IMAGE_NAME
 
 	# Re-build qspi U-Boot
-	if [ "$PRODUCT" == "rom7720a1" ] || [ "$PRODUCT" == "rom5620a1" ] | [ "$PRODUCT" == "rom3620a1" ] || [ "$PRODUCT" == "rom5721a1" || [ "$PRODUCT" == "rsb3720a1"]; then
+	if [ "$PRODUCT" == "rom7720a1" ] || [ "$PRODUCT" == "rom5620a1" ] || [ "$PRODUCT" == "rom3620a1" ] || [ "$PRODUCT" == "rom5721a1" || [ "$PRODUCT" == "rsb3720a1"]; then
 		echo "[ADV] build_yocto_image: build qspi u-boot"
 		echo "UBOOT_CONFIG = \"fspi\"" >> $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf
 		building imx-boot

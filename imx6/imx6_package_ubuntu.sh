@@ -229,7 +229,8 @@ TOTAL_LIST=" \
     RSB6410A2 \
     RSB3430A1_SOLO \
     RSB3430A1 \
-    EBCRS03A1
+    EBCRS03A1 \
+    EBCRB02A1
 "
 MACHINE_LIST=""
 
@@ -271,6 +272,7 @@ do
     rsb6410a2) PROD="6410A2" ;;
     rsb3430a1) PROD="3430A1" ;;
     ebcrs03a1) PROD="RS03A1" ;;
+    ebcrb02a1) PROD="RB02A1" ;;
     *) echo "cannot handle \"$NEW_MACHINE\""; exit 1 ;;
     esac
 

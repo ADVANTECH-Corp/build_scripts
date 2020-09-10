@@ -70,5 +70,8 @@ fi
 if [ $RSB3430A1_SOLO == true ]; then
 	MACHINE_LIST="$MACHINE_LIST imx6dlrsb3430a1"
 fi
+if [ $EBCRB02A1 == true ]; then
+	MACHINE_LIST="$MACHINE_LIST imx6qebcrb02a1"
+fi
 export MACHINE_LIST
 ./imx6_dailybuild.sh

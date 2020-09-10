@@ -132,5 +132,10 @@ if [ $RSB3430A1_SOLO == true ]; then
 	$BUILD_SH rsb3430a1-solo 3430A1"$AIM_VERSION"LIV"$VERSION_NUM" 1G
 	[ "$?" -ne 0 ] && exit 1
 fi
+if [ $EBCRB02A1 == true ]; then
+	PRODUCT="ebcrb02a1"
+	$BUILD_SH ebcrb02a1 rb02A1"$AIM_VERSION"LIV"$VERSION_NUM" 1G-2G
+	[ "$?" -ne 0 ] && exit 1
+fi
 
 echo "[ADV] All done!"

@@ -125,6 +125,11 @@ if [ $RSB3430A1_SOLO == true ]; then
 	./imx6_sumo_officialbuild.sh rsb3430a1-solo 3430A1"$AIM_VERSION"LIV"$VERSION_NUM" 1G fsl-imx-xwayland
 	[ "$?" -ne 0 ] && exit 1
 fi
+if [ $EBCRB02A1 == true ]; then
+	PRODUCT="ebcrb02a1"
+	./imx6_sumo_officialbuild.sh ebcrb02a1 rb02A1"$AIM_VERSION"LIV"$VERSION_NUM" 1G-2G fsl-imx-xwayland
+	[ "$?" -ne 0 ] && exit 1
+fi
 # Push commit
 if [ -n $PRODUCT ]; then
 	./imx6_sumo_officialbuild.sh push_commit $PRODUCT

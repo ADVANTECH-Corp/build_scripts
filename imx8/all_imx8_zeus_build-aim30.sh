@@ -4,7 +4,7 @@ if [ "x${ALSO_BUILD_OFFICIAL_IMAGE}" != "x" ]; then
 	BUILD_SH="./imx8_zeus_dailybuild-aim30.sh"
 	VERSION_NUM=${RELEASE_VERSION}
 else
-	NUM1=`expr $VERSION : 'V\([0-9]*\)'`
+	NUM1=`expr $VERSION : 'V\([0-9A-Z]*\)'`
 	NUM2=`expr $VERSION : '.*[.]\([0-9A-Z]*\)'`
 	# Official release
 	BUILD_SH="./imx8_zeus_officialbuild-aim30.sh"

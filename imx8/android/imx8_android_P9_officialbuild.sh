@@ -81,47 +81,48 @@ function get_source_code()
 
 function check_tag_and_checkout()
 {
-	FILE_PATH=$1
-	echo "check_tag_and_checkout FILE_PATH:${FILE_PATH}"
-	if [ -d "$FILE_PATH" ];then
-		cd $FILE_PATH
-		RESPOSITORY_TAG=`git tag | grep $VER_TAG`
-		if [ "$RESPOSITORY_TAG" != "" ]; then
-			echo "[ADV] [FILE_PATH] repository has been tagged ,and check to this $VER_TAG version"
-			REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
-			git checkout $VER_TAG
-			#git tag --delete $VER_TAG
-			#git push --delete $REMOTE_SERVER refs/tags/$VER_TAG
-		else
-			echo "[ADV] [FILE_PATH] repository isn't tagged ,nothing to do"
-		fi
-		cd $CURR_PATH
-	else
-		echo "[ADV] Directory $FILE_PATH doesn't exist"
-		exit 1
-	fi
+        FILE_PATH=$1
+
+        if [ -d "$CURR_PATH/$ROOT_DIR/$FILE_PATH" ];then
+                cd $CURR_PATH/$ROOT_DIR/$FILE_PATH
+                RESPOSITORY_TAG=`git tag | grep $VER_TAG`
+                if [ "$RESPOSITORY_TAG" != "" ]; then
+                        echo "[ADV] [FILE_PATH] repository has been tagged ,and check to this $VER_TAG version"
+                        REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+                        git checkout $VER_TAG
+                        #git tag --delete $VER_TAG
+                        #git push --delete $REMOTE_SERVER refs/tags/$VER_TAG
+                else
+                        echo "[ADV] [FILE_PATH] repository isn't tagged ,nothing to do"
+                fi
+                cd $CURR_PATH
+        else
+                echo "[ADV] Directory $ROOT_DIR/$FILE_PATH doesn't exist"
+                exit 1
+        fi
 }
 
 function check_tag_and_replace()
 {
-	FILE_PATH=$1
-	REMOTE_URL=$2
-	REMOTE_BRANCH=$3
-	echo "check_tag_and_replace FILE_PATH:${FILE_PATH}"
-	HASH_ID=`git ls-remote $REMOTE_URL $VER_TAG | awk '{print $1}'`
-	if [ "$HASH_ID" != "" ]; then
-			echo "[ADV] $REMOTE_URL has been tagged ,ID is $HASH_ID"
-	else
-			HASH_ID=`git ls-remote $REMOTE_URL | grep refs/heads/$REMOTE_BRANCH | awk '{print $1}'`
-			echo "[ADV] $REMOTE_URL isn't tagged ,get latest HASH_ID is $HASH_ID"
-	fi
-	sed -i "s/"\$\{AUTOREV\}"/$HASH_ID/g" $ROOT_DIR/$FILE_PATH
+        FILE_PATH=$1
+        REMOTE_URL=$2
+        REMOTE_BRANCH=$3
+
+        HASH_ID=`git ls-remote $REMOTE_URL $VER_TAG | awk '{print $1}'`
+        if [ "$HASH_ID" != "" ]; then
+                echo "[ADV] $REMOTE_URL has been tagged ,ID is $HASH_ID"
+        else
+                HASH_ID=`git ls-remote $REMOTE_URL | grep refs/heads/$REMOTE_BRANCH | awk '{print $1}'`
+                echo "[ADV] $REMOTE_URL isn't tagged ,get latest HASH_ID is $HASH_ID"
+        fi
+        sed -i "s/"\$\{AUTOREV\}"/$HASH_ID/g" $ROOT_DIR/$FILE_PATH
 }
 
 function auto_add_tag()
 {
 	FILE_PATH=$1
 	echo "[ADV] $FILE_PATH"
+        cd $CURR_PATH
 	if [ -d "$FILE_PATH" ];then
 			cd $FILE_PATH
 			HEAD_HASH_ID=`git rev-parse HEAD`
@@ -302,9 +303,9 @@ function building()
 	LOG3_FILE="$NEW_MACHINE"_Build3.log
 
 	if [ "$1" == "android" ]; then
-		#make -j4 droid otapackage 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 		make -j8 bootloader 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 		make -j8 bootimage 2>> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
+                make dtboimage -j8 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 		make -j8 2>> $CURR_PATH/$ROOT_DIR/$LOG3_FILE
 	else
 		make -j8 $1 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE

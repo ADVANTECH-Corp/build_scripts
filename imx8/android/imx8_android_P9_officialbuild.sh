@@ -351,7 +351,7 @@ function build_android_images()
 	set_environment
 	# Android & OTA images
 	building android
-	building otapackage
+	#building otapackage
 }
 
 function prepare_images()

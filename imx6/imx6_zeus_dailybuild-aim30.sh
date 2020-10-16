@@ -349,7 +349,6 @@ function prepare_images()
                         chmod 755 $CURR_PATH/mkspi-advboot.sh
                         sudo cp $CURR_PATH/mkspi-advboot.sh $OUTPUT_DIR/recovery/
                         ;;
-                        ;;
                 *)
                         echo "[ADV] prepare_images: invalid parameter #1!"
                         exit 1;

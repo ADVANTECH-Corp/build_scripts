@@ -64,33 +64,22 @@ function define_cpu_type()
 {
         CPU_TYPE=`expr $1 : '.*-\(.*\)$'`
         case $CPU_TYPE in
-                "8X")
+                "solo")
                         PRODUCT=`expr $1 : '\(.*\).*-'`
-                        KERNEL_CPU_TYPE="imx8qxp"
-                        CPU_TYPE="iMX8X"
+                        UBOOT_CPU_TYPE="mx6dl"
+                        KERNEL_CPU_TYPE="imx6dl"
+                        CPU_TYPE="DualLiteSolo"
                         ;;
-                "8M")
+                "plus")
                         PRODUCT=`expr $1 : '\(.*\).*-'`
-                        KERNEL_CPU_TYPE="imx8mq"
-                        CPU_TYPE="iMX8M"
-                        ;;
-                "8MM")
-                        PRODUCT=`expr $1 : '\(.*\).*-'`
-                        KERNEL_CPU_TYPE="imx8mm"
-                        CPU_TYPE="iMX8MM"
-                        ;;
-		"8MP")
-                        PRODUCT=`expr $1 : '\(.*\).*-'`
-                        KERNEL_CPU_TYPE="imx8mp"
-                        CPU_TYPE="iMX8MP"
-                        ;;
-                "8QM")
-                        PRODUCT=`expr $1 : '\(.*\).*-'`
-                        KERNEL_CPU_TYPE="imx8qm"
-                        CPU_TYPE="iMX8QM"
+                        UBOOT_CPU_TYPE="mx6qp"
+                        KERNEL_CPU_TYPE="imx6qp"
+                        CPU_TYPE="DualQuadPlus"
                         ;;
                 *)
-                        # Do nothing
+                        UBOOT_CPU_TYPE="mx6q"
+                        KERNEL_CPU_TYPE="imx6q"
+                        CPU_TYPE="DualQuad"
                         ;;
         esac
 }

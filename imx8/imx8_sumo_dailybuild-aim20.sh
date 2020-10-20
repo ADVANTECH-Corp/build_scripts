@@ -353,6 +353,16 @@ function prepare_images()
                         bunzip2 -f $DEPLOY_IMAGE_PATH/$FILE_NAME.bz2
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
                         ;;
+		"individually")
+			mkdir $OUTPUT_DIR/image $OUTPUT_DIR/mk_inand
+			sudo cp $CURR_PATH/individually-script-tool/* $OUTPUT_DIR/mk_inand/
+			sudo chmod 755 $OUTPUT_DIR/mk_inand/*
+                        FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.tar.bz2"
+                        cp $DEPLOY_IMAGE_PATH/$FILE_NAME 					$OUTPUT_DIR/image/rootfs.tar.bz2
+			cp $DEPLOY_IMAGE_PATH/adv-${KERNEL_CPU_TYPE}*dtb			$OUTPUT_DIR/image
+			cp $DEPLOY_IMAGE_PATH/Image						$OUTPUT_DIR/image
+			cp $DEPLOY_IMAGE_PATH/imx-boot-"${KERNEL_CPU_TYPE}${PRODUCT}"-sd.bin	$OUTPUT_DIR/image/flash.bin
+			cp $DEPLOY_IMAGE_PATH/"${KERNEL_CPU_TYPE}"*bin				$OUTPUT_DIR/image
                 "flash")
                         mkdir $OUTPUT_DIR/image $OUTPUT_DIR/mk_inand
                         # normal image
@@ -369,7 +379,7 @@ function prepare_images()
 
         # Package image file
         case $IMAGE_TYPE in
-                "flash" | "modules" | "misc" | "imx-boot")
+                "flash" | "modules" | "misc" | "imx-boot" | "individually")
                         echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
                         tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
                         generate_md5 ${OUTPUT_DIR}.tgz
@@ -411,6 +421,9 @@ function copy_image_to_storage()
 		;;
 		"flash")
 			mv -f ${FLASH_DIR}.tgz $STORAGE_PATH
+		;;
+		"individually")
+			mv -f ${INDIVIDUAL_DIR}.tgz $STORAGE_PATH
 		;;
 		"misc")
 			mv -f ${MISC_DIR}.tgz $STORAGE_PATH
@@ -475,6 +488,11 @@ else #"$PRODUCT" != "$VER_PREFIX"
         FLASH_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_flash_tool
         prepare_images flash $FLASH_DIR
         copy_image_to_storage flash
+
+        echo "[ADV] create individually script tool "
+        INDIVIDUAL_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_individually_script_tool
+        prepare_images individually $INDIVIDUAL_DIR
+        copy_image_to_storage individually
 
         echo "[ADV] create imx-boot files"
         DEPLOY_IMX_BOOT_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/imx-boot/*/git"

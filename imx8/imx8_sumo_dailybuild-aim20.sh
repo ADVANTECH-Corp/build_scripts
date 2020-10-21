@@ -363,6 +363,7 @@ function prepare_images()
 			cp $DEPLOY_IMAGE_PATH/Image						$OUTPUT_DIR/image
 			cp $DEPLOY_IMAGE_PATH/imx-boot-"${KERNEL_CPU_TYPE}${PRODUCT}"-sd.bin	$OUTPUT_DIR/image/flash.bin
 			cp $DEPLOY_IMAGE_PATH/"${KERNEL_CPU_TYPE}"*bin				$OUTPUT_DIR/image
+			;;
                 "flash")
                         mkdir $OUTPUT_DIR/image $OUTPUT_DIR/mk_inand
                         # normal image

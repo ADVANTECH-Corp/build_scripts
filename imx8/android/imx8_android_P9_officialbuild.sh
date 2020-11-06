@@ -178,21 +178,20 @@ function create_xml_and_commit()
 	echo "[ADV]VER_TAG=$VER_TAG"
 	if [ -d "$ROOT_DIR/.repo/manifests" ];then
 		echo "[ADV] Create XML file"
-		cd $ROOT_DIR/.repo
-		cp manifest.xml manifests/$VER_TAG.xml
-		cd manifests
+		cd $ROOT_DIR/.repo/manifests
 		git checkout $BSP_BRANCH
-
-		# add revision into xml
-		update_revision_for_xml $VER_TAG.xml
-
-		# push to github
-		REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
-		git add $VER_TAG.xml
-		git commit -m "[Official Release] ${VER_TAG}"
-		git push
-		git tag -a $VER_TAG -F $CURR_PATH/$REALEASE_NOTE
-		git push $REMOTE_SERVER $VER_TAG
+                if [ ! -f "$VER_TAG.xml" ];then
+                    cp default.xml $VER_TAG.xml
+		    # add revision into xml
+                    update_revision_for_xml $VER_TAG.xml
+		    # push to github
+		    REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+		    git add $VER_TAG.xml
+		    git commit -m "[Official Release] ${VER_TAG}"
+		    git push
+		    git tag -a $VER_TAG -F $CURR_PATH/$REALEASE_NOTE
+		    git push $REMOTE_SERVER $VER_TAG
+		fi
 		cd $CURR_PATH
 	else
 		echo "[ADV] Directory $ROOT_DIR/.repo/manifests doesn't exist"

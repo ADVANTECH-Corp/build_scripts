@@ -73,7 +73,7 @@ function auto_add_tag()
         repo forall -c git push $REMOTE_SERVER $VER_TAG
 
         # rootfs_adv_priv
-        cd rootfs_adv_priv
+        cd $CURR_PATH/$ROOT_DIR/rootfs_adv_priv
         REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
         git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
         git push $REMOTE_SERVER $VER_TAG

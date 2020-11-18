@@ -7,7 +7,7 @@ MEMORY_TYPE=$3
 #--- [platform specific] ---
 VER_PREFIX="imx8"
 TMP_DIR="tmp"
-DEFAULT_DEVICE="imx8mprsb3720a1_6g"
+DEFAULT_DEVICE="imx8mprsb3720a1"
 #---------------------------
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
@@ -320,7 +320,7 @@ function save_temp_log()
 function building()
 {
         echo "[ADV] building $1 $2..."
-        LOG_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"_log_"$MEMORY_TYPE"
+        LOG_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"_log
 
         if [ "$1" == "populate_sdk" ]; then
 		        if [ "$DEPLOY_IMAGE_NAME" == "fsl-image-full" ]; then
@@ -354,11 +354,11 @@ function set_environment()
         else
                 if [ -e $BUILDALL_DIR/conf/local.conf ] ; then
                         # Change MACHINE setting
-                        sed -i "s/MACHINE ??=.*/MACHINE ??= '${KERNEL_CPU_TYPE}${PRODUCT}_${MEMORY_TYPE,,}'/g" $BUILDALL_DIR/conf/local.conf
+                        sed -i "s/MACHINE ??=.*/MACHINE ??= '${KERNEL_CPU_TYPE}${PRODUCT}'/g" $BUILDALL_DIR/conf/local.conf
                         EULA=1 source setup-environment $BUILDALL_DIR
                 else
                         # First build
-                        EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT}__${MEMORY_TYPE,,} source imx-setup-release.sh -b $BUILDALL_DIR
+                        EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} source imx-setup-release.sh -b $BUILDALL_DIR
                 fi
         fi
 }
@@ -444,7 +444,7 @@ function get_bsp_tarball()
 
 function get_csv_info()
 {
-	IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"_"$MEMORY_TYPE"
+	IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"
 	CSV_FILE="$STORAGE_PATH/${IMAGE_DIR}.img.csv"
 
 	if [ -e ${CSV_FILE} ] ; then

@@ -16,33 +16,29 @@ $BUILD_SH imx8 imx8LBV"$VERSION_NUM" 1G
 [ "$?" -ne 0 ] && exit 1
 
 #imx8_projects
-if [ $ROM7720A1_4G == true ]; then
+if [ $ROM7720A1 == true ]; then
 	$BUILD_SH rom7720a1-8QM 7720A1"$AIM_VERSION"LIV"$VERSION_NUM" 4G
 	[ "$?" -ne 0 ] && exit 1
 fi
-if [ $ROM5720A1_2G == true ]; then
+if [ $ROM5720A1 == true ]; then
 	$BUILD_SH rom5720a1-8M 5720A1"$AIM_VERSION"LIV"$VERSION_NUM" 2G
 	[ "$?" -ne 0 ] && exit 1
 fi
-if [ $ROM5721A1_2G == true ]; then
+if [ $ROM5721A1 == true ]; then
 	$BUILD_SH rom5721a1-8MM 5721A1"$AIM_VERSION"LIV"$VERSION_NUM" 2G
 	[ "$?" -ne 0 ] && exit 1
 fi
-if [ $ROM5620A1_2G == true ]; then
+if [ $ROM5620A1 == true ]; then
 	$BUILD_SH rom5620a1-8X 5620A1"$AIM_VERSION"LIV"$VERSION_NUM" 2G
 	[ "$?" -ne 0 ] && exit 1
 fi
-if [ $ROM3620A1_2G == true ]; then
+if [ $ROM3620A1 == true ]; then
 	$BUILD_SH rom3620a1-8X 3620A1"$AIM_VERSION"LIV"$VERSION_NUM" 2G
 	[ "$?" -ne 0 ] && exit 1
 fi
-if [ $RSB3720A1_6G == true ]; then
+if [ $RSB3720A1 == true ]; then
 	$BUILD_SH rsb3720a1-8MP 3720A1"$AIM_VERSION"LIV"$VERSION_NUM" 6G
 	[ "$?" -ne 0 ] && exit 1
-fi
-if [ $RSB3720A1_4G == true ]; then
-        $BUILD_SH rsb3720a1-8MP 3720A1"$AIM_VERSION"LIV"$VERSION_NUM" 4G
-        [ "$?" -ne 0 ] && exit 1
 fi
 
 echo "[ADV] All done!"

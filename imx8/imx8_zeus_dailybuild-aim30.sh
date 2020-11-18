@@ -223,7 +223,7 @@ function add_version()
 function building()
 {
         echo "[ADV] building $1 $2..."
-        LOG_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"_log_"$MEMORY_TYPE"
+        LOG_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"_log
 
         if [ "$1" == "populate_sdk" ]; then
                 if [ "$DEPLOY_IMAGE_NAME" == "fsl-image-full" ]; then
@@ -253,11 +253,11 @@ function set_environment()
 
 	if [ -e $BUILDALL_DIR/conf/local.conf ] ; then
 		# Change MACHINE setting
-		sed -i "s/MACHINE ??=.*/MACHINE ??= '${KERNEL_CPU_TYPE}${PRODUCT}_${MEMORY_TYPE,,}'/g" $BUILDALL_DIR/conf/local.conf
+		sed -i "s/MACHINE ??=.*/MACHINE ??= '${KERNEL_CPU_TYPE}${PRODUCT}'/g" $BUILDALL_DIR/conf/local.conf
 		EULA=1 source setup-environment $BUILDALL_DIR
 	else
 		# First build
-		EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT}_${MEMORY_TYPE,,} source imx-setup-release.sh -b $BUILDALL_DIR
+		EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} source imx-setup-release.sh -b $BUILDALL_DIR
 	fi
 }
 
@@ -454,30 +454,30 @@ else #"$PRODUCT" != "$VER_PREFIX"
 
         echo "[ADV] generate normal image"
         DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
-        IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"_"$MEMORY_TYPE"
+        IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"
         prepare_images normal $IMAGE_DIR
         copy_image_to_storage normal
 
         echo "[ADV] create flash tool"
-        FLASH_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_flash_tool_"$MEMORY_TYPE"
+        FLASH_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_flash_tool
         prepare_images flash $FLASH_DIR
         copy_image_to_storage flash
 
         echo "[ADV] create imx-boot files"
         DEPLOY_IMX_BOOT_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/imx-boot/*/git"
-        IMX_BOOT_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_imx-boot_"$MEMORY_TYPE"
+        IMX_BOOT_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_imx-boot
         prepare_images imx-boot $IMX_BOOT_DIR
         copy_image_to_storage imx-boot
 
         echo "[ADV] create misc files"
         DEPLOY_MISC_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
-        MISC_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_misc_"$MEMORY_TYPE"
+        MISC_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_misc
         prepare_images misc $MISC_DIR
         copy_image_to_storage misc
 
         echo "[ADV] create module"
         DEPLOY_MODULES_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
-        MODULES_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_modules_"$MEMORY_TYPE"
+        MODULES_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_modules
         prepare_images modules $MODULES_DIR
         copy_image_to_storage modules
 

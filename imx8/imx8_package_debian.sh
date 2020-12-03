@@ -110,9 +110,13 @@ function copy_folder()
 
 function create_debian_image()
 {
-    SDCARD_SIZE=3700
+    case ${AIM_VERSION} in
+    AIM20) SDCARD_SIZE=3700;;
+    AIM30) SDCARD_SIZE=6500;;
+    *) echo "cannot read AIM version from \"$AIM_VERSION\""; exit 1 ;;
+    esac
 
-    YOCTO_IMAGE_SDCARD="fsl-image-*${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
+    YOCTO_IMAGE_SDCARD="*-image-*${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
     YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool.tgz"
     DEBIAN_IMAGE="${DEBIAN_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_${DATE}.img"
 
@@ -215,7 +219,9 @@ TOTAL_LIST=" \
     ROM7720A1_8QM \
     ROM5720A1_8M \
     ROM5620A1_8X \
-    ROM5721A1_8MM
+    ROM3620A1_8X \
+    ROM5721A1_8MM \
+    RSB3720A1_8MP
 "
 MACHINE_LIST=""
 
@@ -242,6 +248,7 @@ do
     8m)  CPU_TYPE="iMX8M";  CPU_TYPE_Module="imx8mq"  ;;
     8mm) CPU_TYPE="iMX8MM"; CPU_TYPE_Module="imx8mm"  ;;
     8qm) CPU_TYPE="iMX8QM"; CPU_TYPE_Module="imx8qm"  ;;
+    8mp) CPU_TYPE="iMX8MP"; CPU_TYPE_Module="imx8mp"  ;;
     *) echo "cannot read CPU type from \"$NEW_MACHINE\""; exit 1 ;;
     esac
 
@@ -250,7 +257,9 @@ do
     rom7720a1) PROD="7720A1" ;;
     rom5720a1) PROD="5720A1" ;;
     rom5620a1) PROD="5620A1" ;;
+    rom3620a1) PROD="3620A1" ;;
     rom5721a1) PROD="5721A1" ;;
+    rsb3720a1) PROD="3720A1" ;;
     *) echo "cannot handle \"$NEW_MACHINE\""; exit 1 ;;
     esac
 

@@ -232,6 +232,9 @@ function get_source_code()
 {
     echo "[ADV] get rk3399 debian9 source code"
     cd $CURR_PATH
+
+    git clone https://github.com/rockchip-linux/repo.git
+
     mkdir $ROOT_DIR
     cd $ROOT_DIR
 

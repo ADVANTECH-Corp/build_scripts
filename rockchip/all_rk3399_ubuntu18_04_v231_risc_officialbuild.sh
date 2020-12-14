@@ -26,13 +26,13 @@ if [ "$RSB4710A2" == "true" ]; then
 	./rk3399_ubuntu18_04_v231_risc_officialbuild.sh $VERSION_NUM
 fi
 
-if [ "$ROM5780A1" == "true" ]; then
-	UBOOT_DEFCONFIG=rk3399_rom5780a1_2G
+if [ "$ROM5780A3" == "true" ]; then
+	UBOOT_DEFCONFIG=rk3399_rom5780a3_2G
 	KERNEL_DEFCONFIG=rk3399_adv_defconfig
-	KERNEL_DTB=rk3399-rom5780-a1.img
+	KERNEL_DTB=rk3399-rom5780-a3.img
 	MACHINE_LIST="$MACHINE_LIST ROM5780"
 	MODEL_NAME="ROM5780"
-	HW_VER="A1"
+	HW_VER="A3"
 
 	export UBOOT_DEFCONFIG
 	export KERNEL_DEFCONFIG

@@ -109,14 +109,14 @@ function do_repo_init()
         REPO_OPT="$REPO_OPT -m $BSP_XML"
     fi
 
-    repo init $REPO_OPT
+    ../repo/repo init $REPO_OPT
 }
 
 function get_source_code()
 {
     echo "[ADV] get yocto source code"
+    git clone https://github.com/rockchip-linux/repo.git
     cd $ROOT_DIR
-
     do_repo_init
 
     EXISTED_VERSION=`find .repo/manifests -name ${VER_TAG}.xml`
@@ -130,7 +130,7 @@ function get_source_code()
         do_repo_init
     fi
 
-    repo sync
+    ../repo/repo sync
 
     cd $CURR_PATH
 }
@@ -225,7 +225,7 @@ function create_xml_and_commit()
                 echo "[ADV] Create XML file"
                 cd $ROOT_DIR
                 # add revision into xml
-                repo manifest -o $VER_TAG.xml -r
+                ../repo/repo manifest -o $VER_TAG.xml -r
                 mv $VER_TAG.xml .repo/manifests
                 cd .repo/manifests
 		git checkout $BSP_BRANCH

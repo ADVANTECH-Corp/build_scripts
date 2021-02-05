@@ -7,7 +7,7 @@ MEMORY_TYPE=$3
 #--- [platform specific] ---
 VER_PREFIX="imx6"
 TMP_DIR="tmp"
-DEFAULT_DEVICE="imx6qrom4410a1"
+DEFAULT_DEVICE="imx6qrsb4410a1"
 #---------------------------
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"

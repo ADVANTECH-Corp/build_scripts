@@ -68,6 +68,7 @@ function auto_add_tag()
         echo "[ADV] tag exists! There is no need to add tag"
     else
         echo "[ADV] Add tag $VER_TAG"
+	cd $CURR_PATH/$ROOT_DIR/
         ../repo/repo forall -c git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
         ../repo/repo forall -c git push $REMOTE_SERVER $VER_TAG
     fi
@@ -234,8 +235,8 @@ function get_source_code()
 
     cd u-boot
     REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
-    ../repo/repo forall -c git checkout -b local --track $REMOTE_SERVER/$BSP_BRANCH
     cd ..
+    ../repo/repo forall -c git checkout -b local --track $REMOTE_SERVER/$BSP_BRANCH
 
     cd $CURR_PATH
 }

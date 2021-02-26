@@ -318,7 +318,9 @@ function prepare_images()
     IMAGE_DIR="${OFFICIAL_VER}"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
-	mkdir -p $IMAGE_DIR/rockdev/image
+    cp -aRL $CURR_PATH/$ROOT_DIR/tools/windows/RKDevTool/* $IMAGE_DIR/
+
+    mkdir -p $IMAGE_DIR/rockdev/image
 
     # Copy image files to image directory
 

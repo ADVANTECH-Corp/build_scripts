@@ -36,6 +36,21 @@ if [ "$RSB4710A2LITE" == "true" ]; then
 	./rk3399_android_N7_officialbuild.sh $VERSION_NUM
 fi
 
+if [ "$RSB3710A2" == "true" ]; then
+	UBOOT_DEFCONFIG=rk3399_rsb3710a2_2G_defconfig
+	KERNEL_DEFCONFIG=rk3399_adv_defconfig
+	KERNEL_DTB=rk3399-rsb3710-a2.img
+	ANDROID_PRODUCT=rk3399_rsb3710-userdebug
+	MACHINE_LIST="$MACHINE_LIST rsb_3710"
+
+	export UBOOT_DEFCONFIG
+	export KERNEL_DEFCONFIG
+	export KERNEL_DTB
+	export ANDROID_PRODUCT
+	export MACHINE_LIST
+	./rk3399_android_N7_officialbuild.sh $VERSION_NUM
+fi
+
 if [ "$RK3399DEMO" == "true" ]; then
 	UBOOT_DEFCONFIG=rk3399_defconfig
 	KERNEL_DEFCONFIG=rockchip_defconfig

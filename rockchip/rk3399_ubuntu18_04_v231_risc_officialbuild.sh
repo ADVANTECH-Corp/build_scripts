@@ -346,7 +346,14 @@ function prepare_images()
     IMAGE_DIR="${OFFICIAL_VER}"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
-	mkdir -p $IMAGE_DIR/rockdev/image
+
+    if [ -d $CURR_PATH/$ROOT_DIR/tools/windows/RKDevTool ];then
+        cp -aRL $CURR_PATH/$ROOT_DIR/tools/windows/RKDevTool/* $IMAGE_DIR/
+    else
+        cp -aRL $CURR_PATH/$ROOT_DIR/tools/windows/AndroidTool/* $IMAGE_DIR/
+    fi
+
+    mkdir -p $IMAGE_DIR/rockdev/image
 
     # Copy image files to image directory
 

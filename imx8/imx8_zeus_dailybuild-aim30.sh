@@ -2,7 +2,8 @@
 
 PRODUCT=$1
 OFFICIAL_VER=$2
-MEMORY_TYPE=$3
+MEMORY_LIST=$3
+BOOT_DEVICE_LIST=$4
 
 #--- [platform specific] ---
 VER_PREFIX="imx8"
@@ -17,7 +18,7 @@ echo "[ADV] DEPLOY_IMAGE_NAME = ${DEPLOY_IMAGE_NAME}"
 echo "[ADV] BACKEND_TYPE = ${BACKEND_TYPE}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
-echo "[ADV] MEMORY_TYPE=$MEMORY_TYPE"
+echo "[ADV] MEMORY_LIST=$MEMORY_LIST"
 
 echo "[ADV] U_BOOT_VERSION = ${U_BOOT_VERSION}"
 echo "[ADV] U_BOOT_URL = ${U_BOOT_URL}"
@@ -35,8 +36,6 @@ CURR_PATH="$PWD"
 ROOT_DIR="${VER_TAG}"_"$DATE"
 STORAGE_PATH="$CURR_PATH/$STORED/$DATE"
 
-MEMORY_COUT=1
-MEMORY=`echo $MEMORY_TYPE | cut -d '-' -f $MEMORY_COUT`
 PRE_MEMORY=""
 
 # Make storage folder
@@ -294,6 +293,26 @@ function clean_yocto_packages()
         fi
 }
 
+function rebuild_bootloader()
+{
+        #rebuild bootloader
+	BOOTLOADER_TYPE=$1 
+        echo "[ADV] Rebuild image for $BOOTLOADER_TYPE"
+	echo "UBOOT_CONFIG = \"$BOOTLOADER_TYPE\"" >> $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf
+        case $BOOTLOADER_TYPE in
+                "512M" | "1G" | "2G" | "4G" | "6G")
+			building $DEPLOY_IMAGE_NAME clean
+			building $DEPLOY_IMAGE_NAME 
+			;;
+                *)
+			building imx-boot
+                        ;;
+	esac
+	sed -i "/UBOOT_CONFIG/d" $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf
+        cd  $CURR_PATH
+}
+
+
 function build_yocto_images()
 {
         set_environment
@@ -313,13 +332,6 @@ function build_yocto_images()
 	# Build full image
         building $DEPLOY_IMAGE_NAME
 
-	# Re-build qspi U-Boot
-	if [ "$PRODUCT" == "rom7720a1" ] || [ "$PRODUCT" == "rom5620a1" ] || [ "$PRODUCT" == "rom3620a1" ] || [ "$PRODUCT" == "rsb3720a1" ]; then
-		echo "[ADV] build_yocto_image: build qspi u-boot"
-		echo "UBOOT_CONFIG = \"fspi\"" >> $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf
-		building imx-boot
-		sed -i "/UBOOT_CONFIG/d" $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf
-	fi
 }
 
 function prepare_images()
@@ -466,39 +478,53 @@ else #"$PRODUCT" != "$VER_PREFIX"
 	echo "[ADV] build images"
         build_yocto_images
 
-        echo "[ADV] generate normal image"
-        DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
-        IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"
-        prepare_images normal $IMAGE_DIR
-        copy_image_to_storage normal
 
-        echo "[ADV] create flash tool"
-        FLASH_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_flash_tool
-        prepare_images flash $FLASH_DIR
-        copy_image_to_storage flash
 
-        echo "[ADV] create individually script tool "
-        INDIVIDUAL_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_individually_script_tool
-        prepare_images individually $INDIVIDUAL_DIR
-        copy_image_to_storage individually
+	for MEMORY in $MEMORY_LIST;do
+                if [ "$PRE_MEMORY" != "" ]; then
+                        rebuild_bootloader $MEMORY
+                fi
+                PRE_MEMORY=$MEMORY
 
-        echo "[ADV] create imx-boot files"
-        DEPLOY_IMX_BOOT_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/imx-boot/*/git"
-        IMX_BOOT_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_imx-boot
-        prepare_images imx-boot $IMX_BOOT_DIR
-        copy_image_to_storage imx-boot
+		echo "[ADV] generate normal image"
+		DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
+		IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"_"$MEMORY"
+		prepare_images normal $IMAGE_DIR
+		copy_image_to_storage normal
 
-        echo "[ADV] create misc files"
-        DEPLOY_MISC_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
-        MISC_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_misc
-        prepare_images misc $MISC_DIR
-        copy_image_to_storage misc
+		echo "[ADV] create flash tool"
+		FLASH_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_flash_tool
+		prepare_images flash $FLASH_DIR
+		copy_image_to_storage flash
 
-        echo "[ADV] create module"
-        DEPLOY_MODULES_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
-        MODULES_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_modules
-        prepare_images modules $MODULES_DIR
-        copy_image_to_storage modules
+		echo "[ADV] create individually script tool "
+		INDIVIDUAL_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_individually_script_tool
+		prepare_images individually $INDIVIDUAL_DIR
+		copy_image_to_storage individually
+
+		echo "[ADV] create imx-boot files"
+		DEPLOY_IMX_BOOT_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/imx-boot/*/git"
+		IMX_BOOT_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_imx-boot
+		prepare_images imx-boot $IMX_BOOT_DIR
+		copy_image_to_storage imx-boot
+
+		for BOOT_DEVICE in $BOOT_DEVICE_LIST; do
+                        rebuild_bootloader $BOOT_DEVICE
+		done
+
+		echo "[ADV] create misc files"
+		DEPLOY_MISC_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
+		MISC_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_misc
+		prepare_images misc $MISC_DIR
+		copy_image_to_storage misc
+
+        done
+
+	echo "[ADV] create module"
+	DEPLOY_MODULES_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
+	MODULES_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_modules
+	prepare_images modules $MODULES_DIR
+	copy_image_to_storage modules
 
         save_temp_log
 fi

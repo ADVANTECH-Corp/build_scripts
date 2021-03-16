@@ -391,6 +391,7 @@ function prepare_images()
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR/image
                         chmod 755 $CURR_PATH/mksd-linux.sh
                         sudo cp $CURR_PATH/mksd-linux.sh $OUTPUT_DIR/mk_inand/
+			rm $FILE_NAME && sync
                         ;;
                 *)
                         echo "[ADV] prepare_images: invalid parameter #1!"

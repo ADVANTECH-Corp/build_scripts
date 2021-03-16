@@ -48,17 +48,18 @@ fi
 function get_source_code()
 {
     echo "[ADV] get android source code"
+    git clone https://github.com/rockchip-linux/repo.git
     mkdir $ROOT_DIR
     cd $ROOT_DIR
 
     if [ "$BSP_BRANCH" == "" ] ; then
-       repo init -u $BSP_URL
+       ../repo/repo init -u $BSP_URL
     elif [ "$BSP_XML" == "" ] ; then
-       repo init -u $BSP_URL -b $BSP_BRANCH
+       ../repo/repo init -u $BSP_URL -b $BSP_BRANCH
     else
-       repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
+       ../repo/repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
     fi
-    repo sync
+    ../repo/repo sync
 
     cd $CURR_PATH
     cd $ROOT_DIR/u-boot

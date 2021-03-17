@@ -379,9 +379,9 @@ function prepare_images()
                         sudo chmod 755 $OUTPUT_DIR/mk_inand/*
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.tar.bz2"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME 					$OUTPUT_DIR/image/rootfs.tar.bz2
-                        cp $DEPLOY_IMAGE_PATH/adv-${KERNEL_CPU_TYPE}*dtb			$OUTPUT_DIR/image
+                        cp $DEPLOY_IMAGE_PATH/${KERNEL_CPU_TYPE}*dtb				$OUTPUT_DIR/image
                         cp $DEPLOY_IMAGE_PATH/Image						$OUTPUT_DIR/image
-                        cp $DEPLOY_IMAGE_PATH/imx-boot-"${KERNEL_CPU_TYPE}${PRODUCT}"-sd.bin*	$OUTPUT_DIR/image/flash.bin
+                        cp $DEPLOY_IMAGE_PATH/imx-boot-"${KERNEL_CPU_TYPE}${PRODUCT}"-"$MEMORY".bin*	$OUTPUT_DIR/image/flash.bin
                         cp $DEPLOY_IMAGE_PATH/"${KERNEL_CPU_TYPE}"*bin				$OUTPUT_DIR/image
                         ;;
                 "flash")
@@ -391,7 +391,7 @@ function prepare_images()
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR/image
                         chmod 755 $CURR_PATH/mksd-linux.sh
                         sudo cp $CURR_PATH/mksd-linux.sh $OUTPUT_DIR/mk_inand/
-			rm $FILE_NAME && sync
+			rm $DEPLOY_IMAGE_PATH/$FILE_NAME && sync
                         ;;
                 *)
                         echo "[ADV] prepare_images: invalid parameter #1!"

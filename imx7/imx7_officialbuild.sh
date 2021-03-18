@@ -102,7 +102,7 @@ function do_repo_init()
         REPO_OPT="$REPO_OPT -m $BSP_XML"
     fi
 
-    repo init $REPO_OPT
+    ../repo/repo init $REPO_OPT
 }
 
 function get_source_code()
@@ -123,7 +123,7 @@ function get_source_code()
         do_repo_init
     fi
 
-    repo sync
+    ../repo/repo sync
 
     cd $CURR_PATH
 }

@@ -297,14 +297,16 @@ function rebuild_bootloader()
 {
         #rebuild bootloader
 	BOOTLOADER_TYPE=$1 
-        echo "[ADV] Rebuild image for $BOOTLOADER_TYPE"
-	echo "UBOOT_CONFIG = \"$BOOTLOADER_TYPE\"" >> $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf
         case $BOOTLOADER_TYPE in
                 "512M" | "1G" | "2G" | "4G" | "6G")
+			echo "[ADV] Rebuild image for $BOOTLOADER_TYPE"
+			echo "UBOOT_CONFIG = \"$BOOTLOADER_TYPE\"" >> $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf
 			building $DEPLOY_IMAGE_NAME clean
 			building $DEPLOY_IMAGE_NAME 
 			;;
                 *)
+			echo "[ADV] Rebuild bootloader for "$BOOTLOADER_TYPE"_"$MEMORY""
+			echo "UBOOT_CONFIG = \""$BOOTLOADER_TYPE"_"$MEMORY"\"" >> $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf 
 			building imx-boot
                         ;;
 	esac

@@ -111,12 +111,18 @@ function copy_folder()
 function create_ubuntu_image()
 {
     case ${AIM_VERSION} in
-    AIM20) SDCARD_SIZE=3700;;
-    AIM30) SDCARD_SIZE=6500;;
-    *) echo "cannot read AIM version from \"$AIM_VERSION\""; exit 1 ;;
+        AIM20)
+            IMAGE_SIZE=3700
+            YOCTO_IMAGE="*-image-*${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
+            ;;
+        AIM30)
+            IMAGE_SIZE=6500
+            YOCTO_IMAGE="*-image-*${CPU_TYPE_Module}${NEW_MACHINE}*.wic"
+            ;;
+        *)
+            echo "cannot read AIM version from \"$AIM_VERSION\""; exit 1 ;;
     esac
 
-    YOCTO_IMAGE_SDCARD="*-image-*${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
     YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_flash_tool.tgz"
     UBUNTU_IMAGE="${UBUNTU_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_${DATE}.img"
 
@@ -132,20 +138,29 @@ quit
 EOF
     #  Yocto image
     tar zxf ${YOCTO_IMAGE_TGZ}
-    mv ${YOCTO_IMAGE_TGZ/.tgz}/image/*.sdcard .
+    case ${AIM_VERSION} in
+        AIM20)
+            mv ${YOCTO_IMAGE_TGZ/.tgz}/image/*.sdcard .
+            ;;
+        AIM30)
+            mv ${YOCTO_IMAGE_TGZ/.tgz}/image/*.wic .
+            ;;
+	*)
+            echo "cannot read AIM version from \"$AIM_VERSION\""; exit 1 ;;
+    esac
 
     # Maybe the loop device is occuppied, unmount it first
     sudo umount $MOUNT_POINT
     sudo losetup -d $LOOP_DEV
 
     echo "[ADV] rename yocto image file to ubuntu image file"
-    sudo mv ${YOCTO_IMAGE_SDCARD} ${UBUNTU_IMAGE}
+    sudo mv ${YOCTO_IMAGE} ${UBUNTU_IMAGE}
 
     # resize
     sudo mv ${UBUNTU_IMAGE} ${UBUNTU_IMAGE/.img}.sdcard
-    sudo dd if=/dev/zero of=${UBUNTU_IMAGE} bs=1M count=$SDCARD_SIZE
+    sudo dd if=/dev/zero of=${UBUNTU_IMAGE} bs=1M count=$IMAGE_SIZE
     sudo losetup ${LOOP_DEV} ${UBUNTU_IMAGE}
-    echo "[ADV] resize ${UBUNTU_IMAGE} to ${SDCARD_SIZE}MB"
+    echo "[ADV] resize ${UBUNTU_IMAGE} to ${IMAGE_SIZE}MB"
     sudo dd if=${UBUNTU_IMAGE/.img}.sdcard of=$LOOP_DEV
     sudo sync
 

@@ -289,6 +289,7 @@ function rebuild_bootloader()
                 "512M" | "1G" | "2G" | "4G" | "6G")
 			echo "[ADV] Rebuild image for $BOOTLOADER_TYPE"
 			echo "UBOOT_CONFIG = \"$BOOTLOADER_TYPE\"" >> $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf
+			building imx-boot clean
 			building $DEPLOY_IMAGE_NAME clean
 			building $DEPLOY_IMAGE_NAME 
 			;;
@@ -414,13 +415,13 @@ function generate_OTA_update_package()
         cp ota-package.sh $DEPLOY_IMAGE_PATH
         cd $DEPLOY_IMAGE_PATH
 
-        echo "[ADV] creating update_${IMAGE_DIR}_kernel.zip for OTA package ..."
+        echo "[ADV] creating update_$1_kernel.zip for OTA package ..."
         HW_VER=$((${#PRODUCT}-2))
         DTB_FILE=`ls adv-${KERNEL_CPU_TYPE}-${PRODUCT:0:$HW_VER}-${PRODUCT:$HW_VER:2}.dtb`
-        ./ota-package.sh -k Image -d ${DTB_FILE} -m modules-${KERNEL_CPU_TYPE}${PRODUCT}.tgz -o update_${IMAGE_DIR}_kernel
+        ./ota-package.sh -k Image -d ${DTB_FILE} -m modules-${KERNEL_CPU_TYPE}${PRODUCT}.tgz -o update_$1_kernel
 
-        echo "[ADV] creating update_${IMAGE_DIR}_rootfs.zip for OTA package ..."
-        ./ota-package.sh -r $DEPLOY_IMAGE_NAME-${KERNEL_CPU_TYPE}${PRODUCT}.ext4 -o update_${IMAGE_DIR}_rootfs
+        echo "[ADV] creating update_$1_rootfs.zip for OTA package ..."
+        ./ota-package.sh -r $DEPLOY_IMAGE_NAME-${KERNEL_CPU_TYPE}${PRODUCT}.ext4 -o update_$1_rootfs
 
         mv update*.zip $CURR_PATH
         cd $CURR_PATH
@@ -539,7 +540,8 @@ else #"$PRODUCT" != "$VER_PREFIX"
         copy_image_to_storage modules
 
         echo "[ADV] generate ota packages"
-        generate_OTA_update_package
+	OTA_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"
+        generate_OTA_update_package $OTA_DIR
         copy_image_to_storage ota
 
         save_temp_log

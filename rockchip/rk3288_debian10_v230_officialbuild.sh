@@ -320,6 +320,8 @@ function prepare_images()
     mkdir $IMAGE_DIR
     cp -aRL $CURR_PATH/$ROOT_DIR/tools/windows/RKDevTool/* $IMAGE_DIR/
 
+    cp -aRL $CURR_PATH/$ROOT_DIR/tools/windows/DriverAssitant_*.zip $IMAGE_DIR/
+
     mkdir -p $IMAGE_DIR/rockdev/image
 
     # Copy image files to image directory

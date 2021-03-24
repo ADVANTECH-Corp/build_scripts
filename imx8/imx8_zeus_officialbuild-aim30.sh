@@ -2,7 +2,8 @@
 
 PRODUCT=$1
 OFFICIAL_VER=$2
-MEMORY_TYPE=$3
+MEMORY_LIST=$3
+BOOT_DEVICE_LIST=$4
 
 #--- [platform specific] ---
 VER_PREFIX="imx8"
@@ -18,8 +19,8 @@ echo "[ADV] DEPLOY_IMAGE_NAME = ${DEPLOY_IMAGE_NAME}"
 echo "[ADV] BACKEND_TYPE = ${BACKEND_TYPE}"
 echo "[ADV] VERSION = ${VERSION}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
-echo "[ADV] MEMORY_TYPE=$MEMORY_TYPE"
-
+echo "[ADV] MEMORY_LIST=${MEMORY_LIST}"
+echo "[ADV] BOOT_DEVICE_LIST=${BOOT_DEVICE_LIST}"
 echo "[ADV] U_BOOT_VERSION = ${U_BOOT_VERSION}"
 echo "[ADV] U_BOOT_URL = ${U_BOOT_URL}"
 echo "[ADV] U_BOOT_BRANCH = ${U_BOOT_BRANCH}"
@@ -37,9 +38,6 @@ CURR_PATH="$PWD"
 ROOT_DIR="${VER_TAG}"_"$DATE"
 STORAGE_PATH="$CURR_PATH/$STORED/$DATE"
 
-MEMORY_COUT=1
-MEMORY=`echo $MEMORY_TYPE | cut -d '-' -f $MEMORY_COUT`
-PRE_MEMORY=""
 
 echo "$Release_Note" > Release_Note
 REALEASE_NOTE="Release_Note"
@@ -444,9 +442,10 @@ function get_bsp_tarball()
 
 function get_csv_info()
 {
-	IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"
+	IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"_"$1"
 	CSV_FILE="$STORAGE_PATH/${IMAGE_DIR}.img.csv"
 
+	echo "[ADV] Show HASH in ${CSV_FILE}"
 	if [ -e ${CSV_FILE} ] ; then
 		HASH_ADVANTECH=`cat ${CSV_FILE} | grep "meta-advantech" | cut -d ',' -f 2`
 		HASH_KERNEL=`cat ${CSV_FILE} | grep "linux-imx" | cut -d ',' -f 2`
@@ -487,8 +486,9 @@ else # "$PRODUCT" != "$VER_PREFIX"
 
         if [ -z "$EXISTED_VERSION" ] ; then
 		# Get info from CSV
-		get_csv_info
-
+		for MEMORY in $MEMORY_LIST;do
+			get_csv_info $MEMORY
+		done
 		# Check meta-advantech tag exist or not, and checkout to tag version
 		check_tag_and_checkout $META_ADVANTECH_PATH $META_ADVANTECH_BRANCH $HASH_ADVANTECH
 

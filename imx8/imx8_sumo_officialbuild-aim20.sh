@@ -38,7 +38,6 @@ CURR_PATH="$PWD"
 ROOT_DIR="${VER_TAG}"_"$DATE"
 STORAGE_PATH="$CURR_PATH/$STORED/$DATE"
 
-PRE_MEMORY=""
 
 echo "$Release_Note" > Release_Note
 REALEASE_NOTE="Release_Note"

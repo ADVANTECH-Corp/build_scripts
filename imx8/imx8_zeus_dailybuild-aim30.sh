@@ -18,8 +18,8 @@ echo "[ADV] DEPLOY_IMAGE_NAME = ${DEPLOY_IMAGE_NAME}"
 echo "[ADV] BACKEND_TYPE = ${BACKEND_TYPE}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
-echo "[ADV] MEMORY_LIST=$MEMORY_LIST"
-
+echo "[ADV] MEMORY_LIST=${MEMORY_LIST}"
+echo "[ADV] BOOT_DEVICE_LIST=${BOOT_DEVICE_LIST}"
 echo "[ADV] U_BOOT_VERSION = ${U_BOOT_VERSION}"
 echo "[ADV] U_BOOT_URL = ${U_BOOT_URL}"
 echo "[ADV] U_BOOT_BRANCH = ${U_BOOT_BRANCH}"
@@ -301,6 +301,7 @@ function rebuild_bootloader()
                 "512M" | "1G" | "2G" | "4G" | "6G")
 			echo "[ADV] Rebuild image for $BOOTLOADER_TYPE"
 			echo "UBOOT_CONFIG = \"$BOOTLOADER_TYPE\"" >> $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf
+			building imx-boot clean
 			building $DEPLOY_IMAGE_NAME clean
 			building $DEPLOY_IMAGE_NAME 
 			;;

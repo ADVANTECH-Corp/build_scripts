@@ -336,6 +336,8 @@ function prepare_images()
         cp -aRL $CURR_PATH/$ROOT_DIR/tools/windows/AndroidTool/* $IMAGE_DIR/
     fi
 
+    cp -aRL $CURR_PATH/$ROOT_DIR/tools/windows/DriverAssitant_*.zip $IMAGE_DIR/
+
     mkdir -p $IMAGE_DIR/rockdev/image
 
     # Copy image files to image directory

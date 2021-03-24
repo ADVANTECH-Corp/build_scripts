@@ -353,6 +353,11 @@ function prepare_images()
     IMAGE_DIR="${VER_TAG}"_"$NEW_MACHINE"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
+
+    cp -aRL $CURR_PATH/$ROOT_DIR/RKTools/windows/AndroidTool/* $IMAGE_DIR/
+
+    cp -aRL $CURR_PATH/$ROOT_DIR/RKTools/windows/DriverAssitant_*.zip $IMAGE_DIR/
+
     mkdir -p $IMAGE_DIR/rockdev/image
 
     # Copy image files to image directory

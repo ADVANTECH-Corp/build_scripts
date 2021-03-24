@@ -283,7 +283,7 @@ function building()
 		./build.sh recovery >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_RECOVERY
     elif [ "$1" == "rootfs" ]; then
 		echo "[ADV] build rootfs"
-
+		sudo apt-get update
 		sudo apt-get install -y binfmt-support
 		sudo apt-get install -y qemu-user-static
 		sudo apt-get -y update

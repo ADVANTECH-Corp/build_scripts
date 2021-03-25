@@ -354,9 +354,9 @@ function prepare_images()
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
 
-    cp -aRL $CURR_PATH/$ROOT_DIR/RKTools/windows/AndroidTool/* $IMAGE_DIR/
+    cp -aRL $CURR_PATH/$ROOT_DIR/$SUB_DIR/RKTools/windows/AndroidTool/* $IMAGE_DIR/
 
-    cp -aRL $CURR_PATH/$ROOT_DIR/RKTools/windows/DriverAssitant_*.zip $IMAGE_DIR/
+    cp -aRL $CURR_PATH/$ROOT_DIR/$SUB_DIR/RKTools/windows/DriverAssitant_*.zip $IMAGE_DIR/
 
     mkdir -p $IMAGE_DIR/rockdev/image
 

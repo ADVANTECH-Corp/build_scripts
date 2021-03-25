@@ -492,7 +492,7 @@ else #"$PRODUCT" != "$VER_PREFIX"
 
 		echo "[ADV] generate normal image"
 		DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
-		IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"_"$MEMORY"
+		IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_"$DATE"
 		prepare_images normal $IMAGE_DIR
 		copy_image_to_storage normal
 

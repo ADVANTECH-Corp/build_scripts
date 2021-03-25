@@ -261,16 +261,16 @@ function building()
 		cd $CURR_PATH/$ROOT_DIR/u-boot
 		make clean
 		echo " V$RELEASE_VERSION" > .scmversion
-		./make.sh $UBOOT_DEFCONFIG > &1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_UBOOT
+		./make.sh $UBOOT_DEFCONFIG >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_UBOOT
 	elif [ "$1" == "kernel" ]; then
 		echo "[ADV] build kernel KERNEL_DEFCONFIG = $KERNEL_DEFCONFIG KERNEL_DTB=$KERNEL_DTB"
 		cd $CURR_PATH/$ROOT_DIR/kernel
 
 		echo "[ADV] build kernel make ARCH=arm64 $KERNEL_DEFCONFIG"
 		make clean
-		make ARCH=arm64 $KERNEL_DEFCONFIG > &1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL
+		make ARCH=arm64 $KERNEL_DEFCONFIG >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL
 		echo "[ADV] build kernel make ARCH=arm64 $KERNEL_DTB -j12"
-		make ARCH=arm64 $KERNEL_DTB -j12 > &1 | tee -a $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL
+		make ARCH=arm64 $KERNEL_DTB -j12 >&1 | tee -a $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL
     elif [ "$1" == "recovery" ]; then
 		sudo apt-get update
 		sudo apt-get install -y expect-dev
@@ -280,7 +280,7 @@ function building()
 		    rm buildroot/output/rockchip_rk3399_recovery -rf
 		fi
 		source envsetup.sh rockchip_rk3399_recovery
-		./build.sh recovery > &1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_RECOVERY
+		./build.sh recovery >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_RECOVERY
     elif [ "$1" == "rootfs" ]; then
 		echo "[ADV] build rootfs"
 		sudo apt-get update
@@ -293,7 +293,7 @@ function building()
 		sudo dpkg -i ubuntu-build-service/packages/*
 		sudo apt-get install -f 
 		cd $CURR_PATH/$ROOT_DIR/
-		sudo BUILD_IN_DOCKER=TRUE ./mk-debian.sh > &1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
+		sudo BUILD_IN_DOCKER=TRUE ./mk-debian.sh >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
 
 	else
         echo "[ADV] pass building..."

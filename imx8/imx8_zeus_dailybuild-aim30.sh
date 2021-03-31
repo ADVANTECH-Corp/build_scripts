@@ -301,6 +301,8 @@ function rebuild_bootloader()
                 "512M" | "1G" | "2G" | "4G" | "6G")
 			echo "[ADV] Rebuild image for $BOOTLOADER_TYPE"
 			echo "UBOOT_CONFIG = \"$BOOTLOADER_TYPE\"" >> $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf
+			building imx-atf cleansstate
+			building optee-os cleansstate
 			building imx-boot clean
 			building $DEPLOY_IMAGE_NAME clean
 			building $DEPLOY_IMAGE_NAME 

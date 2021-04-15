@@ -36,6 +36,10 @@ if [ $ROM3620A1 == true ]; then
 	$BUILD_SH rom3620a1-8X 3620A1"$AIM_VERSION"LIV"$VERSION_NUM" "2G" ""
 	[ "$?" -ne 0 ] && exit 1
 fi
+if [ $ROM5722A1 == true ]; then
+        $BUILD_SH rom5722a1-8MP 5722A1"$AIM_VERSION"LIV"$VERSION_NUM" "6G" ""
+        [ "$?" -ne 0 ] && exit 1
+fi
 if [ $RSB3720A1 == true ]; then
 	$BUILD_SH rsb3720a1-8MP 3720A1"$AIM_VERSION"LIV"$VERSION_NUM" "6G 4G" "FSPI"
 	[ "$?" -ne 0 ] && exit 1

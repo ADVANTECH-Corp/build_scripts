@@ -17,7 +17,7 @@ $BUILD_SH imx8 imx8LBV"$VERSION_NUM" 1G
 
 #imx8_projects
 if [ $ROM7720A1 == true ]; then
-	$BUILD_SH rom7720a1-8QM 7720A1"$AIM_VERSION"LIV"$VERSION_NUM" "4G" ""
+	$BUILD_SH rom7720a1-8QM 7720A1"$AIM_VERSION"LIV"$VERSION_NUM" "4G" "FSPI"
 	[ "$?" -ne 0 ] && exit 1
 fi
 if [ $ROM5720A1 == true ]; then
@@ -29,11 +29,11 @@ if [ $ROM5721A1 == true ]; then
 	[ "$?" -ne 0 ] && exit 1
 fi
 if [ $ROM5620A1 == true ]; then
-	$BUILD_SH rom5620a1-8X 5620A1"$AIM_VERSION"LIV"$VERSION_NUM" "2G" ""
+	$BUILD_SH rom5620a1-8X 5620A1"$AIM_VERSION"LIV"$VERSION_NUM" "2G" "FSPI"
 	[ "$?" -ne 0 ] && exit 1
 fi
 if [ $ROM3620A1 == true ]; then
-	$BUILD_SH rom3620a1-8X 3620A1"$AIM_VERSION"LIV"$VERSION_NUM" "2G" ""
+	$BUILD_SH rom3620a1-8X 3620A1"$AIM_VERSION"LIV"$VERSION_NUM" "2G" "FSPI"
 	[ "$?" -ne 0 ] && exit 1
 fi
 if [ $ROM5722A1 == true ]; then

@@ -123,8 +123,7 @@ function create_ubuntu_image()
             echo "cannot read AIM version from \"$AIM_VERSION\""; exit 1 ;;
     esac
 
-    YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_*_flash_tool.tgz"
-    UBUNTU_IMAGE="${UBUNTU_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_${DATE}.img"
+    YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}*flash_tool.tgz"
 
     pftp -v -n ${FTP_SITE} << EOF
 user "ftpuser" "P@ssw0rd"
@@ -140,8 +139,8 @@ EOF
     FILE_LIST=`ls $YOCTO_IMAGE_TGZ`
     for FILE in $FILE_LIST
     do
-		UBUNTU_IMAGE=${FILE/$PRODUCT/$DEBIAN_PRODUCT}		#replace 5721A1AIM20LI to 5721A1AIM20DI
-		UBUNTU_IMAGE=${DEBIAN_IMAGE/flash_tool.tgz/$DATE.img}	#replace flash_tool.tgz to 2021-03-22.img
+		UBUNTU_IMAGE=${FILE/$PRODUCT/$UBUNTU_PRODUCT}		#replace 5721A1AIM20LI to 5721A1AIM20UI
+		UBUNTU_IMAGE=${UBUNTU_IMAGE/flash_tool.tgz/$DATE.img}	#replace flash_tool.tgz to 2021-03-22.img
 		#Here we get 5721A1AIM20UIV90214_iMX8MM_2G_2021-03-22.img
 		
 		#  Yocto image

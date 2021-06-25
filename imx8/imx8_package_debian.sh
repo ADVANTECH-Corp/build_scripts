@@ -123,7 +123,7 @@ function create_debian_image()
             echo "cannot read AIM version from \"$AIM_VERSION\""; exit 1 ;;
     esac
 
-    YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_*_flash_tool.tgz"
+    YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}*flash_tool.tgz"
 
     pftp -v -n ${FTP_SITE} << EOF
 user "ftpuser" "P@ssw0rd"

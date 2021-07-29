@@ -7,7 +7,7 @@ MEMORY_TYPE=$3
 #--- [platform specific] ---
 VER_PREFIX="imx6"
 TMP_DIR="tmp"
-DEFAULT_DEVICE="imx6qrsb4410a1"
+DEFAULT_DEVICE="imx6qrom7420a1"
 #---------------------------
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
@@ -312,9 +312,9 @@ function building()
         LOG_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"_log
 
         if [ "$1" == "populate_sdk" ]; then
-                if [ "$DEPLOY_IMAGE_NAME" == "fsl-image-qt5" ]; then
-                        echo "[ADV] bitbake meta-toolchain-qt5"
-                        bitbake meta-toolchain-qt5
+                if [ "$DEPLOY_IMAGE_NAME" == "fsl-image-full" ]; then
+                        echo "[ADV] bitbake meta-toolchain"
+                        bitbake meta-toolchain
                 else
                         echo "[ADV] bitbake $DEPLOY_IMAGE_NAME -c populate_sdk"
                         bitbake $DEPLOY_IMAGE_NAME -c populate_sdk

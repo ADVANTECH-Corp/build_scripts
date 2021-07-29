@@ -64,17 +64,21 @@ fi
 function get_source_code()
 {
 	echo "[ADV] get android source code"
+
+	curl https://storage.googleapis.com/git-repo-downloads/repo > repo
+	chmod 777 repo
+
 	mkdir $ROOT_DIR
 	cd $ROOT_DIR
 
 	if [ "$BSP_BRANCH" == "" ] ; then
-	   repo init -u $BSP_URL
+	   ../repo init -u $BSP_URL
 	elif [ "$BSP_XML" == "" ] ; then
-	   repo init -u $BSP_URL -b $BSP_BRANCH
+	   ../repo init -u $BSP_URL -b $BSP_BRANCH
 	else
-	   repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
+	   ../repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
 	fi
-	repo sync -j8
+	../repo sync -j8
 
 	cd $CURR_PATH
 }

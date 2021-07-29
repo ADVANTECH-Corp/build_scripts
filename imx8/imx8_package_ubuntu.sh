@@ -123,8 +123,7 @@ function create_ubuntu_image()
             echo "cannot read AIM version from \"$AIM_VERSION\""; exit 1 ;;
     esac
 
-    YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_*_flash_tool.tgz"
-    UBUNTU_IMAGE="${UBUNTU_PRODUCT}${VERSION_TAG}_${CPU_TYPE}_${DATE}.img"
+    YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}*flash_tool.tgz"
 
     pftp -v -n ${FTP_SITE} << EOF
 user "ftpuser" "P@ssw0rd"
@@ -140,8 +139,8 @@ EOF
     FILE_LIST=`ls $YOCTO_IMAGE_TGZ`
     for FILE in $FILE_LIST
     do
-		UBUNTU_IMAGE=${FILE/$PRODUCT/$DEBIAN_PRODUCT}		#replace 5721A1AIM20LI to 5721A1AIM20DI
-		UBUNTU_IMAGE=${DEBIAN_IMAGE/flash_tool.tgz/$DATE.img}	#replace flash_tool.tgz to 2021-03-22.img
+		UBUNTU_IMAGE=${FILE/$PRODUCT/$UBUNTU_PRODUCT}		#replace 5721A1AIM20LI to 5721A1AIM20UI
+		UBUNTU_IMAGE=${UBUNTU_IMAGE/flash_tool.tgz/$DATE.img}	#replace flash_tool.tgz to 2021-03-22.img
 		#Here we get 5721A1AIM20UIV90214_iMX8MM_2G_2021-03-22.img
 		
 		#  Yocto image
@@ -241,6 +240,7 @@ TOTAL_LIST=" \
     ROM5620A1_8X \
     ROM3620A1_8X \
     ROM5721A1_8MM \
+    ROM5722A1_8MP \
     RSB3720A1_8MP
 "
 MACHINE_LIST=""
@@ -279,6 +279,7 @@ do
     rom5620a1) PROD="5620A1" ;;
     rom3620a1) PROD="3620A1" ;;
     rom5721a1) PROD="5721A1" ;;
+    rom5722a1) PROD="5722A1" ;;
     rsb3720a1) PROD="3720A1" ;;
     *) echo "cannot handle \"$NEW_MACHINE\""; exit 1 ;;
     esac

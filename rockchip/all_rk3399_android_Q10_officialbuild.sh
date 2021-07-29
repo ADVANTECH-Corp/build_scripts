@@ -35,3 +35,19 @@ if [ "$ROM5780A3" == "true" ]; then
 	export MACHINE_LIST
 	./rk3399_android_Q10_officialbuild.sh $VERSION_NUM
 fi
+
+if [ "$PPC115W" == "true" ]; then
+        UBOOT_DEFCONFIG=rk3399_rsb4710a2_2G
+        KERNEL_DEFCONFIG=rk3399_adv_defconfig
+        KERNEL_DTB=rk3399-ppc115w-a2.img
+        ANDROID_PRODUCT=ppc115w_Android10-userdebug
+        MACHINE_LIST="$MACHINE_LIST ppc115w"
+
+        export UBOOT_DEFCONFIG
+        export KERNEL_DEFCONFIG
+        export KERNEL_DTB
+        export ANDROID_PRODUCT
+        export MACHINE_LIST
+        ./rk3399_android_Q10_officialbuild.sh $VERSION_NUM
+fi
+

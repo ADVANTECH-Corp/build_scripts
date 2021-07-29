@@ -123,7 +123,7 @@ function create_debian_image()
             echo "cannot read AIM version from \"$AIM_VERSION\""; exit 1 ;;
     esac
 
-    YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}_*_flash_tool.tgz"
+    YOCTO_IMAGE_TGZ="${PRODUCT}${VERSION_TAG}_${CPU_TYPE}*flash_tool.tgz"
 
     pftp -v -n ${FTP_SITE} << EOF
 user "ftpuser" "P@ssw0rd"
@@ -243,6 +243,7 @@ TOTAL_LIST=" \
     ROM5620A1_8X \
     ROM3620A1_8X \
     ROM5721A1_8MM \
+    ROM5722A1_8MP \
     RSB3720A1_8MP
 "
 MACHINE_LIST=""
@@ -281,6 +282,7 @@ do
     rom5620a1) PROD="5620A1" ;;
     rom3620a1) PROD="3620A1" ;;
     rom5721a1) PROD="5721A1" ;;
+    rom5722a1) PROD="5722A1" ;;
     rsb3720a1) PROD="3720A1" ;;
     *) echo "cannot handle \"$NEW_MACHINE\""; exit 1 ;;
     esac

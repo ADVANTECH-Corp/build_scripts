@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ADV_PATH="\
+android10-patch \
 u-boot \
 kernel \
 . \
@@ -42,6 +43,7 @@ CURR_PATH="$PWD"
 ROOT_DIR="${VER_TAG}"_"$DATE"
 SUB_DIR="android"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
+PATCH_DIR="android10-patch"
 
 #-- Advantech/rk3399 gitlab android source code repository
 echo "[ADV-ROOT]  $ROOT_DIR"
@@ -256,6 +258,10 @@ function get_source_code()
        ../repo/repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
     fi
     ../repo/repo sync
+    
+     cd $CURR_PATH/$ROOT_DIR/$SUB_DIR/
+     git clone https://gitlab.edgecenter.io/risc-private-bsp/rk3399/android10-patch.git
+
 
     for TEMP_PATH in ${ADV_PATH}
     do
@@ -296,6 +302,15 @@ function building()
     elif [ "$1" == "android" ]; then
         echo "[ADV] build android ANDROID_PRODUCT=$ANDROID_PRODUCT"
         cd $CURR_PATH/$ROOT_DIR/$SUB_DIR/
+        PATCH_PATH="${CURR_PATH}/{$ROOT_DIR}/${SUB_DIR}/${PATCH_DIR}"
+        for TEMP_PATH in ${PATCH_PATH}
+        do
+           if [ -f "${TEMP_PATH}" ];then
+               PATCH_FILE="${PATCH_PATH}/${TEMP_PATH}"
+               echo "[ADV] android patches ${PATCH_FILE}"
+               patch -p1 < ${PATCH_FILE}
+           fi
+        done
         source build/envsetup.sh
         lunch $ANDROID_PRODUCT
         make clean

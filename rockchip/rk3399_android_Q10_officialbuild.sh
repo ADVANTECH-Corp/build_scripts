@@ -300,17 +300,20 @@ function building()
         make ARCH=arm64 $KERNEL_DEFCONFIG >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL
         make ARCH=arm64 $KERNEL_DTB -j8 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL
     elif [ "$1" == "android" ]; then
-        echo "[ADV] build android ANDROID_PRODUCT=$ANDROID_PRODUCT"
+        echo "[ADV] patch android form private-gitlab"
         cd $CURR_PATH/$ROOT_DIR/$SUB_DIR/
-        PATCH_PATH="${CURR_PATH}/{$ROOT_DIR}/${SUB_DIR}/${PATCH_DIR}"
-        for TEMP_PATH in ${PATCH_PATH}
+        patch_files=$(ls $PATCH_DIR)
+        for filename in $patch_files
         do
-           if [ -f "${TEMP_PATH}" ];then
-               PATCH_FILE="${PATCH_PATH}/${TEMP_PATH}"
-               echo "[ADV] android patches ${PATCH_FILE}"
-               patch -p1 < ${PATCH_FILE}
-           fi
+	    echo "[ADV] android patche-file's $filename"
+            if [ -f "$PATCH_DIR/$filename" ];then
+                if [ "${filename##*.}x" = "patch"x ];then
+                    echo "[ADV] android patched $PATCH_DIR/$filename"
+                    patch -p1 < $PATCH_DIR/$filename
+                fi
+            fi
         done
+	echo "[ADV] build android ANDROID_PRODUCT=$ANDROID_PRODUCT"
         source build/envsetup.sh
         lunch $ANDROID_PRODUCT
         make clean

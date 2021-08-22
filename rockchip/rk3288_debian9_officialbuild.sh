@@ -68,8 +68,9 @@ function auto_add_tag()
         echo "[ADV] tag exists! There is no need to add tag"
     else
         echo "[ADV] Add tag $VER_TAG"
-		repo forall -c git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
-		repo forall -c git push $REMOTE_SERVER $VER_TAG
+	cd $CURR_PATH/$ROOT_DIR/
+        ../repo/repo forall -c git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
+        ../repo/repo forall -c git push $REMOTE_SERVER $VER_TAG
     fi
     cd $CURR_PATH
 }
@@ -81,10 +82,10 @@ function create_xml_and_commit()
         echo "[ADV] Create XML file"
         cd $ROOT_DIR
         # add revision into xml
-        repo manifest -o $VER_TAG.xml -r
+        ../repo/repo manifest -o $VER_TAG.xml -r
         mv $VER_TAG.xml .repo/manifests
         cd .repo/manifests
-		git checkout $BSP_BRANCH
+	git checkout $BSP_BRANCH
 
         # push to github
         REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
@@ -187,7 +188,7 @@ END_OF_CSV
 function generate_manifest()
 {
     cd $CURR_PATH/$ROOT_DIR/
-	repo manifest -o ${VER_TAG}.xml -r
+    ../repo/repo manifest -o ${VER_TAG}.xml -r
 }
 
 function save_temp_log()
@@ -217,22 +218,25 @@ function get_source_code()
 {
     echo "[ADV] get rk3288 debian9 source code"
 	cd $CURR_PATH
+
+    git clone https://github.com/rockchip-linux/repo.git
+
     mkdir $ROOT_DIR
     cd $ROOT_DIR
 
     if [ "$BSP_BRANCH" == "" ] ; then
-       repo init -u $BSP_URL
+       ../repo/repo init -u $BSP_URL
     elif [ "$BSP_XML" == "" ] ; then
-       repo init -u $BSP_URL -b $BSP_BRANCH
+       ../repo/repo init -u $BSP_URL -b $BSP_BRANCH
     else
-       repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
+       ../repo/repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
     fi
-    repo sync
+    ../repo/repo sync
 
     cd u-boot
     REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
-    repo forall -c git checkout -b local --track $REMOTE_SERVER/$BSP_BRANCH
     cd ..
+    ../repo/repo forall -c git checkout -b local --track $REMOTE_SERVER/$BSP_BRANCH
 
     cd $CURR_PATH
 }
@@ -263,12 +267,14 @@ function building()
 		echo "[ADV] build kernel make ARCH=arm $KERNEL_DTB -j12"
 		make ARCH=arm $KERNEL_DTB -j12 >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL
     elif [ "$1" == "recovery" ]; then
+		sudo apt-get update
+		sudo apt-get install -y expect-dev
 		echo "[ADV] build recovery"
 		cd $CURR_PATH/$ROOT_DIR
 		if [  -d "buildroot/output/rockchip_rk3288_recovery" ];then
 		    rm buildroot/output/rockchip_rk3288_recovery -rf
 		fi
-		source envsetup.sh 20
+		source envsetup.sh rockchip_rk3288_recovery
 		./build.sh recovery >> $CURR_PATH/$ROOT_DIR/$LOG_FILE_RECOVERY
     elif [ "$1" == "rootfs" ]; then
 		echo "[ADV] build rootfs"
@@ -301,6 +307,7 @@ function build_linux_images()
     # package image to rockdev folder
 	cd $CURR_PATH/$ROOT_DIR
 	echo "[ADV] build link images to rockdev"
+	source envsetup.sh rockchip_rk3288_recovery
 	./mkfirmware.sh
 	echo "[ADV] build linux images end"
 }
@@ -312,7 +319,11 @@ function prepare_images()
     IMAGE_DIR="${OFFICIAL_VER}"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
-	mkdir -p $IMAGE_DIR/rockdev/image
+    cp -aRL $CURR_PATH/$ROOT_DIR/tools/windows/AndroidTool/* $IMAGE_DIR/
+
+    cp -aRL $CURR_PATH/$ROOT_DIR/tools/windows/DriverAssitant_*.zip $IMAGE_DIR/
+
+    mkdir -p $IMAGE_DIR/rockdev/image
 
     # Copy image files to image directory
 

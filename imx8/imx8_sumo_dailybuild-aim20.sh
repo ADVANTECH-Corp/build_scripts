@@ -292,7 +292,9 @@ function rebuild_bootloader()
 			building imx-atf cleansstate
 			building optee-os-imx cleansstate
 			building imx-boot clean
+			building initramfs-debug-image clean
 			building $DEPLOY_IMAGE_NAME clean
+			building initramfs-debug-image 
 			building $DEPLOY_IMAGE_NAME 
 			;;
                 *)

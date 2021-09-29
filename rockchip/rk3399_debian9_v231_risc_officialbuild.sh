@@ -2,6 +2,7 @@
 
 PLATFORM_PREFIX="RK3399_RISC_"
 VER_PREFIX="DIV"
+BSP_VER_PREFIX="DBV"
 
 
 idx=0
@@ -29,6 +30,7 @@ echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
 VER_TAG="${PLATFORM_PREFIX}${VER_PREFIX}"$(echo $RELEASE_VERSION | sed 's/[.]//')
 echo "[ADV] VER_TAG = $VER_TAG"
 OFFICIAL_VER="${MODEL_NAME}${HW_VER}${AIM_VERSION}${VER_PREFIX}"$(echo $RELEASE_VERSION | sed 's/[.]//')
+BSP_VER="${MODEL_NAME}${HW_VER}${AIM_VERSION}${BSP_VER_PREFIX}"$(echo $RELEASE_VERSION | sed 's/[.]//')
 echo "[ADV] OFFICIAL_VER = $OFFICIAL_VER"
 echo "[ADV] isFirstMachine = $isFirstMachine"
 CURR_PATH="$PWD"
@@ -293,7 +295,7 @@ function building()
 		sudo dpkg -i ubuntu-build-service/packages/*
 		sudo apt-get install -f 
 		cd $CURR_PATH/$ROOT_DIR/
-		sudo BUILD_IN_DOCKER=TRUE ./mk-debian.sh >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
+		sudo BUILD_IN_DOCKER=TRUE ./mk-debian.sh new >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
 
 	else
         echo "[ADV] pass building..."
@@ -337,6 +339,7 @@ function prepare_images()
     fi
 
     cp -aRL $CURR_PATH/$ROOT_DIR/tools/windows/DriverAssitant_*.zip $IMAGE_DIR/
+    cp -aRL $CURR_PATH/$ROOT_DIR/tools/windows/SDDiskTool_*.zip $IMAGE_DIR/
 
     mkdir -p $IMAGE_DIR/rockdev/image
 
@@ -346,6 +349,34 @@ function prepare_images()
     tar czf ${IMAGE_DIR}.img.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}.img.tgz
     #rm -rf $IMAGE_DIR
+
+    # BSP
+    cd $CURR_PATH
+    BSP_DIR="${BSP_VER}"_"$DATE"
+    mkdir $BSP_DIR
+    cd u-boot
+    make clean
+    git add . -f
+    git reset --hard
+
+    cd $CURR_PATH
+    cd kernel
+    make clean
+    git add . -f
+    git reset --hard
+
+    cd $CURR_PATH
+    cp -R $CURR_PATH/$ROOT_DIR/u-boot $BSP_DIR/
+    rm -rf $BSP_DIR/u-boot/.git
+    cp -R $CURR_PATH/$ROOT_DIR/kernel $BSP_DIR/
+    rm -rf $BSP_DIR/kernel/.git
+    cp -R $CURR_PATH/$ROOT_DIR/rkbin $BSP_DIR/
+    rm -rf $BSP_DIR/rkbin/.git
+    cp -R $CURR_PATH/$ROOT_DIR/prebuilts $BSP_DIR/
+    rm -rf $BSP_DIR/prebuilts/.git
+
+    tar czf ${BSP_DIR}.img.tgz $BSP_DIR
+    generate_md5 ${BSP_DIR}.img.tgz
 }
 
 function copy_image_to_storage()

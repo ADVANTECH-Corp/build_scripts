@@ -291,7 +291,7 @@ function rebuild_bootloader()
 			echo "UBOOT_CONFIG = \"$BOOTLOADER_TYPE\"" >> $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf
 			building imx-atf cleansstate
 			building optee-os-imx cleansstate
-			building imx-boot clean
+			building imx-boot cleansstate
 			building initramfs-debug-image clean
 			building $DEPLOY_IMAGE_NAME clean
 			building initramfs-debug-image 

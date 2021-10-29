@@ -8,7 +8,6 @@ BOOT_DEVICE_LIST=$4
 #--- [platform specific] ---
 VER_PREFIX="imx8"
 TMP_DIR="tmp"
-DEFAULT_DEVICE="imx8mprsb3720a1"
 #---------------------------
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
@@ -251,19 +250,14 @@ function set_environment()
 	cd $CURR_PATH/$ROOT_DIR
 	echo "[ADV] set environment"
 
-        if [ "$1" == "sdk" ]; then
-	        # Use default device for sdk
-                EULA=1 DISTRO=$BACKEND_TYPE MACHINE=$DEFAULT_DEVICE source imx-setup-release.sh -b $BUILDALL_DIR
-        else
-		if [ -e $BUILDALL_DIR/conf/local.conf ] ; then
-			# Change MACHINE setting
-			sed -i "s/MACHINE ??=.*/MACHINE ??= '${KERNEL_CPU_TYPE}${PRODUCT}'/g" $BUILDALL_DIR/conf/local.conf
-			EULA=1 source setup-environment $BUILDALL_DIR
-		else
-			# First build
-			EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} source imx-setup-release.sh -b $BUILDALL_DIR
-		fi
-        fi
+	if [ -e $BUILDALL_DIR/conf/local.conf ] ; then
+		# Change MACHINE setting
+		sed -i "s/MACHINE ??=.*/MACHINE ??= '${KERNEL_CPU_TYPE}${PRODUCT}'/g" $BUILDALL_DIR/conf/local.conf
+		EULA=1 source setup-environment $BUILDALL_DIR
+	else
+		# First build
+		EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} source imx-setup-release.sh -b $BUILDALL_DIR
+	fi
 }
 
 function clean_yocto_packages()
@@ -324,16 +318,6 @@ function rebuild_bootloader()
 }
 
 
-function build_yocto_sdk()
-{
-        set_environment sdk
-
-        # Build default full image first
-        ## building $DEPLOY_IMAGE_NAME
-
-        # Generate sdk image
-        building populate_sdk
-}
 function build_yocto_images()
 {
         set_environment
@@ -371,9 +355,6 @@ function prepare_images()
         fi
 	
         case $IMAGE_TYPE in
-                "sdk")
-			cp $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/sdk/* $OUTPUT_DIR
-                        ;;
                 "misc")
                         cp $DEPLOY_MISC_PATH/${KERNEL_CPU_TYPE}*.dtb $OUTPUT_DIR
                         cp $DEPLOY_MISC_PATH/Image $OUTPUT_DIR
@@ -425,7 +406,7 @@ function prepare_images()
 
         # Package image file
         case $IMAGE_TYPE in
-                "sdk" | "flash" | "modules" | "misc" | "imx-boot" | "individually")
+                "flash" | "modules" | "misc" | "imx-boot" | "individually")
                         echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
                         tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
                         generate_md5 ${OUTPUT_DIR}.tgz
@@ -444,9 +425,6 @@ function copy_image_to_storage()
 	echo "[ADV] copy $1 images to $STORAGE_PATH"
 
 	case $1 in
-		"sdk")
-			mv -f ${SDK_DIR}.tgz $STORAGE_PATH
-			;;
 		"bsp")
 			mv -f ${ROOT_DIR}.tgz $STORAGE_PATH
 		;;
@@ -494,15 +472,6 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
         generate_md5 $ROOT_DIR.tgz
 
         copy_image_to_storage bsp
-	
-	# Build Yocto SDK
-	echo "[ADV] build yocto sdk"
-	build_yocto_sdk
-	
-	echo "[ADV] generate sdk image"
-	SDK_DIR="$ROOT_DIR"_sdk
-	prepare_images sdk $SDK_DIR
-	copy_image_to_storage sdk
 
 else #"$PRODUCT" != "$VER_PREFIX"
         if [ ! -e $ROOT_DIR ]; then

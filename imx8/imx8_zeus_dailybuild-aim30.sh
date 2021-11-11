@@ -304,7 +304,9 @@ function rebuild_bootloader()
 			building imx-atf cleansstate
 			building optee-os cleansstate
 			building imx-boot clean
+			building initramfs-debug-image clean
 			building $DEPLOY_IMAGE_NAME clean
+			building initramfs-debug-image 
 			building $DEPLOY_IMAGE_NAME 
 			;;
                 *)
@@ -333,6 +335,9 @@ function build_yocto_images()
 
         # Clean package to avoid build error
 	clean_yocto_packages
+
+        echo "[ADV] Build recovery image!"
+        building initramfs-debug-image
 
 	# Build full image
         building $DEPLOY_IMAGE_NAME
@@ -420,6 +425,24 @@ function prepare_images()
         rm -rf $OUTPUT_DIR
 }
 
+function generate_OTA_update_package()
+{
+        echo "[ADV] generate OTA update package"
+        cp ota-package.sh $DEPLOY_IMAGE_PATH
+        cd $DEPLOY_IMAGE_PATH
+
+        echo "[ADV] creating update_$1_kernel.zip for OTA package ..."
+        HW_VER=$((${#PRODUCT}-2))
+        DTB_FILE=`ls ${KERNEL_CPU_TYPE}-${PRODUCT:0:$HW_VER}-${PRODUCT:$HW_VER:2}.dtb`
+        ./ota-package.sh -k Image -d ${DTB_FILE} -m modules-${KERNEL_CPU_TYPE}${PRODUCT}.tgz -o update_$1_kernel
+
+        echo "[ADV] creating update_$1_rootfs.zip for OTA package ..."
+        ./ota-package.sh -r $DEPLOY_IMAGE_NAME-${KERNEL_CPU_TYPE}${PRODUCT}.ext4 -o update_$1_rootfs
+
+        mv update*.zip $CURR_PATH
+        cd $CURR_PATH
+}
+
 function copy_image_to_storage()
 {
 	echo "[ADV] copy $1 images to $STORAGE_PATH"
@@ -447,6 +470,9 @@ function copy_image_to_storage()
 			generate_csv $IMAGE_DIR.img.gz
 			mv ${IMAGE_DIR}.img.csv $STORAGE_PATH
 			mv -f $IMAGE_DIR.img.gz $STORAGE_PATH
+		;;
+		"ota")
+			mv -f update*.zip $STORAGE_PATH
 		;;
 		*)
 		echo "[ADV] copy_image_to_storage: invalid parameter #1!"
@@ -484,14 +510,11 @@ else #"$PRODUCT" != "$VER_PREFIX"
 	echo "[ADV] build images"
         build_yocto_images
 
-
-
 	for MEMORY in $MEMORY_LIST;do
                 if [ "$PRE_MEMORY" != "" ]; then
                         rebuild_bootloader $MEMORY
                 fi
                 PRE_MEMORY=$MEMORY
-
 		echo "[ADV] generate normal image"
 		DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
 		IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_"$DATE"
@@ -531,6 +554,11 @@ else #"$PRODUCT" != "$VER_PREFIX"
 	MODULES_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_modules
 	prepare_images modules $MODULES_DIR
 	copy_image_to_storage modules
+
+        echo "[ADV] generate ota packages"
+	OTA_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"
+        generate_OTA_update_package $OTA_DIR
+        copy_image_to_storage ota
 
         save_temp_log
 fi

@@ -354,12 +354,14 @@ function prepare_images()
     cd $CURR_PATH
     BSP_DIR="${BSP_VER}"_"$DATE"
     mkdir $BSP_DIR
+
+    cd $CURR_PATH/$ROOT_DIR
     cd u-boot
     make clean
     git add . -f
     git reset --hard
 
-    cd $CURR_PATH
+    cd $CURR_PATH/$ROOT_DIR
     cd kernel
     make clean
     git add . -f

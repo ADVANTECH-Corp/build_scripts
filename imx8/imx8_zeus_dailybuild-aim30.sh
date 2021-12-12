@@ -423,7 +423,10 @@ function prepare_images()
                         echo "[ADV] creating ${OUTPUT_DIR}.img.gz ..."
                         gzip -c9 $OUTPUT_DIR/$FILE_NAME > $OUTPUT_DIR.img.gz
                         generate_md5 $OUTPUT_DIR.img.gz
-                        ;;
+                        echo "[ADV] creating ${OUTPUT_DIR}_OTA.img.gz ..."
+                        gzip -c9 $OUTPUT_DIR/$FILE_NAME_OTA > $OUTPUT_DIR_OTA.img.gz
+                        generate_md5 $OUTPUT_DIR_OTA.img.gz
+			;;
         esac
         rm -rf $OUTPUT_DIR
 }

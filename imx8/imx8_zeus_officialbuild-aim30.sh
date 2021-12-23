@@ -8,6 +8,7 @@ BOOT_DEVICE_LIST=$4
 #--- [platform specific] ---
 VER_PREFIX="imx8"
 TMP_DIR="tmp"
+DEFAULT_DEVICE="imx8mprsb3720a1"
 #---------------------------
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
@@ -311,6 +312,134 @@ function save_temp_log()
 	find . -name "temp" | xargs rm -rf
 }
 
+# ===============================
+#  Functions [platform specific]
+# ===============================
+function building()
+{
+        echo "[ADV] building $1 $2..."
+        LOG_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"_log
+
+        if [ "$1" == "populate_sdk" ]; then
+		        if [ "$DEPLOY_IMAGE_NAME" == "fsl-image-full" ]; then
+                        echo "[ADV] bitbake meta-toolchain"
+                        bitbake meta-toolchain
+                else
+                        echo "[ADV] bitbake $DEPLOY_IMAGE_NAME -c populate_sdk"
+                        bitbake $DEPLOY_IMAGE_NAME -c populate_sdk
+                fi
+        elif [ "x" != "x$2" ]; then
+                bitbake $1 -c $2 -f
+        else
+                bitbake $1
+        fi
+
+        if [ "$?" -ne 0 ]; then
+                echo "[ADV] Build failure! Check details in ${LOG_DIR}.tgz"
+                save_temp_log
+                exit 1
+        fi
+}
+
+function set_environment()
+{
+        cd $CURR_PATH/$ROOT_DIR
+	echo "[ADV] set environment"
+
+        if [ "$1" == "sdk" ]; then
+	        # Use default device for sdk
+                EULA=1 DISTRO=$BACKEND_TYPE MACHINE=$DEFAULT_DEVICE source imx-setup-release.sh -b $BUILDALL_DIR
+        else
+                if [ -e $BUILDALL_DIR/conf/local.conf ] ; then
+                        # Change MACHINE setting
+                        sed -i "s/MACHINE ??=.*/MACHINE ??= '${KERNEL_CPU_TYPE}${PRODUCT}'/g" $BUILDALL_DIR/conf/local.conf
+                        EULA=1 source setup-environment $BUILDALL_DIR
+                else
+                        # First build
+                        EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} source imx-setup-release.sh -b $BUILDALL_DIR
+                fi
+        fi
+}
+
+function build_yocto_sdk()
+{
+        set_environment sdk
+
+        # Build default full image first
+        ## building $DEPLOY_IMAGE_NAME
+
+        # Generate sdk image
+        building populate_sdk
+}
+
+function prepare_images()
+{
+        cd $CURR_PATH
+
+        IMAGE_TYPE=$1
+        OUTPUT_DIR=$2
+	echo "[ADV] prepare $IMAGE_TYPE image"
+        if [ "x$OUTPUT_DIR" == "x" ]; then
+                echo "[ADV] prepare_images: invalid parameter #2!"
+                exit 1;
+        else
+                echo "[ADV] mkdir $OUTPUT_DIR"
+                mkdir $OUTPUT_DIR
+        fi
+	
+        case $IMAGE_TYPE in
+                "sdk")
+			cp $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/sdk/* $OUTPUT_DIR
+                        ;;
+                *)
+                        echo "[ADV] prepare_images: invalid parameter #1!"
+                        exit 1;
+                        ;;
+        esac
+
+        # Package image file
+        case $IMAGE_TYPE in
+                "sdk")
+                        echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
+			tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
+			generate_md5 ${OUTPUT_DIR}.tgz
+                        ;;
+                *) # Normal images
+                        echo "[ADV] creating ${OUTPUT_DIR}.img.gz ..."
+                        gzip -c9 $OUTPUT_DIR/$FILE_NAME > $OUTPUT_DIR.img.gz
+                        generate_md5 $OUTPUT_DIR.img.gz
+                        ;;
+        esac
+        rm -rf $OUTPUT_DIR
+}
+
+function copy_image_to_storage()
+{
+	echo "[ADV] copy $1 images to $STORAGE_PATH"
+
+	case $1 in
+		"sdk")
+			mv -f ${SDK_DIR}.tgz $STORAGE_PATH
+			;;
+		*)
+			echo "[ADV] copy_image_to_storage: invalid parameter #1!"
+			exit 1;
+			;;
+	esac
+
+	mv -f *.md5 $STORAGE_PATH
+}
+
+function get_bsp_tarball()
+{
+	if [ -e $STORAGE_PATH/${ROOT_DIR}.tgz ] ; then
+		tar zxf $STORAGE_PATH/${ROOT_DIR}.tgz
+	else
+		echo "[ADV] Cannot find BSP tarball"
+		exit 1;
+	fi
+}
+
 function get_csv_info()
 {
 	IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$1"_"$DATE"
@@ -336,31 +465,51 @@ function get_csv_info()
 # ================
 define_cpu_type $PRODUCT
 
-mkdir $ROOT_DIR
-get_source_code
+if [ "$PRODUCT" == "$VER_PREFIX" ]; then
+	echo "[ADV] get bsp tarball"
+	get_bsp_tarball
 
-if [ -z "$EXISTED_VERSION" ] ; then
-	# Get info from CSV
-	for MEMORY in $MEMORY_LIST;do
-		get_csv_info $MEMORY
-	done
-	# Check meta-advantech tag exist or not, and checkout to tag version
-	check_tag_and_checkout $META_ADVANTECH_PATH $META_ADVANTECH_BRANCH $HASH_ADVANTECH
+	# Build Yocto SDK
+	echo "[ADV] build yocto sdk"
+	build_yocto_sdk
 
-	# Check tag exist or not, and replace bbappend file SRCREV
-	check_tag_and_replace $U_BOOT_PATH $U_BOOT_URL $HASH_UBOOT
-	check_tag_and_replace $KERNEL_PATH $KERNEL_URL $HASH_KERNEL
+	echo "[ADV] generate sdk image"
+	SDK_DIR="$ROOT_DIR"_sdk
+	prepare_images sdk $SDK_DIR
+	copy_image_to_storage sdk
 
-	commit_tag_and_rollback $META_ADVANTECH_PATH
+	rm -rf $ROOT_DIR
 
-	# Add git tag and Package kernel & u-boot
-	echo "[ADV] Add tag"
-	commit_tag_and_package $U_BOOT_URL $U_BOOT_BRANCH $HASH_UBOOT
-	commit_tag_and_package $KERNEL_URL $KERNEL_BRANCH $HASH_KERNEL
+else # "$PRODUCT" != "$VER_PREFIX"
+	mkdir $ROOT_DIR
+	get_source_code
 
-	# Create manifests xml and commit
-	create_xml_and_commit
+        if [ -z "$EXISTED_VERSION" ] ; then
+		# Get info from CSV
+		for MEMORY in $MEMORY_LIST;do
+			get_csv_info $MEMORY
+		done
+		# Check meta-advantech tag exist or not, and checkout to tag version
+		check_tag_and_checkout $META_ADVANTECH_PATH $META_ADVANTECH_BRANCH $HASH_ADVANTECH
+
+		# Check tag exist or not, and replace bbappend file SRCREV
+		check_tag_and_replace $U_BOOT_PATH $U_BOOT_URL $HASH_UBOOT
+		check_tag_and_replace $KERNEL_PATH $KERNEL_URL $HASH_KERNEL
+
+                commit_tag_and_rollback $META_ADVANTECH_PATH
+
+                # Add git tag and Package kernel & u-boot
+                echo "[ADV] Add tag"
+                commit_tag_and_package $U_BOOT_URL $U_BOOT_BRANCH $HASH_UBOOT
+                commit_tag_and_package $KERNEL_URL $KERNEL_BRANCH $HASH_KERNEL
+
+                # Create manifests xml and commit
+                create_xml_and_commit
+        fi
 fi
+
+#cd $CURR_PATH
+#rm -rf $ROOT_DIR
 
 echo "[ADV] build script done!"
 

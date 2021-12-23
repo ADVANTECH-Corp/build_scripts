@@ -311,16 +311,6 @@ function save_temp_log()
 	find . -name "temp" | xargs rm -rf
 }
 
-function get_bsp_tarball()
-{
-	if [ -e $STORAGE_PATH/${ROOT_DIR}.tgz ] ; then
-		tar zxf $STORAGE_PATH/${ROOT_DIR}.tgz
-	else
-		echo "[ADV] Cannot find BSP tarball"
-		exit 1;
-	fi
-}
-
 function get_csv_info()
 {
 	IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$1"_"$DATE"
@@ -346,42 +336,31 @@ function get_csv_info()
 # ================
 define_cpu_type $PRODUCT
 
-if [ "$PRODUCT" == "$VER_PREFIX" ]; then
-	echo "[ADV] get bsp tarball"
-	get_bsp_tarball
+mkdir $ROOT_DIR
+get_source_code
 
-	rm -rf $ROOT_DIR
+if [ -z "$EXISTED_VERSION" ] ; then
+	# Get info from CSV
+	for MEMORY in $MEMORY_LIST;do
+		get_csv_info $MEMORY
+	done
+	# Check meta-advantech tag exist or not, and checkout to tag version
+	check_tag_and_checkout $META_ADVANTECH_PATH $META_ADVANTECH_BRANCH $HASH_ADVANTECH
 
-else # "$PRODUCT" != "$VER_PREFIX"
-	mkdir $ROOT_DIR
-	get_source_code
+	# Check tag exist or not, and replace bbappend file SRCREV
+	check_tag_and_replace $U_BOOT_PATH $U_BOOT_URL $HASH_UBOOT
+	check_tag_and_replace $KERNEL_PATH $KERNEL_URL $HASH_KERNEL
 
-        if [ -z "$EXISTED_VERSION" ] ; then
-		# Get info from CSV
-		for MEMORY in $MEMORY_LIST;do
-			get_csv_info $MEMORY
-		done
-		# Check meta-advantech tag exist or not, and checkout to tag version
-		check_tag_and_checkout $META_ADVANTECH_PATH $META_ADVANTECH_BRANCH $HASH_ADVANTECH
+	commit_tag_and_rollback $META_ADVANTECH_PATH
 
-		# Check tag exist or not, and replace bbappend file SRCREV
-		check_tag_and_replace $U_BOOT_PATH $U_BOOT_URL $HASH_UBOOT
-		check_tag_and_replace $KERNEL_PATH $KERNEL_URL $HASH_KERNEL
+	# Add git tag and Package kernel & u-boot
+	echo "[ADV] Add tag"
+	commit_tag_and_package $U_BOOT_URL $U_BOOT_BRANCH $HASH_UBOOT
+	commit_tag_and_package $KERNEL_URL $KERNEL_BRANCH $HASH_KERNEL
 
-                commit_tag_and_rollback $META_ADVANTECH_PATH
-
-                # Add git tag and Package kernel & u-boot
-                echo "[ADV] Add tag"
-                commit_tag_and_package $U_BOOT_URL $U_BOOT_BRANCH $HASH_UBOOT
-                commit_tag_and_package $KERNEL_URL $KERNEL_BRANCH $HASH_KERNEL
-
-                # Create manifests xml and commit
-                create_xml_and_commit
-        fi
+	# Create manifests xml and commit
+	create_xml_and_commit
 fi
-
-#cd $CURR_PATH
-#rm -rf $ROOT_DIR
 
 echo "[ADV] build script done!"
 

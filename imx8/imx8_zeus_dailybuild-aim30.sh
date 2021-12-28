@@ -382,9 +382,6 @@ function prepare_images()
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
                         bunzip2 -f $DEPLOY_IMAGE_PATH/$FILE_NAME.bz2
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
-                        FILE_NAME_OTA=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.sdcard"
-                        bunzip2 -f $DEPLOY_IMAGE_PATH/$FILE_NAME_OTA.bz2
-                        cp $DEPLOY_IMAGE_PATH/$FILE_NAME_OTA $OUTPUT_DIR
 			;;
                 "individually")
                         mkdir $OUTPUT_DIR/image $OUTPUT_DIR/mk_inand
@@ -423,9 +420,6 @@ function prepare_images()
                         echo "[ADV] creating ${OUTPUT_DIR}.img.gz ..."
                         gzip -c9 $OUTPUT_DIR/$FILE_NAME > $OUTPUT_DIR.img.gz
                         generate_md5 $OUTPUT_DIR.img.gz
-                        echo "[ADV] creating ${OUTPUT_DIR}_OTA.img.gz ..."
-                        gzip -c9 $OUTPUT_DIR/$FILE_NAME_OTA > $OUTPUT_DIR_OTA.img.gz
-                        generate_md5 $OUTPUT_DIR_OTA.img.gz
 			;;
         esac
         rm -rf $OUTPUT_DIR

@@ -409,11 +409,11 @@ build_linux_images
 prepare_images
 copy_image_to_storage
 save_temp_log
-if [ $isFirstMachine == "true" ]; then
-	uboot_version_commit
-	create_xml_and_commit
-	auto_add_tag
-fi
+#if [ $isFirstMachine == "true" ]; then
+#	uboot_version_commit
+#	create_xml_and_commit
+#	auto_add_tag
+#fi
 
 echo "[ADV] build script done!"
 

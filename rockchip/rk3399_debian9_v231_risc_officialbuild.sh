@@ -386,6 +386,7 @@ function copy_image_to_storage()
     echo "[ADV] copy images to $OUTPUT_DIR"
     cd $CURR_PATH
     IMAGE_DIR="${OFFICIAL_VER}"_"$DATE"
+	BSP_DIR="${BSP_VER}"_"$DATE"
 	if [ $isFirstMachine == "true" ]; then
 	    generate_manifest
 	    mv ${VER_TAG}.xml $OUTPUT_DIR
@@ -395,6 +396,7 @@ function copy_image_to_storage()
     mv ${IMAGE_DIR}.csv $OUTPUT_DIR
 
     mv -f ${IMAGE_DIR}.img.tgz $OUTPUT_DIR
+    mv -f ${BSP_DIR}.img.tgz $OUTPUT_DIR
     mv -f *.md5 $OUTPUT_DIR
 
 }

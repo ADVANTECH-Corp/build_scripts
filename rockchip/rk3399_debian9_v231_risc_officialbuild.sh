@@ -377,8 +377,8 @@ function prepare_images()
     cp -R $CURR_PATH/$ROOT_DIR/prebuilts $BSP_DIR/
     rm -rf $BSP_DIR/prebuilts/.git
 
-    tar czf ${BSP_DIR}.img.tgz $BSP_DIR
-    generate_md5 ${BSP_DIR}.img.tgz
+    tar czf ${BSP_DIR}.bsp.tgz $BSP_DIR
+    generate_md5 ${BSP_DIR}.bsp.tgz
 }
 
 function copy_image_to_storage()
@@ -396,7 +396,7 @@ function copy_image_to_storage()
     mv ${IMAGE_DIR}.csv $OUTPUT_DIR
 
     mv -f ${IMAGE_DIR}.img.tgz $OUTPUT_DIR
-    mv -f ${BSP_DIR}.img.tgz $OUTPUT_DIR
+    mv -f ${BSP_DIR}.bsp.tgz $OUTPUT_DIR
     mv -f *.md5 $OUTPUT_DIR
 
 }

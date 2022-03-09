@@ -59,3 +59,20 @@ if [ "$ROM5780A3" == "true" ]; then
 	export HW_VER
 	./rk3399_debian9_v231_risc_officialbuild.sh $VERSION_NUM
 fi
+
+if [ "$ROM5780B1" == "true" ]; then
+	UBOOT_DEFCONFIG=rk3399_rom5780b1_2G
+	KERNEL_DEFCONFIG=rk3399_adv_defconfig
+	KERNEL_DTB=rk3399-rom5780-b1.img
+	MACHINE_LIST="$MACHINE_LIST ROM5780"
+	MODEL_NAME="ROM5780"
+	HW_VER="B1"
+
+	export UBOOT_DEFCONFIG
+	export KERNEL_DEFCONFIG
+	export KERNEL_DTB
+	export MACHINE_LIST
+	export MODEL_NAME
+	export HW_VER
+	./rk3399_debian9_v231_risc_officialbuild.sh $VERSION_NUM
+fi

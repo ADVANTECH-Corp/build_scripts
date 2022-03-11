@@ -108,7 +108,7 @@ function do_repo_init()
 function get_source_code()
 {
     echo "[ADV] get yocto source code"
-    git clone https://github.com/rockchip-linux/repo.git
+    git clone https://github.com/ADVANTECH-Rockchip/repo.git
     cd $ROOT_DIR
 
     do_repo_init

@@ -21,7 +21,7 @@ if [ $ROM7720A1 == true ]; then
 	[ "$?" -ne 0 ] && exit 1
 fi
 if [ $ROM5720A1 == true ]; then
-	$BUILD_SH rom5720a1-8M 5720A1"$AIM_VERSION"LIV"$VERSION_NUM" "2G" ""
+	$BUILD_SH rom5720a1-8M 5720A1"$AIM_VERSION"LIV"$VERSION_NUM" "4G 2G" ""
 	[ "$?" -ne 0 ] && exit 1
 fi
 if [ $ROM5721A1 == true ]; then

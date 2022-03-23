@@ -24,7 +24,7 @@ git config --global user.email "advrisc@gmail.com" "
 sudo docker exec ${DOCK_ID} /bin/bash -c "
 sudo chmod a+rw /home/adv/BSP/ -R; \
 cd /home/adv/BSP; \
-soure azure_env.sh; \
+source azure_env.sh; \
 ./all_rk3568_debian10_v110_risc_officialbuild.sh"
 
 # stop & rm docker container

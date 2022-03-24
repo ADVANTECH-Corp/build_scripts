@@ -113,6 +113,7 @@ function uboot_version_commit()
 
 	# push to github
 	REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+	echo " V$RELEASE_VERSION" > .scmversion
 	git add .scmversion -f
 	git commit -m "[Official Release] ${VER_TAG}"
 	git push $REMOTE_SERVER local:$BSP_BRANCH

@@ -28,6 +28,10 @@ if [ $ROM5721A1 == true ]; then
 	$BUILD_SH rom5721a1-8MM 5721A1"$AIM_VERSION"LIV"$VERSION_NUM" "2G 1G" "FSPI"
 	[ "$?" -ne 0 ] && exit 1
 fi
+if [ $RSB3730A1 == true ]; then
+        $BUILD_SH rsb3730a1-8MM 3730A1"$AIM_VERSION"LIV"$VERSION_NUM" "2G 1G" "FSPI"
+        [ "$?" -ne 0 ] && exit 1
+fi
 if [ $ROM5620A1 == true ]; then
 	$BUILD_SH rom5620a1-8X 5620A1"$AIM_VERSION"LIV"$VERSION_NUM" "2G" "FSPI"
 	[ "$?" -ne 0 ] && exit 1

@@ -16,9 +16,10 @@ echo "[ADV] KERNEL_DTB = ${KERNEL_DTB}"
 echo "[ADV] LUNCH_COMBO = ${LUNCH_COMBO}"
 echo "[ADV] MODEL_NAME = ${MODEL_NAME}"
 echo "[ADV] BOARD_VER = ${BOARD_VER}"
+echo "[ADV] BSP_TARBALL = ${BSP_TARBALL}"
 
 CURR_PATH="$PWD"
-ROOT_DIR="${PLATFORM_PREFIX}_${RELEASE_VERSION}_$DATE/android-bsp"
+ROOT_DIR="${PLATFORM_PREFIX}_${RELEASE_VERSION}_${DATE}/android-bsp"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
 IMAGE_VER="${MODEL_NAME}${BOARD_VER}${AIM_VERSION}AIV${RELEASE_VERSION}_$DATE"
 
@@ -33,6 +34,35 @@ fi
 # ===========
 #  Functions
 # ===========
+function decompress_bsp()
+{
+    cd $CURR_PATH/${PLATFORM_PREFIX}_${RELEASE_VERSION}_${DATE}
+
+    if [ "$BSP_TARBALL" == "" ] ; then
+        echo "[ADV] BSP_TARBALL is null"
+    else
+        tar -zxvf ${BSP_TARBALL}
+    fi
+}
+
+function get_source_code()
+{
+    cd $CURR_PATH/$ROOT_DIR
+
+    if [ "$BSP_BRANCH" == "" ] ; then
+        echo "[ADV] BSP_BRANCH is null"
+        repo init -u $BSP_URL
+    elif [ "$BSP_XML" == "" ] ; then
+        echo "[ADV] BSP_XML is null"
+        repo init -u $BSP_URL -b $BSP_BRANCH
+    else
+        echo "[ADV] BSP BRANCH AND URL is not null"
+        repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
+    fi
+
+    repo sync
+}
+
 function generate_md5()
 {
     FILENAME=$1
@@ -173,23 +203,12 @@ function copy_image_to_storage()
 # ================
 #  Main procedure 
 # ================
+
 if [ "$PRODUCT" == "$VER_PREFIX" ]; then
     echo "[ADV] get android source code"
 
-    cd $ROOT_DIR
-
-    if [ "$BSP_BRANCH" == "" ] ; then
-        echo "[ADV] BSP_BRANCH is null"
-        repo init -u $BSP_URL
-    elif [ "$BSP_XML" == "" ] ; then
-        echo "[ADV] BSP_XML is null"
-        repo init -u $BSP_URL -b $BSP_BRANCH
-    else
-        echo "[ADV] BSP BRANCH AND URL is not null"
-        repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
-    fi
-
-    repo sync
+    decompress_bsp
+    get_source_code
 
 else #"$PRODUCT" != "$VER_PREFIX"
     echo "[ADV] build images"

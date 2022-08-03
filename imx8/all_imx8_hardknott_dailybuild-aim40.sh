@@ -1,17 +1,8 @@
 #!/bin/bash
-if [ "x${ALSO_BUILD_OFFICIAL_IMAGE}" != "x" ]; then
 	# Dailybuild
-	echo "[ADV] Dailybuild Start"
+	echo "[ADV] Dailybuild start"
 	BUILD_SH="./imx8_hardknott_dailybuild-aim40.sh"
 	VERSION_NUM=${RELEASE_VERSION}
-else
-	echo "[ADV] Officialbuild Start"
-	NUM1=`expr $VERSION : 'V\([0-9A-Z]*\)'`
-	NUM2=`expr $VERSION : '.*[.]\([0-9A-Z]*\)'`
-	# Official release
-	BUILD_SH="./imx8_hardknott_officialbuild-aim40.sh"
-	VERSION_NUM=$NUM1$NUM2
-fi
 
 #imx8_BSP
 $BUILD_SH imx8 imx8LBV"$VERSION_NUM" 1G

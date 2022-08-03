@@ -450,8 +450,8 @@ auto_add_tag $ANDROID_PATCH_PATH
 echo "[ADV] create_xml_and_commit"
 create_xml_and_commit
 
-echo "[ADV] patches android source code"
-patches_android_code
+# echo "[ADV] patches android source code"
+# patches_android_code
 
 echo "[ADV] build images"
 for NEW_MACHINE in $MACHINE_LIST

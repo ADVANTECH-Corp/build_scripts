@@ -41,7 +41,6 @@ ANDROID_HARDWARE_PATH=$CURR_PATH/$ROOT_DIR/hardware
 ANDROID_PACKAGES_PATH=$CURR_PATH/$ROOT_DIR/packages
 ANDROID_SYSTEM_PATH=$CURR_PATH/$ROOT_DIR/system
 ANDROID_BUILD_URL=${ANDROID_BUILD_URL}
-ANDROID_PATCH_PATH=$CURR_PATH/$ROOT_DIR/patches_android_9.0.0_r35
 
 #======================
 AND_BSP="android"
@@ -426,7 +425,6 @@ check_tag_and_checkout $ANDROID_FRAMEWORKS_PATH
 check_tag_and_checkout $ANDROID_HARDWARE_PATH
 check_tag_and_checkout $ANDROID_PACKAGES_PATH
 check_tag_and_checkout $ANDROID_SYSTEM_PATH
-check_tag_and_checkout $ANDROID_PATCH_PATH
 
 # Add git tag
 echo "[ADV] Add tag"
@@ -443,7 +441,6 @@ auto_add_tag $ANDROID_FRAMEWORKS_PATH
 auto_add_tag $ANDROID_HARDWARE_PATH
 auto_add_tag $ANDROID_PACKAGES_PATH
 auto_add_tag $ANDROID_SYSTEM_PATH
-auto_add_tag $ANDROID_PATCH_PATH
 
 # ------------REMOVE FOR TEST   ------------- #
 # Create manifests xml and commit

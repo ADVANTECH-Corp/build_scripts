@@ -87,12 +87,15 @@ function generate_csv()
     fi
 
     HASH_ANDROID_BSP=$(cd $CURR_PATH/$ROOT_DIR/.repo/manifests && git rev-parse --short HEAD)
-    HASH_ANDROID_PRELOADER=$(cd $CURR_PATH/$ROOT_DIR/vendor/mediatek/proprietary/bootable/bootloader/preloader && git rev-parse --short HEAD)
-    HASH_ANDROID_LK=$(cd $CURR_PATH/$ROOT_DIR/vendor/mediatek/proprietary/bootable/bootloader/lk && git rev-parse --short HEAD)
     HASH_ANDROID_DEVICE=$(cd $CURR_PATH/$ROOT_DIR/device && git rev-parse --short HEAD)
+    HASH_ANDROID_FRAMEWORKS=$(cd $CURR_PATH/$ROOT_DIR/frameworks && git rev-parse --short HEAD)
+    HASH_ANDROID_HARDWARE=$(cd $CURR_PATH/$ROOT_DIR/hardware && git rev-parse --short HEAD)
     HASH_ANDROID_KERNEL=$(cd $CURR_PATH/$ROOT_DIR/kernel-4.19 && git rev-parse --short HEAD)
-    cd $CURR_PATH
+    HASH_ANDROID_PACKAGES=$(cd $CURR_PATH/$ROOT_DIR/packages && git rev-parse --short HEAD)
+    HASH_ANDROID_SYSTEM=$(cd $CURR_PATH/$ROOT_DIR/system && git rev-parse --short HEAD)
+    HASH_ANDROID_VENDOR=$(cd $CURR_PATH/$ROOT_DIR/vendor && git rev-parse --short HEAD)
 
+    cd $CURR_PATH
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV
 ESSD Software/OS Update News
@@ -107,13 +110,16 @@ MD5 Checksum,TGZ: ${MD5_SUM}
 Image Size,${FILE_SIZE}B (${FILE_SIZE_BYTE} bytes)
 Issue description, N/A
 Function Addition,
-Android-manifest, ${HASH_BSP}
+Android-manifest, ${HASH_ANDROID_BSP}
 
 ANDROID_BSP, ${HASH_ANDROID_BSP}
-ANDROID_PRELOADER, ${HASH_ANDROID_PRELOADER}
-ANDROID_LK, ${HASH_ANDROID_LK}
 ANDROID_DEVICE, ${HASH_ANDROID_DEVICE}
+ANDROID_FRAMEWORKS, ${HASH_ANDROID_FRAMEWORKS}
+ANDROID_HARDWARE, ${HASH_ANDROID_HARDWARE}
 ANDROID_KERNEL, ${HASH_ANDROID_KERNEL}
+ANDROID_PACKAGES, ${HASH_ANDROID_PACKAGES}
+ANDROID_SYSTEM, ${HASH_ANDROID_SYSTEM}
+ANDROID_VENDOR, ${HASH_ANDROID_VENDOR}
 
 END_OF_CSV
 }
@@ -182,7 +188,7 @@ function prepare_images()
     mkdir $IMAGE_DIR
 
     # Copy image files to image directory
-    cp $CURR_PATH/$ROOT_DIR/out/target/product/aiot8395p1_64_bsp/* $IMAGE_DIR
+    cp $CURR_PATH/$ROOT_DIR/out/target/product/$OUTPUT_FOLDER/* $IMAGE_DIR
 
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR

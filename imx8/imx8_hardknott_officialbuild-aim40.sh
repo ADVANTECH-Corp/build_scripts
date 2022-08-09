@@ -432,6 +432,7 @@ function copy_image_to_storage()
 
 function get_bsp_tarball()
 {
+	echo "[ADV] get bsp tarball path $STORAGE_PATH and file name is ${ROOT_DIR}"
 	if [ -e $STORAGE_PATH/${ROOT_DIR}.tgz ] ; then
 		tar zxf $STORAGE_PATH/${ROOT_DIR}.tgz
 	else

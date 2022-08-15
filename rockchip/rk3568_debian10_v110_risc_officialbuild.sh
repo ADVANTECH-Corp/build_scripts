@@ -154,7 +154,7 @@ function generate_csv()
     HASH_DEBIAN_PREBUILTS=$(cd $CURR_PATH/$ROOT_DIR/prebuilts && git rev-parse --short HEAD)
     HASH_DEBIAN_RKBIN=$(cd $CURR_PATH/$ROOT_DIR/rkbin && git rev-parse --short HEAD)
     HASH_DEBIAN_ROOTFS=$(cd $CURR_PATH/$ROOT_DIR/debian && git rev-parse --short HEAD)
-    HASH_DEBIAN_ROOTFS_ADV=$(cd $CURR_PATH/$ROOT_DIR/rootfs_adv && git rev-parse --short HEAD)
+    HASH_DEBIAN_ROOTFS_ADV=$(cd $CURR_PATH/$ROOT_DIR/debian_adv && git rev-parse --short HEAD)
     HASH_DEBIAN_TOOLS=$(cd $CURR_PATH/$ROOT_DIR/tools && git rev-parse --short HEAD)
 
     cd $CURR_PATH

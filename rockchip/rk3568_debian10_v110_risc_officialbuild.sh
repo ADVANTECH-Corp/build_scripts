@@ -310,7 +310,11 @@ function build_linux_images()
 {
     cd $CURR_PATH/$ROOT_DIR
 	echo "[ADV] build linux images begin"
-	
+
+	TARGET_PRODUCT="device/rockchip/.target_product"
+	TARGET_PRODUCT_DIR=$(realpath ${TARGET_PRODUCT})
+	ln -rfs $TARGET_PRODUCT_DIR/$BOARD_CONFIG device/rockchip/.BoardConfig.mk
+
 	building uboot
 	building kernel
 	if [ $isFirstMachine == "true" ]; then

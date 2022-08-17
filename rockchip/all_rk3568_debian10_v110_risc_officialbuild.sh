@@ -17,6 +17,7 @@ if [ "$RSB4810A2" == "true" ]; then
 	MACHINE_LIST="$MACHINE_LIST RSB4810"
 	MODEL_NAME="RSB4810"
 	HW_VER="A2"
+	BOARD_CONFIG="BoardConfig-rk3568-rsb4810a2.mk"
 
 	export UBOOT_DEFCONFIG
 	export KERNEL_DEFCONFIG
@@ -24,6 +25,7 @@ if [ "$RSB4810A2" == "true" ]; then
 	export MACHINE_LIST
 	export MODEL_NAME
 	export HW_VER
+	export BOARD_CONFIG
 	./rk3568_debian10_v110_risc_officialbuild.sh $VERSION_NUM
 fi
 
@@ -34,6 +36,7 @@ if [ "$ROM5880A1" == "true" ]; then
 	MACHINE_LIST="$MACHINE_LIST ROM5880"
 	MODEL_NAME="ROM5880"
 	HW_VER="A1"
+	BOARD_CONFIG="BoardConfig-rk3568-rom5880a1.mk"
 
 	export UBOOT_DEFCONFIG
 	export KERNEL_DEFCONFIG
@@ -41,6 +44,7 @@ if [ "$ROM5880A1" == "true" ]; then
 	export MACHINE_LIST
 	export MODEL_NAME
 	export HW_VER
+	export BOARD_CONFIG
 	./rk3568_debian10_v110_risc_officialbuild.sh $VERSION_NUM
 fi
 

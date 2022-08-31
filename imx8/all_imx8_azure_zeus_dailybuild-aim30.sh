@@ -67,7 +67,7 @@ function build_project()
 
 	if [ $EPCR5710A1 == true ]; then
 		export BUILD_NN_IMX_CLEANSTATE=true
-		$BUILD_SH epcr5710a1-8MP 5710A1"$AIM_VERSION"LIV"$VERSION_NUM" "4G" "FSPI"
+		$BUILD_SH epcr5710a1-8MP 5710A1"$AIM_VERSION"LIV"$VERSION_NUM" "6G 4G 2G" "FSPI"
 		[ "$?" -ne 0 ] && exit 1
 	fi
 }

@@ -288,7 +288,7 @@ function clean_yocto_packages()
 	building spirv-tools cleansstate
 	building fmt cleansstate
 	building armnn	cleansstate
-	if [ "$PRODUCT" == "rom7720a1" ] || [ "$PRODUCT" == "rom5620a1" ] || [ "$PRODUCT" == "rom3620a1" ] || [ "$PRODUCT" == "rom5722a1" ] || [ "$PRODUCT" == "rsb3720a1" ]; then
+	if [ "$BUILD_NN_IMX_CLEANSTATE" == "true" ] ; then
                 building nn-imx cleansstate
         fi
 }

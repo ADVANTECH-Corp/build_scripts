@@ -320,6 +320,10 @@ function rebuild_bootloader()
 
 function build_yocto_images()
 {
+	# Modify the nxp build fail issue#
+
+sed -i 's/git.alsa-project.org/github.com\/alsa-project/g' $CURR_PATH/$ROOT_DIR/sources/meta-imx/meta-sdk/recipes-multimedia/tinycompress/tinycompress_1.1.6.bb
+
         set_environment
 
         # Re-build U-Boot & kernel

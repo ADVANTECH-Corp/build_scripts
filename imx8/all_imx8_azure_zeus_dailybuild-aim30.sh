@@ -76,6 +76,7 @@ function build_project()
 build_project DailyBuild
 
 if [ "${ALSO_BUILD_OFFICIAL_IMAGE}" == true ]; then
+	export VERSION=VA.`echo $VERSION_NUM | cut -b 2-`
 	build_project OfficialBuild
 fi
 

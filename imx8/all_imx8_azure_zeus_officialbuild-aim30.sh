@@ -73,7 +73,7 @@ function build_project()
 }
 
 
-export VERSION=VA.`echo $VERSION_NUM | cut -b 2-`
+export VERSION=VA.`echo $RELEASE_VERSION | cut -b 2-`
 build_project OfficialBuild
 
 echo "[ADV] All done!"

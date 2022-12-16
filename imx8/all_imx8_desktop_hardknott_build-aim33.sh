@@ -9,7 +9,7 @@ if [[ ! ${ALSO_BUILD_OFFICIAL_IMAGE} =~ 1|true ]]; then
 else
 	# Official release
     [[ ! $VERSION =~ ^V[0-9A-Z][0-9]{4}$ ]] && { echo "invalid VERSION ($VERSION)"; exit 1; }
-	BUILD_SH=${B/_build/_officialbuild}
+	BUILD_SH=./${B/_build/_officialbuild}
 	VERSION_NUM=${VERSION#V}
 fi
 echo BUILD_SH=$BUILD_SH

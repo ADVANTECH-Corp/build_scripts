@@ -134,7 +134,7 @@ function generate_csv()
     FILE_SIZE=
 
     if [ -e $FILENAME ]; then
-        MD5_SUM=`cat ${FILENAME}.md5`
+        MD5_SUM=`cut -f1 -d' ' ${FILENAME}.md5`
         set - `ls -l ${FILENAME}`; FILE_SIZE_BYTE=$5
         set - `ls -lh ${FILENAME}`; FILE_SIZE=$5
     fi

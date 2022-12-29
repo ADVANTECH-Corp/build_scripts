@@ -63,6 +63,15 @@ function get_source_code()
     repo sync
 }
 
+function modify_source_code()
+{
+    cd $CURR_PATH/$ROOT_DIR
+
+    # Add the image version to "Custom build version"
+    echo "MTK_INTERNAL_BUILD_VERNO = \""$IMAGE_VER"\"" >> vendor/mediatek/proprietary/buildinfo_vnd/label.ini
+    echo "MTK_INTERNAL_BUILD_VERNO = \""$IMAGE_VER"\"" >> vendor/mediatek/proprietary/buildinfo_sys/label.ini
+}
+
 function generate_md5()
 {
     FILENAME=$1
@@ -215,6 +224,7 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 
     decompress_bsp
     get_source_code
+    modify_source_code
 
 else #"$PRODUCT" != "$VER_PREFIX"
     echo "[ADV] build images"
@@ -222,12 +232,11 @@ else #"$PRODUCT" != "$VER_PREFIX"
     for NEW_MACHINE in $MACHINE_LIST
     do
         echo "[ADV] NEW_MACHINE = $NEW_MACHINE"
-	build_android_images
-	prepare_images
-	copy_image_to_storage
-	save_temp_log
+        build_android_images
+        prepare_images
+        copy_image_to_storage
+        save_temp_log
     done
-
 fi
 
 echo "[ADV] build script done!"

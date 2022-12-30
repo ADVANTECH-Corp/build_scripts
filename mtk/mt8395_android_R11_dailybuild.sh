@@ -163,17 +163,8 @@ function building()
     LOG2_FILE="$NEW_MACHINE"_Build2.log
 
     if [ "$1" == "kernel" ]; then
-	echo "[ADV] build kernel  = $KERNEL_CONFIG"
-        cd $CURR_PATH/$ROOT_DIR/kernel-4.19
-        make distclean
-        make ARCH=arm64 $KERNEL_CONFIG
-        make ARCH=arm64 $KERNEL_DTB >> $CURR_PATH/$ROOT_DIR/$LOG_FILE
+        make kernel 2>&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE
     elif [ "$1" == "android" ]; then
-        echo "[ADV] build android"
-        cd $CURR_PATH/$ROOT_DIR
-        source build/envsetup.sh
-        lunch $LUNCH_COMBO
-        make clean
         make 2>&1 | tee $CURR_PATH/$ROOT_DIR/$LOG2_FILE
     else
         echo "[ADV] pass building..."
@@ -184,6 +175,14 @@ function building()
 
 function build_android_images()
 {
+    cd $CURR_PATH/$ROOT_DIR
+    source build/envsetup.sh
+    lunch $LUNCH_COMBO
+    make clean
+
+    # Kernel
+    building kernel
+
     # Android 
     building android
 }

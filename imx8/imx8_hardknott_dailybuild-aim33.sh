@@ -482,10 +482,10 @@ else #"$PRODUCT" != "$VER_PREFIX"
                 echo -e "No BSP is found!\nStop building." && exit 1
         fi
 
-        if [ -e $CURR_PATH/downloads ] ; then
-                echo "[ADV] link downloads directory from backup"
-                ln -s $CURR_PATH/downloads $CURR_PATH/$ROOT_DIR/downloads
-        fi
+        #if [ -e $CURR_PATH/downloads ] ; then
+        #        echo "[ADV] link downloads directory from backup"
+        #        ln -s $CURR_PATH/downloads $CURR_PATH/$ROOT_DIR/downloads
+        #fi
 
         echo "[ADV] add version"
         add_version

@@ -8,7 +8,6 @@ BOOT_DEVICE_LIST=$4
 #--- [platform specific] ---
 VER_PREFIX="imx8"
 TMP_DIR="tmp"
-DEFAULT_DEVICE="imx8mprsb3720a1"
 #---------------------------
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
@@ -17,7 +16,7 @@ echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
 echo "[ADV] BSP_XML = ${BSP_XML}"
 echo "[ADV] DEPLOY_IMAGE_NAME = ${DEPLOY_IMAGE_NAME}"
 echo "[ADV] BACKEND_TYPE = ${BACKEND_TYPE}"
-echo "[ADV] VERSION = ${VERSION}"
+echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
 echo "[ADV] MEMORY_LIST=${MEMORY_LIST}"
 echo "[ADV] BOOT_DEVICE_LIST=${BOOT_DEVICE_LIST}"
@@ -32,7 +31,7 @@ echo "[ADV] KERNEL_URL = ${KERNEL_URL}"
 echo "[ADV] KERNEL_BRANCH = ${KERNEL_BRANCH}"
 echo "[ADV] KERNEL_PATH = ${KERNEL_PATH}"
 
-VER_TAG="${VER_PREFIX}UB${VERSION}"
+VER_TAG="${VER_PREFIX}UBV${RELEASE_VERSION}"
 
 CURR_PATH="$PWD"
 ROOT_DIR="${VER_TAG}"_"$DATE"
@@ -49,16 +48,6 @@ else
 	echo "[ADV] mkdir $STORAGE_PATH"
 	mkdir -p $STORAGE_PATH
 fi
-
-# Make mnt folder
-MOUNT_POINT="$CURR_PATH/mnt"
-if [ -e $MOUNT_POINT ]; then
-	echo "[ADV] $MOUNT_POINT had already been created"
-else
-	echo "[ADV] mkdir $MOUNT_POINT"
-	mkdir $MOUNT_POINT
-fi
-
 
 # ===========
 #  Functions
@@ -80,17 +69,8 @@ function define_cpu_type()
 
 function do_repo_init()
 {
-    REPO_OPT="-u $BSP_URL"
-
-    if [ ! -z "$BSP_BRANCH" ] ; then
-        REPO_OPT="$REPO_OPT -b $BSP_BRANCH"
-    fi
-    if [ ! -z "$BSP_XML" ] ; then
-        REPO_OPT="$REPO_OPT -m $BSP_XML"
-    fi
-
-    repo init $REPO_OPT
-}
+    repo init -u $BSP_URL ${BSP_BRANCH+"-b"} $BSP_BRANCH ${BSP_XML+"-m"} $BSP_XML
+} 
 
 function get_source_code()
 {
@@ -103,7 +83,7 @@ function get_source_code()
     if [ -z "$EXISTED_VERSION" ] ; then
         echo "[ADV] This is a new VERSION"
     else
-        echo "[ADV] $VERSION already exists!"
+        echo "[ADV] ${RELEASE_VERSION} already exists!"
         rm -rf .repo
         BSP_BRANCH="refs/tags/$VER_TAG"
         BSP_XML="$VER_TAG.xml"
@@ -115,157 +95,152 @@ function get_source_code()
     cd $CURR_PATH
 }
 
+function generate_md5()
+{
+    [[ -e $1 ]] && md5sum -b $1 > $1.md5
+}
+
 function check_tag_and_checkout()
 {
-        FILE_PATH=$1
+    FILE_PATH=$1
 	META_BRANCH=$2
 	HASH_CSV=$3
 
-        if [ -d "$ROOT_DIR/$FILE_PATH" ];then
-                cd $ROOT_DIR/$FILE_PATH
-                META_TAG=`git tag | grep $VER_TAG`
-                if [ "$META_TAG" != "" ]; then
-                        echo "[ADV] meta-advantech has been tagged ($VER_TAG). Nothing to do."
-                else
-			echo "[ADV] Set meta-advantech to $HASH_CSV"
-			BRANCH_SUFFIX=`echo $META_BRANCH | cut -d '_' -f 2`
-			BRANCH_ORI="${META_BRANCH/_$BRANCH_SUFFIX}"
-			git checkout $BRANCH_ORI
-			git pull
-			git reset --hard $HASH_CSV
-			echo "[ADV] Checkout to '$META_BRANCH' and merge from '$BRANCH_ORI'"
-			git checkout $META_BRANCH
-			git pull
-			git merge $BRANCH_ORI --no-edit --log
-                fi
-                cd $CURR_PATH
+    if [ -d "$ROOT_DIR/$FILE_PATH" ];then
+        cd $ROOT_DIR/$FILE_PATH
+        META_TAG=`git tag | grep $VER_TAG`
+        if [ "$META_TAG" != "" ]; then
+            echo "[ADV] meta-advantech has been tagged ($VER_TAG). Nothing to do."
         else
-                echo "[ADV] Directory $ROOT_DIR/$FILE_PATH doesn't exist"
-                exit 1
+            echo "[ADV] Set meta-advantech to $HASH_CSV"
+            BRANCH_SUFFIX=`echo $META_BRANCH | cut -d '_' -f 2`
+            BRANCH_ORI="${META_BRANCH/_$BRANCH_SUFFIX}"
+            git checkout $BRANCH_ORI
+            git pull
+            git reset --hard $HASH_CSV
+            echo "[ADV] Checkout to '$META_BRANCH' and merge from '$BRANCH_ORI'"
+            git checkout $META_BRANCH
+            git pull
+            git merge $BRANCH_ORI --no-edit --log
         fi
+        cd $CURR_PATH
+    else
+        echo "[ADV] Directory $ROOT_DIR/$FILE_PATH doesn't exist"
+        exit 1
+    fi
 }
 
 function check_tag_and_replace()
 {
-        FILE_PATH=$1
-        REMOTE_URL=$2
-        HASH_CSV=$3
+    FILE_PATH=$1
+    REMOTE_URL=$2
+    HASH_CSV=$3
 
-        HASH_ID=`git ls-remote $REMOTE_URL $VER_TAG | awk '{print $1}'`
-        if [ "x$HASH_ID" != "x" ]; then
-                echo "[ADV] $REMOTE_URL has been tagged ,ID is $HASH_ID"
-        else
-		HASH_ID=$HASH_CSV
-                echo "[ADV] $REMOTE_URL isn't tagged , set HASH_ID to $HASH_ID"
-        fi
-        sed -i "s/"\$\{AUTOREV\}"/$HASH_ID/g" $ROOT_DIR/$FILE_PATH
+    HASH_ID=`git ls-remote $REMOTE_URL $VER_TAG | awk '{print $1}'`
+    if [ "x$HASH_ID" != "x" ]; then
+        echo "[ADV] $REMOTE_URL has been tagged ,ID is $HASH_ID"
+    else
+    HASH_ID=$HASH_CSV
+        echo "[ADV] $REMOTE_URL isn't tagged , set HASH_ID to $HASH_ID"
+    fi
+    sed -i "s/"\$\{AUTOREV\}"/$HASH_ID/g" $ROOT_DIR/$FILE_PATH
 }
 
 function commit_tag_and_rollback()
 {
-        FILE_PATH=$1
+    FILE_PATH=$1
 
-        if [ -d "$ROOT_DIR/$FILE_PATH" ];then
-                cd $ROOT_DIR/$FILE_PATH
-                META_TAG=`git tag | grep $VER_TAG`
-                if [ "x$META_TAG" != "x" ]; then
-                        echo "[ADV] meta-advantech has been tagged ($VER_TAG). Nothing to do."
-                else
-                        echo "[ADV] create tag $VER_TAG"
-                        REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
-                        git add .
-                        git commit -m "[Official Release] $VER_TAG"
-                        git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
-                        git push --follow-tags
-                        # Rollback
-                        HEAD_HASH_ID=`git rev-parse HEAD`
-                        git revert $HEAD_HASH_ID --no-edit
-                        git push
-                        git reset --hard $HEAD_HASH_ID
-                fi
-                cd $CURR_PATH
+    if [ -d "$ROOT_DIR/$FILE_PATH" ];then
+        cd $ROOT_DIR/$FILE_PATH
+        META_TAG=`git tag | grep $VER_TAG`
+        if [ "x$META_TAG" != "x" ]; then
+            echo "[ADV] meta-advantech has been tagged ($VER_TAG). Nothing to do."
         else
-                echo "[ADV] Directory $ROOT_DIR/$FILE_PATH doesn't exist"
-                exit 1
+            echo "[ADV] create tag $VER_TAG"
+            REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+            git add .
+            git commit -m "[Official Release] $VER_TAG"
+            git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
+            git push --follow-tags
+            # Rollback
+            HEAD_HASH_ID=`git rev-parse HEAD`
+            git revert $HEAD_HASH_ID --no-edit
+            git push
+            git reset --hard $HEAD_HASH_ID
         fi
+        cd $CURR_PATH
+    else
+        echo "[ADV] Directory $ROOT_DIR/$FILE_PATH doesn't exist"
+        exit 1
+    fi
 }
 
 function commit_tag_and_package()
 {
-        REMOTE_URL=$1
-        META_BRANCH=$2
-        HASH_CSV=$3
+    REMOTE_URL=$1
+    META_BRANCH=$2
+    HASH_CSV=$3
 
-        # Get source
-        git clone $REMOTE_URL
-        SOURCE_DIR=${REMOTE_URL##*/}
-        SOURCE_DIR=${SOURCE_DIR/.git}
-        cd $SOURCE_DIR
-        git checkout $META_BRANCH
-        git reset --hard $HASH_CSV
+    # Get source
+    git clone $REMOTE_URL
+    SOURCE_DIR=${REMOTE_URL##*/}
+    SOURCE_DIR=${SOURCE_DIR/.git}
+    cd $SOURCE_DIR
+    git checkout $META_BRANCH
+    git reset --hard $HASH_CSV
 
-        # Add tag
-        HASH_ID=`git tag -v $VER_TAG | grep object | cut -d ' ' -f 2`
-        if [ "x$HASH_ID" != "x" ] ; then
-                echo "[ADV] tag exists! There is no need to add tag"
-        else
-                echo "[ADV] Add tag $VER_TAG"
-                REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
-                git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
-                git push $REMOTE_SERVER $VER_TAG
-        fi
+    # Add tag
+    HASH_ID=`git tag -v $VER_TAG | grep object | cut -d ' ' -f 2`
+    if [ "x$HASH_ID" != "x" ] ; then
+        echo "[ADV] tag exists! There is no need to add tag"
+    else
+        echo "[ADV] Add tag $VER_TAG"
+        REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+        git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
+        git push $REMOTE_SERVER $VER_TAG
+    fi
 
-        # Package
-        cd ..
-        echo "[ADV] creating "$ROOT_DIR"_"$SOURCE_DIR".tgz ..."
-        tar czf "$ROOT_DIR"_"$SOURCE_DIR".tgz $SOURCE_DIR --exclude-vcs
-        generate_md5 "$ROOT_DIR"_"$SOURCE_DIR".tgz
-        rm -rf $SOURCE_DIR
-        mv -f "$ROOT_DIR"_"$SOURCE_DIR".tgz $STORAGE_PATH
-        mv -f "$ROOT_DIR"_"$SOURCE_DIR".tgz.md5 $STORAGE_PATH
+    # Package
+    cd ..
+    echo "[ADV] creating "$ROOT_DIR"_"$SOURCE_DIR".tgz ..."
+    tar czf "$ROOT_DIR"_"$SOURCE_DIR".tgz $SOURCE_DIR --exclude-vcs
+    generate_md5 "$ROOT_DIR"_"$SOURCE_DIR".tgz
+    rm -rf $SOURCE_DIR
+    mv -f "$ROOT_DIR"_"$SOURCE_DIR".tgz $STORAGE_PATH
+    mv -f "$ROOT_DIR"_"$SOURCE_DIR".tgz.md5 $STORAGE_PATH
 
-        cd $CURR_PATH
+    cd $CURR_PATH
 }
 
 function create_xml_and_commit()
 {
-        if [ -d "$ROOT_DIR/.repo/manifests" ];then
-                echo "[ADV] Create XML file"
-                cd $ROOT_DIR
-                # add revision into xml
-                repo manifest -o $VER_TAG.xml -r
+    if [ -d "$ROOT_DIR/.repo/manifests" ];then
+        echo "[ADV] Create XML file"
+        cd $ROOT_DIR
+        # add revision into xml
+        repo manifest -o $VER_TAG.xml -r
 
-                # revise for new branch
-                BRANCH_SUFFIX=`echo $META_ADVANTECH_BRANCH | cut -d '_' -f 2`
-                BRANCH_ORI="${META_ADVANTECH_BRANCH/_$BRANCH_SUFFIX}"
-                sed -i "s/$BRANCH_ORI/$META_ADVANTECH_BRANCH/g" $VER_TAG.xml
+        # revise for new branch
+        BRANCH_SUFFIX=`echo $META_ADVANTECH_BRANCH | cut -d '_' -f 2`
+        BRANCH_ORI="${META_ADVANTECH_BRANCH/_$BRANCH_SUFFIX}"
+        sed -i "s/$BRANCH_ORI/$META_ADVANTECH_BRANCH/g" $VER_TAG.xml
 
-                mv $VER_TAG.xml .repo/manifests
-                cd .repo/manifests
-		git checkout $BSP_BRANCH
+        mv $VER_TAG.xml .repo/manifests
+        cd .repo/manifests
+        git checkout $BSP_BRANCH
 
-                # push to github
-                REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
-                git add $VER_TAG.xml
-                git commit -m "[Official Release] ${VER_TAG}"
-                git push
-                git tag -a $VER_TAG -F $CURR_PATH/$REALEASE_NOTE
-                git push $REMOTE_SERVER $VER_TAG
-                cd $CURR_PATH
-        else
-                echo "[ADV] Directory $ROOT_DIR/.repo/manifests doesn't exist"
-                exit 1
-        fi
-}
-
-function generate_md5()
-{
-        FILENAME=$1
-
-        if [ -e $FILENAME ]; then
-                MD5_SUM=`md5sum -b $FILENAME | cut -d ' ' -f 1`
-                echo $MD5_SUM > $FILENAME.md5
-        fi
+        # push to github
+        REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+        git add $VER_TAG.xml
+        git commit -m "[Official Release] ${VER_TAG}"
+        git push
+        git tag -a $VER_TAG -F $CURR_PATH/$REALEASE_NOTE
+        git push $REMOTE_SERVER $VER_TAG
+        cd $CURR_PATH
+    else
+        echo "[ADV] Directory $ROOT_DIR/.repo/manifests doesn't exist"
+        exit 1
+    fi
 }
 
 # ===============================
@@ -283,8 +258,8 @@ function get_bsp_tarball()
 
 function get_csv_info()
 {
-	IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$1"_"$DATE"
-	CSV_FILE="$STORAGE_PATH/${IMAGE_DIR}.img.csv"
+	IMAGE_DIR="${OFFICIAL_VER}_${CPU_TYPE}_$1_$DATE"
+	CSV_FILE="${STORAGE_PATH}/${IMAGE_DIR}.img.csv"
 
 	echo "[ADV] Show HASH in ${CSV_FILE}"
 	if [ -e ${CSV_FILE} ] ; then
@@ -305,6 +280,11 @@ function get_csv_info()
 #  Main procedure
 # ================
 define_cpu_type $PRODUCT
+
+echo PRODUCT=$PRODUCT
+echo VER_PREFIX=$VER_PREFIX
+echo ROOT_DIR=$ROOT_DIR
+echo VER_TAG=$VER_TAG
 
 if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 	echo "[ADV] get bsp tarball"

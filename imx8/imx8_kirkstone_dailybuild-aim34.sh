@@ -220,7 +220,7 @@ function add_version()
 	echo "UBOOT_LOCALVERSION = \"-$OFFICIAL_VER\"" >> $ROOT_DIR/$U_BOOT_PATH
 	
 	# Set Linux version (replace)
-	sed -i "/LOCALVERSION/cLOCALVERSION = \"-$OFFICIAL_VER\"" $ROOT_DIR/$KERNEL_PATH
+	sed -i "0,/LOCALVERSION/ s/LOCALVERSION = .*/LOCALVERSION = \"-$OFFICIAL_VER\"/g" $ROOT_DIR/$KERNEL_PATH
 }
 
 function building()

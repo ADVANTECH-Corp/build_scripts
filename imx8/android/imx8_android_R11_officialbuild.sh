@@ -67,6 +67,8 @@ function get_source_code()
 	curl https://storage.googleapis.com/git-repo-downloads/repo > repo
 	chmod 777 repo
 
+	tar zxvf prebuilts-imx8-android11*.tar.gz -C $CURR_PATH/$ROOT_DIR
+
 	mkdir $ROOT_DIR
 	cd $ROOT_DIR
 
@@ -305,11 +307,9 @@ function building()
 	LOG3_FILE="$NEW_MACHINE"_Build3.log
 
 	if [ "$1" == "android" ]; then
-		#make -j4 droid otapackage 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
-		make -j8 bootloader 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
-		make -j8 bootimage 2>> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
-		make dtboimage -j8 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
-		make -j8 2>> $CURR_PATH/$ROOT_DIR/$LOG3_FILE
+		./imx-make.sh bootloader -j12 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
+		./imx-make.sh kernel -j12 2>> $CURR_PATH/$ROOT_DIR/$LOG2_FILE
+		./imx-make.sh -j12 2>> $CURR_PATH/$ROOT_DIR/$LOG3_FILE
 	else
 		make -j8 $1 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE
 	fi
@@ -360,16 +360,15 @@ function prepare_images()
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/boot.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/partition-table.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/partition-table-28GB.img $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/partition-table-7GB.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/super.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/vendor.img $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/vendor_boot.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/imx-sdcard-partition.sh $IMAGE_DIR/imagei
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/fastboot_imx_flashall.sh $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/fastboot_imx_flashall.bat $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/uuu_imx_android_flash.sh $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/uuu_imx_android_flash.bat $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/dtbo-$SOC_NAME.img $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/vendor_boot.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/vendor.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/vbmeta-$SOC_NAME.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/vbmeta.img $IMAGE_DIR/image

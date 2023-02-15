@@ -70,10 +70,10 @@ function get_source_code()
 	   ../repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
 	fi
 	../repo sync -j8
-
-    tar zxvf prebuilts-imx8-android11*.tar.gz -C $CURR_PATH/$ROOT_DIR/android
     
 	cd $CURR_PATH
+	
+	tar zxvf prebuilts-imx8-android11*.tar.gz -C $CURR_PATH/$ROOT_DIR/android
 }
 
 function check_tag_and_checkout()

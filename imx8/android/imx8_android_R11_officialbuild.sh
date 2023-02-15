@@ -10,37 +10,29 @@ echo "[ADV] BSP_XML = ${BSP_XML}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] MACHINE_LIST= ${MACHINE_LIST}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
-#echo "[ADV] SCRIPT_XML = ${SCRIPT_XML}"
-#echo "[ADV] KERNEL_VERSION = ${KERNEL_VERSION}"
-echo "[ADV] KERNEL_URL = ${KERNEL_URL}"
-echo "[ADV] KERNEL_BRANCH = ${KERNEL_BRANCH}"
-echo "[ADV] KERNEL_PATH = ${KERNEL_PATH}"
-#echo "[ADV] UBOOT_VERSION = ${UBOOT_VERSION}"
-echo "[ADV] UBOOT_URL = ${UBOOT_URL}"
-echo "[ADV] UBOOT_BRANCH = ${UBOOT_BRANCH}"
-echo "[ADV] UBOOT_PATH = ${UBOOT_PATH}"
 
 VER_TAG="${VER_PREFIX}ABV"$(echo $RELEASE_VERSION | sed 's/[.]//')
 echo "[ADV] VER_TAG = $VER_TAG"
 
 CURR_PATH="$PWD"
-ROOT_DIR="${VER_PREFIX}AB${RELEASE_VERSION}"_"$DATE/android"
+ROOT_DIR="${VER_PREFIX}AB${RELEASE_VERSION}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
 
 #-- Advantech github android source code repository
 echo "[ADV-ROOT]  $ROOT_DIR"
-ANDROID_DEVICE_PATH=$CURR_PATH/$ROOT_DIR/device
-ANDROID_VENDOR_PATH=$CURR_PATH/$ROOT_DIR/vendor
-ANDROID_ART_PATH=$CURR_PATH/$ROOT_DIR/art
-ANDROID_BUILD_PATH=$CURR_PATH/$ROOT_DIR/build
-ANDROID_BOOTABLE_PATH=$CURR_PATH/$ROOT_DIR/bootable
-ANDROID_DEVELOPMENT_PATH=$CURR_PATH/$ROOT_DIR/development
-ANDROID_EXTERNAL_PATH=$CURR_PATH/$ROOT_DIR/external
-ANDROID_FRAMEWORKS_PATH=$CURR_PATH/$ROOT_DIR/frameworks
-ANDROID_HARDWARE_PATH=$CURR_PATH/$ROOT_DIR/hardware
-ANDROID_PACKAGES_PATH=$CURR_PATH/$ROOT_DIR/packages
-ANDROID_SYSTEM_PATH=$CURR_PATH/$ROOT_DIR/system
-ANDROID_BUILD_URL=${ANDROID_BUILD_URL}
+ANDROID_KERNEL_PATH=$CURR_PATH/$ROOT_DIR/android/vendor/nxp-opensource/kernel_imx
+ANDROID_UBOOT_PATH=$CURR_PATH/$ROOT_DIR/android/vendor/nxp-opensource/uboot-imx
+ANDROID_BSP_PATH=$CURR_PATH/$ROOT_DIR/android
+ANDROID_CTS_PATH=$CURR_PATH/$ROOT_DIR/android/cts
+ANDROID_DEVELOPMENT_PATH=$CURR_PATH/$ROOT_DIR/android/development
+ANDROID_DEVICE_PATH=$CURR_PATH/$ROOT_DIR/android/device
+ANDROID_EXTERNAL_PATH=$CURR_PATH/$ROOT_DIR/android/external
+ANDROID_FRAMEWORKS_PATH=$CURR_PATH/$ROOT_DIR/android/frameworks
+ANDROID_PACKAGES_PATH=$CURR_PATH/$ROOT_DIR/android/packages
+ANDROID_SYSTEM_PATH=$CURR_PATH/$ROOT_DIR/android/system
+ANDROID_TEST_PATH=$CURR_PATH/$ROOT_DIR/android/test
+ANDROID_TOOLS_PATH=$CURR_PATH/$ROOT_DIR/android/tools
+ANDROID_VENDOR_PATH=$CURR_PATH/$ROOT_DIR/android/vendor
 
 #======================
 AND_BSP="android"
@@ -228,26 +220,25 @@ function generate_csv()
 	fi
 
 	HASH_BSP=$(cd $CURR_PATH/$ROOT_DIR/.repo/manifests && git rev-parse --short HEAD)
-	HASH_UBOOT=$(cd $CURR_PATH/$ROOT_DIR/vendor/nxp-opensource/uboot-imx && git rev-parse --short HEAD)
-	HASH_KERNEL=$(cd $CURR_PATH/$ROOT_DIR/vendor/nxp-opensource/kernel_imx && git rev-parse --short HEAD)
-	HASH_PATCH=$(cd $CURR_PATH/$ROOT_DIR/patches_android_9.0.0_r35 && git rev-parse --short HEAD)
-	HASH_DEVICE=$(cd $CURR_PATH/$ROOT_DIR/device && git rev-parse --short HEAD)
-	HASH_VENDOR=$(cd $CURR_PATH/$ROOT_DIR/vendor && git rev-parse --short HEAD)
-	HASH_ART=$(cd $CURR_PATH/$ROOT_DIR/art && git rev-parse --short HEAD)
-	HASH_BUILD=$(cd $CURR_PATH/$ROOT_DIR/build && git rev-parse --short HEAD)
-	HASH_BOOTABLE=$(cd $CURR_PATH/$ROOT_DIR/bootable && git rev-parse --short HEAD)
-	HASH_DEVELOPMENT=$(cd $CURR_PATH/$ROOT_DIR/development && git rev-parse --short HEAD)
-	HASH_EXTERNAL=$(cd $CURR_PATH/$ROOT_DIR/external && git rev-parse --short HEAD)
-	HASH_FRAMEWORKS=$(cd $CURR_PATH/$ROOT_DIR/frameworks && git rev-parse --short HEAD)
-	HASH_HARDWARE=$(cd $CURR_PATH/$ROOT_DIR/hardware && git rev-parse --short HEAD)
-	HASH_PACKAGES=$(cd $CURR_PATH/$ROOT_DIR/packages && git rev-parse --short HEAD)
-	HASH_SYSTEM=$(cd $CURR_PATH/$ROOT_DIR/system && git rev-parse --short HEAD)
+	HASH_UBOOT=$(cd $CURR_PATH/$ROOT_DIR/android/vendor/nxp-opensource/uboot-imx && git rev-parse --short HEAD)
+	HASH_KERNEL=$(cd $CURR_PATH/$ROOT_DIR/android/vendor/nxp-opensource/kernel_imx && git rev-parse --short HEAD)
+	HASH_ANDROID_BSP=$(cd $CURR_PATH/$ROOT_DIR/android && git rev-parse --short HEAD)
+	HASH_CTS=$(cd $CURR_PATH/$ROOT_DIR/android/cts && git rev-parse --short HEAD)
+	HASH_DEVELOPMENT=$(cd $CURR_PATH/$ROOT_DIR/android/development && git rev-parse --short HEAD)
+	HASH_DEVICE=$(cd $CURR_PATH/$ROOT_DIR/android/device && git rev-parse --short HEAD)
+	HASH_EXTERNAL=$(cd $CURR_PATH/$ROOT_DIR/android/external && git rev-parse --short HEAD)
+	HASH_FRAMEWORKS=$(cd $CURR_PATH/$ROOT_DIR/android/frameworks && git rev-parse --short HEAD)
+	HASH_PACKAGES=$(cd $CURR_PATH/$ROOT_DIR/android/packages && git rev-parse --short HEAD)
+	HASH_SYSTEM=$(cd $CURR_PATH/$ROOT_DIR/android/system && git rev-parse --short HEAD)
+	HASH_TEST=$(cd $CURR_PATH/$ROOT_DIR/android/test && git rev-parse --short HEAD)
+	HASH_TOOLS=$(cd $CURR_PATH/$ROOT_DIR/android/tools && git rev-parse --short HEAD)
+	HASH_VENDOR=$(cd $CURR_PATH/$ROOT_DIR/android/vendor && git rev-parse --short HEAD)
 
 	cd $CURR_PATH
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV
 ESSD Software/OS Update News
-OS,Android 9.0.0
+OS,Android 11.0.0
 Part Number,N/A
 Author,
 Date,${DATE}
@@ -261,18 +252,16 @@ Function Addition,
 Android-manifest, ${HASH_BSP}
 Andorid-UBOOT, ${HASH_UBOOT}
 Andorid-KERNEL, ${HASH_KERNEL}
-Andorid-DEVICE, ${HASH_DEVICE}
-Andorid-VENDOR, ${HASH_VENDOR}
-Andorid-ART, ${HASH_ART}
-Andorid-BUILD, ${HASH_BUILD}
-Andorid-BOOTABLE, ${HASH_BOOTABLE}
+Andorid-BSP, ${HASH_ANDROID_BSP}
 Andorid-DEVELOPMENT, ${HASH_DEVELOPMENT}
+Andorid-DEVICE, ${HASH_DEVICE}
 Andorid-EXTERNAL, ${HASH_EXTERNAL}
 Andorid-FRAMEWORKS, ${HASH_FRAMEWORKS}
-Andorid-HARDWARE, ${HASH_HARDWARE}
 Andorid-PACKAGES, ${HASH_PACKAGES}
 Andorid-SYSTEM, ${HASH_SYSTEM}
-Andorid-ANDROID-PATCH, ${HASH_PATCH}
+Andorid-TEST, ${HASH_TEST}
+Andorid-TOOLS, ${HASH_TOOLS}
+Andorid-VENDOR, ${HASH_VENDOR}
 END_OF_CSV
 }
 
@@ -399,33 +388,35 @@ get_source_code
 echo "[ADV] check_tag_and_checkout"
 
 # Check ADVANTECH android source code tag exist or not, and checkout to tag version
-check_tag_and_checkout $ANDROID_DEVICE_PATH
-check_tag_and_checkout $ANDROID_VENDOR_PATH
-check_tag_and_checkout $ANDROID_ART_PATH
-check_tag_and_checkout $ANDROID_BUILD_PATH
-check_tag_and_checkout $ANDROID_BOOTABLE_PATH
+check_tag_and_checkout $ANDROID_KERNEL_PATH
+check_tag_and_checkout $ANDROID_UBOOT_PATH
+check_tag_and_checkout $ANDROID_BSP_PATH
+check_tag_and_checkout $ANDROID_CTS_PATH
 check_tag_and_checkout $ANDROID_DEVELOPMENT_PATH
+check_tag_and_checkout $ANDROID_DEVICE_PATH
 check_tag_and_checkout $ANDROID_EXTERNAL_PATH
 check_tag_and_checkout $ANDROID_FRAMEWORKS_PATH
-check_tag_and_checkout $ANDROID_HARDWARE_PATH
 check_tag_and_checkout $ANDROID_PACKAGES_PATH
 check_tag_and_checkout $ANDROID_SYSTEM_PATH
+check_tag_and_checkout $ANDROID_TEST_PATH
+check_tag_and_checkout $ANDROID_TOOLS_PATH
+check_tag_and_checkout $ANDROID_VENDOR_PATH
 
 # Add git tag
 echo "[ADV] Add tag"
-auto_add_tag $CURR_PATH/$ROOT_DIR/$UBOOT_PATH
-auto_add_tag $CURR_PATH/$ROOT_DIR/$KERNEL_PATH
-auto_add_tag $ANDROID_DEVICE_PATH
-auto_add_tag $ANDROID_VENDOR_PATH
-auto_add_tag $ANDROID_ART_PATH
-auto_add_tag $ANDROID_BUILD_PATH
-auto_add_tag $ANDROID_BOOTABLE_PATH
+auto_add_tag $ANDROID_KERNEL_PATH
+auto_add_tag $ANDROID_UBOOT_PATH
+auto_add_tag $ANDROID_BSP_PATH
+auto_add_tag $ANDROID_CTS_PATH
 auto_add_tag $ANDROID_DEVELOPMENT_PATH
+auto_add_tag $ANDROID_DEVICE_PATH
 auto_add_tag $ANDROID_EXTERNAL_PATH
 auto_add_tag $ANDROID_FRAMEWORKS_PATH
-auto_add_tag $ANDROID_HARDWARE_PATH
 auto_add_tag $ANDROID_PACKAGES_PATH
 auto_add_tag $ANDROID_SYSTEM_PATH
+auto_add_tag $ANDROID_TEST_PATH
+auto_add_tag $ANDROID_TOOLS_PATH
+auto_add_tag $ANDROID_VENDOR_PATH
 
 # ------------REMOVE FOR TEST   ------------- #
 # Create manifests xml and commit

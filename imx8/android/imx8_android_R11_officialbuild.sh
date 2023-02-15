@@ -59,8 +59,6 @@ function get_source_code()
 	curl https://storage.googleapis.com/git-repo-downloads/repo > repo
 	chmod 777 repo
 
-	tar zxvf prebuilts-imx8-android11*.tar.gz -C $CURR_PATH/$ROOT_DIR
-
 	mkdir $ROOT_DIR
 	cd $ROOT_DIR
 
@@ -73,6 +71,8 @@ function get_source_code()
 	fi
 	../repo sync -j8
 
+    tar zxvf prebuilts-imx8-android11*.tar.gz -C $CURR_PATH/$ROOT_DIR/android
+    
 	cd $CURR_PATH
 }
 

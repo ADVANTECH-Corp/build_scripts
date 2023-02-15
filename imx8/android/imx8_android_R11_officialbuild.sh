@@ -309,7 +309,7 @@ function set_environment()
 {
 	echo "[ADV] set environment"
 
-	cd $CURR_PATH/$ROOT_DIR
+	cd $CURR_PATH/$ROOT_DIR/android
 	export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
 	source build/envsetup.sh
 
@@ -326,7 +326,7 @@ function set_environment()
 
 function build_android_images()
 {
-	cd $CURR_PATH/$ROOT_DIR
+	cd $CURR_PATH/$ROOT_DIR/android
 	set_environment
 	# Android & OTA images
 	building android
@@ -344,23 +344,23 @@ function prepare_images()
 
 	# Copy image files to image directory
 
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/u-boot-$SOC_NAME.imx $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/u-boot-$SOC_NAME-evk-uuu.imx $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/boot.img $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/partition-table.img $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/partition-table-28GB.img $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/super.img $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/vendor.img $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/vendor_boot.img $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/imx-sdcard-partition.sh $IMAGE_DIR/imagei
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/fastboot_imx_flashall.sh $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/fastboot_imx_flashall.bat $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/uuu_imx_android_flash.sh $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/uuu_imx_android_flash.bat $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/dtbo-$SOC_NAME.img $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/vendor.img $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/vbmeta-$SOC_NAME.img $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/out/target/product/$NEW_MACHINE/vbmeta.img $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/u-boot-$SOC_NAME.imx $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/u-boot-$SOC_NAME-evk-uuu.imx $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/boot.img $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/partition-table.img $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/partition-table-28GB.img $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/super.img $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/vendor.img $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/vendor_boot.img $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/imx-sdcard-partition.sh $IMAGE_DIR/imagei
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/fastboot_imx_flashall.sh $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/fastboot_imx_flashall.bat $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/uuu_imx_android_flash.sh $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/uuu_imx_android_flash.bat $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/dtbo-$SOC_NAME.img $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/vendor.img $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/vbmeta-$SOC_NAME.img $IMAGE_DIR/image
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/vbmeta.img $IMAGE_DIR/image
 
 	cp -a /usr/bin/simg2img $IMAGE_DIR/image
 

@@ -20,7 +20,7 @@ echo "[ADV] UBOOT_URL = ${UBOOT_URL}"
 echo "[ADV] UBOOT_BRANCH = ${UBOOT_BRANCH}"
 echo "[ADV] UBOOT_PATH = ${UBOOT_PATH}"
 
-VER_TAG="${VER_PREFIX}AB"$(echo $RELEASE_VERSION | sed 's/[.]//')
+VER_TAG="${VER_PREFIX}ABV"$(echo $RELEASE_VERSION | sed 's/[.]//')
 echo "[ADV] VER_TAG = $VER_TAG"
 
 CURR_PATH="$PWD"

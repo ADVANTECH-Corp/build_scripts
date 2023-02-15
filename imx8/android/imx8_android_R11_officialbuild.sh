@@ -24,7 +24,7 @@ VER_TAG="${VER_PREFIX}AB"$(echo $RELEASE_VERSION | sed 's/[.]//')
 echo "[ADV] VER_TAG = $VER_TAG"
 
 CURR_PATH="$PWD"
-ROOT_DIR="${VER_PREFIX}AB${RELEASE_VERSION}"_"$DATE"
+ROOT_DIR="${VER_PREFIX}AB${RELEASE_VERSION}"_"$DATE/android"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
 
 #-- Advantech github android source code repository

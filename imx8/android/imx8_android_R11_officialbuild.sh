@@ -15,7 +15,7 @@ VER_TAG="${VER_PREFIX}ABV"$(echo $RELEASE_VERSION | sed 's/[.]//')
 echo "[ADV] VER_TAG = $VER_TAG"
 
 CURR_PATH="$PWD"
-ROOT_DIR="${VER_PREFIX}AB${RELEASE_VERSION}"_"$DATE"
+ROOT_DIR="${VER_PREFIX}ABV${RELEASE_VERSION}"_"$DATE"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
 
 #-- Advantech github android source code repository
@@ -311,6 +311,8 @@ function set_environment()
 
 	cd $CURR_PATH/$ROOT_DIR/android
 	export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
+	export AARCH64_GCC_CROSS_COMPILE=/opt/gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu/bin/aarch64-linux-gnu-
+	export CLANG_PATH=/opt/prebuilt-android-clang
 	source build/envsetup.sh
 
 	if [ "$1" == "sdk" ]; then

@@ -270,7 +270,7 @@ function save_temp_log()
 	LOG_PATH="$CURR_PATH/$ROOT_DIR"
 	cd $LOG_PATH
 
-	LOG_DIR="AI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
+	LOG_DIR="AIV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"_log
 	echo "[ADV] mkdir $LOG_DIR"
 	mkdir $LOG_DIR
 
@@ -340,7 +340,7 @@ function prepare_images()
 {
 	cd $CURR_PATH
 
-	IMAGE_DIR="AI${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
+	IMAGE_DIR="AIV${RELEASE_VERSION}"_"$NEW_MACHINE"_"$DATE"
 	echo "[ADV] mkdir $IMAGE_DIR"
 	mkdir $IMAGE_DIR
 	mkdir $IMAGE_DIR/image
@@ -355,7 +355,7 @@ function prepare_images()
 	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/super.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/vendor.img $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/vendor_boot.img $IMAGE_DIR/image
-	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/imx-sdcard-partition.sh $IMAGE_DIR/imagei
+	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/imx-sdcard-partition.sh $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/fastboot_imx_flashall.sh $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/fastboot_imx_flashall.bat $IMAGE_DIR/image
 	cp -a $CURR_PATH/$ROOT_DIR/android/out/target/product/$NEW_MACHINE/uuu_imx_android_flash.sh $IMAGE_DIR/image

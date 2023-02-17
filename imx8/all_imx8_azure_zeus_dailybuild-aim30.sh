@@ -35,9 +35,9 @@ function build_project()
 		[ "$?" -ne 0 ] && exit 1
 	fi
 
-	if [ $RSB3730A1 == true ]; then
+	if [ $RSB3730A2 == true ]; then
 			export BUILD_NN_IMX_CLEANSTATE=false
-		    $BUILD_SH rsb3730a1-8MM 3730A1"$AIM_VERSION"LIV"$VERSION_NUM" "2G" "FSPI"
+		    $BUILD_SH rsb3730a2-8MM 3730A2"$AIM_VERSION"LIV"$VERSION_NUM" "4G 2G" "FSPI"
 		    [ "$?" -ne 0 ] && exit 1
 	fi
 

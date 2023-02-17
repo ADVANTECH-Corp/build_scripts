@@ -309,6 +309,7 @@ function set_environment()
 {
 	echo "[ADV] set environment"
 
+	sudo git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 /opt/prebuilt-android-clang -b master-kernel-build-2021
 	cd $CURR_PATH/$ROOT_DIR/android
 	export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
 	export AARCH64_GCC_CROSS_COMPILE=/opt/gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu/bin/aarch64-linux-gnu-

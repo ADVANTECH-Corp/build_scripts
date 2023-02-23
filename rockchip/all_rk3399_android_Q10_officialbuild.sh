@@ -1,7 +1,4 @@
 #!/bin/bash
-NUM1=`expr $VERSION : 'V\([0-9]*\)'`
-NUM2=`expr $VERSION : '.*[.]\([0-9A-Z]*\)'`
-VERSION_NUM=$NUM1$NUM2
 
 MACHINE_LIST=""
 
@@ -18,7 +15,7 @@ if [ "$RSB4710A2" == "true" ]; then
 	export KERNEL_DTB
 	export ANDROID_PRODUCT
 	export MACHINE_LIST
-	./rk3399_android_Q10_officialbuild.sh $VERSION_NUM
+	./rk3399_android_Q10_officialbuild.sh
 fi
 
 if [ "$RSB3710A2" == "true" ]; then
@@ -33,7 +30,7 @@ if [ "$RSB3710A2" == "true" ]; then
 	export KERNEL_DTB
 	export ANDROID_PRODUCT
 	export MACHINE_LIST
-	./rk3399_android_Q10_officialbuild.sh $VERSION_NUM
+	./rk3399_android_Q10_officialbuild.sh
 fi
 
 if [ "$ROM5780A3" == "true" ]; then
@@ -48,7 +45,7 @@ if [ "$ROM5780A3" == "true" ]; then
 	export KERNEL_DTB
 	export ANDROID_PRODUCT
 	export MACHINE_LIST
-	./rk3399_android_Q10_officialbuild.sh $VERSION_NUM
+	./rk3399_android_Q10_officialbuild.sh
 fi
 
 if [ "$PPC115W" == "true" ]; then
@@ -63,6 +60,6 @@ if [ "$PPC115W" == "true" ]; then
         export KERNEL_DTB
         export ANDROID_PRODUCT
         export MACHINE_LIST
-        ./rk3399_android_Q10_officialbuild.sh $VERSION_NUM
+        ./rk3399_android_Q10_officialbuild.sh
 fi
 

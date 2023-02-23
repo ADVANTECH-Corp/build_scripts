@@ -22,7 +22,6 @@ if [ $idx -gt 1 ];then
     isFirstMachine="false"
 fi
 
-RELEASE_VERSION=$1
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
 echo "[ADV] BSP_URL = ${BSP_URL}"
@@ -131,7 +130,7 @@ function create_xml_and_commit()
         ../repo/repo manifest -o $VER_TAG.xml -r
         mv $VER_TAG.xml .repo/manifests
         cd .repo/manifests
-	git checkout $BSP_BRANCH
+	    git checkout $BSP_BRANCH
 
         # push to github
         REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`

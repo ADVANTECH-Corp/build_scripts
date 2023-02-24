@@ -119,10 +119,6 @@ function create_debian_image()
             IMAGE_SIZE=6500
 			YOCTO_IMAGE="*-image-*${CPU_TYPE_Module}${NEW_MACHINE}*.sdcard"
             ;;
-		AIM33)
-            IMAGE_SIZE=6500
-            YOCTO_IMAGE="*-image-*${CPU_TYPE_Module}${NEW_MACHINE}*.wic"
-            ;;
         *)
             echo "cannot read AIM version from \"$AIM_VERSION\""; exit 1 ;;
     esac
@@ -156,9 +152,7 @@ EOF
 		AIM30)
 		    mv ${FILE/.tgz}/image/*.sdcard .
 		    ;;
-		AIM33)
-            mv ${FILE/.tgz}/image/*.wic .
-            ;;		*)
+            *)
 		    echo "cannot read AIM version from \"$AIM_VERSION\""; exit 1 ;;
 		esac
 

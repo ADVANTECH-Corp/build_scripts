@@ -259,7 +259,7 @@ function get_source_code()
     ../repo/repo sync
     
      cd $CURR_PATH/$ROOT_DIR/$SUB_DIR/
-     git clone https://AIM-Linux@dev.azure.com/AIM-Linux/risc-private-bsp/_git/rk3399-androidQ10-patch
+     git clone https://AIM-Linux@dev.azure.com/AIM-Linux/risc-private-bsp/_git/rk3399-androidQ10-patch android10-patch
 
 
     for TEMP_PATH in ${ADV_PATH}

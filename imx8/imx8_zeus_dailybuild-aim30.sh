@@ -511,10 +511,10 @@ else #"$PRODUCT" != "$VER_PREFIX"
         build_yocto_images
 
 	for MEMORY in $MEMORY_LIST;do
-		#if [ "$PRE_MEMORY" != "" ]; then
+		if [ "$PRE_MEMORY" != "" ]; then
 			rebuild_bootloader $MEMORY
-		#fi
-		#PRE_MEMORY=$MEMORY
+		fi
+		PRE_MEMORY=$MEMORY
 		echo "[ADV] generate normal image"
 		DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
 		IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_"$DATE"

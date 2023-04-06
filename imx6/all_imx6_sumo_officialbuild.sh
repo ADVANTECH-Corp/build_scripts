@@ -117,7 +117,7 @@ if [ $RSB6410A2 == true ]; then
 fi
 if [ $RSB3430A1 == true ]; then
 	PRODUCT="rsb3430a1"
-	./imx6_sumo_officialbuild.sh rsb3430a1 3430A1"$AIM_VERSION"LIV"$VERSION_NUM" 1G fsl-imx-xwayland
+	./imx6_sumo_officialbuild.sh rsb3430a1 3430A1"$AIM_VERSION"LIV"$VERSION_NUM" 1G-2G fsl-imx-xwayland
 	[ "$?" -ne 0 ] && exit 1
 fi
 if [ $RSB3430A1_SOLO == true ]; then

@@ -21,7 +21,6 @@ if [ $idx -gt 1 ];then
     isFirstMachine="false"
 fi
 
-RELEASE_VERSION=$1
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
 echo "[ADV] BSP_URL = ${BSP_URL}"

@@ -31,7 +31,7 @@ function build_project()
 
 	if [ $ROM5721A1 == true ]; then
 		export BUILD_NN_IMX_CLEANSTATE=false
-		$BUILD_SH rom5721a1-8MM 5721A1"$AIM_VERSION"LIV"$VERSION_NUM" "2G 1G" "FSPI"
+		$BUILD_SH rom5721a1-8MM 5721A1"$AIM_VERSION"LIV"$VERSION_NUM" "4G 2G 1G" "FSPI"
 		[ "$?" -ne 0 ] && exit 1
 	fi
 

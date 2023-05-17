@@ -289,13 +289,15 @@ function building()
 		echo "[ADV] build rootfs"
 		sudo apt-get update
 		sudo apt-get install -y binfmt-support
+		sudo apt --fix-broken install -f -y
+
 		sudo apt-get install -y qemu-user-static
 		sudo apt-get -y update
 		sudo apt-get install -y live-build
 
 		cd $CURR_PATH/$ROOT_DIR/debian
 		sudo dpkg -i ubuntu-build-service/packages/*
-		sudo apt-get install -f 
+		sudo apt-get install -f -y
 		cd $CURR_PATH/$ROOT_DIR/
 		sudo BUILD_IN_DOCKER=TRUE ./mk-debian.sh new >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
 

@@ -145,7 +145,8 @@ function create_xml_and_commit()
         REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
         git add $VER_TAG.xml
         git commit -m "[Official Release] ${VER_TAG}"
-        git pull
+        git fetch
+        git rebase
         git push
         git tag -a $VER_TAG -F $CURR_PATH/$REALEASE_NOTE
         git push $REMOTE_SERVER $VER_TAG

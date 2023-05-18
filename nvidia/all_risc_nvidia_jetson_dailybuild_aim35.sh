@@ -13,7 +13,7 @@ fi
 
 #AIR030A1_projects
 if [ "$AIR030A1" == "true" ]; then
-    IMAGE_TYPE="inner"
+    IMAGE_TYPE="external"
     MODEL_NAME="AIR030"
     BOARD_VER="A1"
     export IMAGE_TYPE

@@ -32,7 +32,7 @@ fi
 if [ "$AIR020A1" == "true" ]; then
     MODEL_NAME="AIR020"
     BOARD_VER="A1"
-    TARGET_BOARD="jetson-xavier-nx-devkit"
+    TARGET_BOARD="jetson-xavier-nx-devkit-emmc"
     PROJECT_BRANCH="air020"
     export MODEL_NAME
     export BOARD_VER

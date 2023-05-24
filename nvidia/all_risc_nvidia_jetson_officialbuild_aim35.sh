@@ -28,4 +28,17 @@ if [ "$AIR030A1" == "true" ]; then
     ./risc_nvidia_jetson_dailybuild_aim35.sh AIR030A1
 fi
 
+#AIR020A1_projects
+if [ "$AIR020A1" == "true" ]; then
+    MODEL_NAME="AIR020"
+    BOARD_VER="A1"
+    TARGET_BOARD="jetson-xavier-nx-devkit"
+    PROJECT_BRANCH="air020"
+    export MODEL_NAME
+    export BOARD_VER
+    export TARGET_BOARD
+    export PROJECT_BRANCH
+    ./risc_nvidia_jetson_dailybuild_aim35.sh AIR030A1
+fi
+
 echo "[ADV] All done!"

@@ -22,4 +22,15 @@ if [ "$AIR030A1" == "true" ]; then
     ./risc_nvidia_jetson_dailybuild_aim35.sh AIR030A1
 fi
 
+#AIR020A1_projects
+if [ "$AIR020A1" == "true" ]; then
+    IMAGE_TYPE="external"
+    MODEL_NAME="AIR020"
+    BOARD_VER="A1"
+    export IMAGE_TYPE
+    export MODEL_NAME
+    export BOARD_VER
+    ./risc_nvidia_jetson_dailybuild_aim35.sh AIR020A1
+fi
+
 echo "[ADV] All done!"

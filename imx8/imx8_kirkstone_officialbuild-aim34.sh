@@ -471,8 +471,8 @@ function get_csv_info()
 define_cpu_type $PRODUCT
 
 if [ "$PRODUCT" == "$VER_PREFIX" ]; then
-	#echo "[ADV] get bsp tarball"
-	#get_bsp_tarball
+	echo "[ADV] get bsp tarball"
+	get_bsp_tarball
 
 	# Build Yocto SDK
 	echo "[ADV] build yocto sdk"

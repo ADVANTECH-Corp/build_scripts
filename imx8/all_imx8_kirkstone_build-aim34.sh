@@ -14,8 +14,8 @@ else
 fi
 
 #imx8_BSP
-#$BUILD_SH imx8 imx8LBV"$VERSION_NUM" 1G
-#[ "$?" -ne 0 ] && exit 1
+$BUILD_SH imx8 imx8LBV"$VERSION_NUM" 1G
+[ "$?" -ne 0 ] && exit 1
 
 #imx8_projects
 if [ $ROM5721A1 == true ]; then

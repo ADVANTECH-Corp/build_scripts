@@ -9,7 +9,7 @@ VERSION_NUM=${RELEASE_VERSION}
 MACHINE_LIST=""
 
 #rk3588_projects
-if [ "$ROM5880A1" == "true" ]; then
+if [ "$ROM6881A1" == "true" ]; then
 	MACHINE_LIST="$MACHINE_LIST ROM6881"
 	MODEL_NAME="ROM6881"
 	HW_VER="A1"

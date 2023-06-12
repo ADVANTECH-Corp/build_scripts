@@ -1,5 +1,6 @@
 #!/bin/bash
 
+REPO=repo
 PLATFORM_PREFIX="RK3568_RISC_"
 VER_PREFIX="DIV"
 BSP_VER_PREFIX="DBV"
@@ -73,8 +74,8 @@ function auto_add_tag()
     else
         echo "[ADV] Add tag $VER_TAG"
         cd $CURR_PATH/$ROOT_DIR
-	../repo/repo forall -c git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
-	../repo/repo forall -c git push $REMOTE_SERVER $VER_TAG
+	$REPO forall -c git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
+	$REPO forall -c git push $REMOTE_SERVER $VER_TAG
     fi
     cd $CURR_PATH
 }
@@ -87,7 +88,7 @@ function create_xml_and_commit()
         echo "[ADV] Create XML file"
         cd $ROOT_DIR
         # add revision into xml
-        ../repo/repo manifest -o $VER_TAG.xml -r
+        $REPO manifest -o $VER_TAG.xml -r
         mv $VER_TAG.xml .repo/manifests
         cd .repo/manifests
 		git checkout $BSP_BRANCH
@@ -197,7 +198,7 @@ END_OF_CSV
 function generate_manifest()
 {
     cd $CURR_PATH/$ROOT_DIR/
-    ../repo/repo manifest -o ${VER_TAG}.xml -r
+    $REPO manifest -o ${VER_TAG}.xml -r
 }
 
 function save_temp_log()
@@ -228,24 +229,24 @@ function get_source_code()
     echo "[ADV] get rk3568 debian10 source code"
     cd $CURR_PATH
 
-    git clone https://github.com/ADVANTECH-Rockchip/repo.git
+    #git clone https://github.com/ADVANTECH-Rockchip/repo.git
 
     mkdir $ROOT_DIR
     cd $ROOT_DIR
 
     if [ "$BSP_BRANCH" == "" ] ; then
-       ../repo/repo init -u $BSP_URL
+       $REPO init -u $BSP_URL
     elif [ "$BSP_XML" == "" ] ; then
-       ../repo/repo init -u $BSP_URL -b $BSP_BRANCH
+       $REPO init -u $BSP_URL -b $BSP_BRANCH
     else
-       ../repo/repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
+       $REPO init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
     fi
-    ../repo/repo sync
+    $REPO sync
 
     cd u-boot
     REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
     cd ..
-    ../repo/repo forall -c git checkout -b local --track $REMOTE_SERVER/$BSP_BRANCH
+    $REPO forall -c git checkout -b local --track $REMOTE_SERVER/$BSP_BRANCH
 
     cd $CURR_PATH
 }
@@ -285,6 +286,8 @@ function building()
     elif [ "$1" == "rootfs" ]; then
 		echo "[ADV] build rootfs"
 		cd $CURR_PATH/$ROOT_DIR/
+		sudo dpkg -i debian/ubuntu-build-service/packages/*
+		sudo apt-get install -f -y
 		./build.sh debian >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
 
 	else

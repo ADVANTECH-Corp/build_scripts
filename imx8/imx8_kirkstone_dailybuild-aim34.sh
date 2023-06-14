@@ -260,7 +260,7 @@ function set_environment()
 		EULA=1 source setup-environment $BUILDALL_DIR
 	else
 		# First build
-		EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} source imx-setup-release.sh -b $BUILDALL_DIR
+		EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} UBOOT_CONFIG=${PRE_MEMORY} source imx-setup-release.sh -b $BUILDALL_DIR
 	fi
 }
 
@@ -489,16 +489,15 @@ else #"$PRODUCT" != "$VER_PREFIX"
         echo "[ADV] add version"
         add_version
 
-	echo "[ADV] build images"
-        build_yocto_images
-
-
-
 	for MEMORY in $MEMORY_LIST;do
                 if [ "$PRE_MEMORY" != "" ]; then
-                        rebuild_bootloader $MEMORY
+                        PRE_MEMORY=$MEMORY
+                        rebuild_bootloader $PRE_MEMORY
+                else
+                        PRE_MEMORY=$MEMORY
+                        echo "[ADV] build images"
+                        build_yocto_images
                 fi
-                PRE_MEMORY=$MEMORY
 
 		echo "[ADV] generate normal image"
 		DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"

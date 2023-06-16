@@ -29,5 +29,8 @@ if [ $LPDDR4EVK8U == true ]; then
         $BUILD_SH -lpddr4-evk-8U EVK"$AIM_VERSION"LIV"$VERSION_NUM" "2G" ""
         [ "$?" -ne 0 ] && exit 1
 fi
-
+if [ $DMSSA66A1 == true ]; then
+        $BUILD_SH imx8mpdmssa66a1-8MP imx8mpdmssa66a1"$AIM_VERSION"LIV"$VERSION_NUM" "6G" ""
+        [ "$?" -ne 0 ] && exit 1
+fi
 echo "[ADV] All done!"

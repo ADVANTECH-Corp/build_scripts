@@ -373,6 +373,7 @@ function prepare_images()
     rm -rf $BSP_DIR/prebuilts/.git
     cp -R $CURR_PATH/$ROOT_DIR/device $BSP_DIR/
     rm -rf $BSP_DIR/device/rockchip/.git
+    cp -d $CURR_PATH/$ROOT_DIR/build.sh $BSP_DIR/
 
     tar czf ${BSP_DIR}.bsp.tgz $BSP_DIR
     generate_md5 ${BSP_DIR}.bsp.tgz

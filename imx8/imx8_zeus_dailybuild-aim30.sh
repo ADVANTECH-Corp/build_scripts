@@ -325,6 +325,11 @@ function build_yocto_images()
 	# Modify the nxp build fail issue#
 	sed -i 's/git.alsa-project.org/github.com\/alsa-project/g' $CURR_PATH/$ROOT_DIR/sources/meta-imx/meta-sdk/recipes-multimedia/tinycompress/tinycompress_1.1.6.bb
 
+echo "test===================================================="
+	kuihong_flag=`cat $CURR_PATH/$ROOT_DIR/sources/meta-imx/meta-sdk/recipes-multimedia/tinycompress/tinycompress_1.1.6.bb | grep SRC_URI`
+	echo " tinycompress_grep_URL= $kuihong_flag"
+echo "test===================================================="
+
         set_environment
 
         # Re-build U-Boot & kernel

@@ -320,6 +320,19 @@ function building()
         echo "[ADV] building $1 $2..."
         LOG_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"_log
 
+echo "test===================================================="
+	kuihong_flag=`cat $CURR_PATH/$ROOT_DIR/sources/meta-imx/meta-sdk/recipes-multimedia/tinycompress/tinycompress_1.1.6.bb | grep SRC_URI`
+	echo "office build first 01 tinycompress_grep_URL= $kuihong_flag"
+echo "test===================================================="
+
+	sed -i 's/git.alsa-project.org/github.com\/alsa-project/g' $CURR_PATH/$ROOT_DIR/sources/meta-imx/meta-sdk/recipes-multimedia/tinycompress/tinycompress_1.1.6.bb
+
+echo "test===================================================="
+	kuihong_flag=`cat $CURR_PATH/$ROOT_DIR/sources/meta-imx/meta-sdk/recipes-multimedia/tinycompress/tinycompress_1.1.6.bb | grep SRC_URI`
+	echo "office build sceconed 02 tinycompress_grep_URL= $kuihong_flag"
+echo "test===================================================="
+
+
         if [ "$1" == "populate_sdk" ]; then
 		        if [ "$DEPLOY_IMAGE_NAME" == "fsl-image-full" ]; then
                         echo "[ADV] bitbake meta-toolchain"

@@ -247,6 +247,14 @@ function get_source_code()
     cd ..
     ../repo/repo forall -c git checkout -b local --track $REMOTE_SERVER/$BSP_BRANCH
 
+    if [ "$MODEL_NAME" == "EBCRB07" ] ; then
+        git clone https://AIM-Linux@dev.azure.com/AIM-Linux/risc-private-bsp/_git/rk3568_linux_debian_ebcrb07 ./debian_$MODEL_NAME
+        cd ./debian_$MODEL_NAME
+        REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+        git checkout -b local --track $REMOTE_SERVER/$BSP_BRANCH
+        cd ..
+    fi
+
     cd $CURR_PATH
 }
 
@@ -300,6 +308,15 @@ function building()
 		sudo apt-get install -f -y
 		cd $CURR_PATH/$ROOT_DIR/
 		sudo BUILD_IN_DOCKER=TRUE ./mk-debian.sh new >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
+
+		if [ -d "debian_$MODEL_NAME" ];then
+			cd $CURR_PATH/$ROOT_DIR/
+			cd debian_$MODEL_NAME
+			sudo BUILD_IN_DOCKER=TRUE ARCH=arm64 ./mk-adv.sh
+			cd ../debian
+			sudo ./mk-image.sh
+			cd $CURR_PATH/$ROOT_DIR/
+		fi
 
 	else
         echo "[ADV] pass building..."

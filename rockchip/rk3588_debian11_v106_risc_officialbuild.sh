@@ -345,6 +345,7 @@ function prepare_images()
     generate_md5 ${IMAGE_DIR}.img.tgz
     #rm -rf $IMAGE_DIR
 
+:<<eof
     # BSP
     cd $CURR_PATH
     BSP_DIR="${BSP_VER}"_"$DATE"
@@ -377,6 +378,7 @@ function prepare_images()
 
     tar czf ${BSP_DIR}.bsp.tgz $BSP_DIR
     generate_md5 ${BSP_DIR}.bsp.tgz
+eof
 }
 
 function copy_image_to_storage()
@@ -394,7 +396,7 @@ function copy_image_to_storage()
     mv ${IMAGE_DIR}.csv $OUTPUT_DIR
 
     mv -f ${IMAGE_DIR}.img.tgz $OUTPUT_DIR
-    mv -f ${BSP_DIR}.bsp.tgz $OUTPUT_DIR
+#    mv -f ${BSP_DIR}.bsp.tgz $OUTPUT_DIR
     mv -f *.md5 $OUTPUT_DIR
 
 }

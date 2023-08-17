@@ -1,7 +1,7 @@
 #!/bin/bash
 	# Dailybuild
 	echo "[ADV] Dailybuild start"
-	BUILD_SH="./imx8_mickledore_dailybuild-aim34.sh"
+	BUILD_SH="./imx8_mickledore_dailybuild-aim36.sh"
 	VERSION_NUM=${RELEASE_VERSION}
 
 #imx8_BSP

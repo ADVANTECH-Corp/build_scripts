@@ -307,7 +307,7 @@ function building()
 		sudo dpkg -i ubuntu-build-service/packages/*
 		sudo apt-get install -f -y
 		cd $CURR_PATH/$ROOT_DIR/
-		sudo BUILD_IN_DOCKER=TRUE ./mk-debian.sh new >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
+		sudo BUILD_IN_DOCKER=TRUE ./mk-debian.sh >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
 
 		if [ -d "debian_$MODEL_NAME" ];then
 			cd $CURR_PATH/$ROOT_DIR/

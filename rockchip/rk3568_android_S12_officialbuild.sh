@@ -285,6 +285,7 @@ function building()
         source build/envsetup.sh
         lunch $ANDROID_PRODUCT
         make clean
+        echo " V$RELEASE_VERSION" > u-boot/.scmversion
         ./build.sh -AUCKuop 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE_ANDROID
     else
         echo "[ADV] pass building..."

@@ -275,8 +275,8 @@ function clean_yocto_packages()
         echo "[ADV] build_yocto_image: clean for virtual_libg2d"
         PACKAGE_LIST=" \
 		gstreamer1.0-rtsp-server gst-examples freerdp \
-		imx-gpu-apitrace gstreamer1.0-plugins-good gstreamer1.0-plugins-base \
-		gstreamer1.0-plugins-bad kmscube imx-gpu-sdk opencv imx-gst1.0-plugin \
+		gstreamer1.0-plugins-good gstreamer1.0-plugins-base \
+		gstreamer1.0-plugins-bad kmscube opencv imx-gst1.0-plugin \
 		weston "
         for PACKAGE in ${PACKAGE_LIST}
         do

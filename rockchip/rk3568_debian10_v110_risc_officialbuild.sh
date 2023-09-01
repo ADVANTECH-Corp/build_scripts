@@ -75,6 +75,12 @@ function auto_add_tag()
         cd $CURR_PATH/$ROOT_DIR
 	../repo/repo forall -c git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
 	../repo/repo forall -c git push $REMOTE_SERVER $VER_TAG
+
+		if [ -d "debian_$MODEL_NAME" ];then
+			cd debian_$MODEL_NAME/
+			git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
+			git push $REMOTE_SERVER $VER_TAG
+		fi
     fi
     cd $CURR_PATH
 }
@@ -276,6 +282,10 @@ function building()
 		./make.sh $UBOOT_DEFCONFIG >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_UBOOT
 	elif [ "$1" == "kernel" ]; then
 		echo "[ADV] build kernel KERNEL_DEFCONFIG = $KERNEL_DEFCONFIG KERNEL_DTB=$KERNEL_DTB"
+		cd $CURR_PATH/$ROOT_DIR/
+		if [ -d "debian_$MODEL_NAME/logo/$DISPLAY_DIRECTION" ];then
+			cp debian_$MODEL_NAME/logo/$DISPLAY_DIRECTION/* kernel/ -rf
+		fi
 		cd $CURR_PATH/$ROOT_DIR/kernel
 
 		echo "[ADV] build kernel make ARCH=arm64 $KERNEL_DEFCONFIG"
@@ -307,11 +317,12 @@ function building()
 		sudo dpkg -i ubuntu-build-service/packages/*
 		sudo apt-get install -f -y
 		cd $CURR_PATH/$ROOT_DIR/
-		sudo BUILD_IN_DOCKER=TRUE ./mk-debian.sh >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
+		sudo BUILD_IN_DOCKER=TRUE ./mk-debian.sh new >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
 
 		if [ -d "debian_$MODEL_NAME" ];then
 			cd $CURR_PATH/$ROOT_DIR/
 			cd debian_$MODEL_NAME
+			echo "v${RELEASE_VERSION}_${DATE}_${DISPLAY_DIRECTION}" > overlay-adv/etc/version
 			sudo BUILD_IN_DOCKER=TRUE ARCH=arm64 ./mk-adv.sh
 			cd ../debian
 			sudo ./mk-image.sh

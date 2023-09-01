@@ -56,6 +56,7 @@ if [ "$EBCRB07A1" == "true" ]; then
 	MODEL_NAME="EBCRB07"
 	HW_VER="A1"
 	BOARD_CONFIG="BoardConfig-rk3568-ebcrb07a1.mk"
+	DISPLAY_DIRECTION=vertical
 
 	export UBOOT_DEFCONFIG
 	export KERNEL_DEFCONFIG
@@ -64,5 +65,6 @@ if [ "$EBCRB07A1" == "true" ]; then
 	export MODEL_NAME
 	export HW_VER
 	export BOARD_CONFIG
+	export DISPLAY_DIRECTION
 	./rk3568_debian10_v110_risc_officialbuild.sh $VERSION_NUM
 fi

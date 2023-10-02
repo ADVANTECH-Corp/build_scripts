@@ -292,9 +292,13 @@ function clean_yocto_packages()
 	echo "[ADV] build_yocto_image: clean for other packages"
 	building spirv-tools cleansstate
 	building fmt cleansstate
-	if [ "$PRODUCT" == "rom7720a1" ] || [ "$PRODUCT" == "rom5620a1" ] || [ "$PRODUCT" == "rom3620a1" ] || [ "$PRODUCT" == "rom5722a1" ] || [ "$PRODUCT" == "rsb3720a1" ]; then
-                building nn-imx cleansstate
-        fi
+	case $PRODUCT in
+		"rom2620a1")
+			;;
+		*)
+			building nn-imx cleansstate
+			;;
+	esac
 }
 
 function rebuild_bootloader()

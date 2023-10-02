@@ -93,11 +93,6 @@ function define_cpu_type()
 			KERNEL_CPU_TYPE="imx8ulp"
 			CPU_TYPE="iMX8ULP"
 			;;
-                "93")
-			PRODUCT=`expr $1 : '\(.*\).*-'`
-			KERNEL_CPU_TYPE="imx93"
-			CPU_TYPE="iMX93"
-			;;
                 *)
                         # Do nothing
                         ;;

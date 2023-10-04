@@ -37,5 +37,8 @@ if [ $RSB3720A1 == true ]; then
 	$BUILD_SH rsb3720a1-8MP 3720A1"$AIM_VERSION"LIV"$VERSION_NUM" "6G 4G" "FSPI"
 	[ "$?" -ne 0 ] && exit 1
 fi
-
+if [ $DMSSA66A1 == true ]; then
+        $BUILD_SH dmssa66a1-8MP imx8mpdmssa66a1"$AIM_VERSION"LIV"$VERSION_NUM" "6G" ""
+        [ "$?" -ne 0 ] && exit 1
+fi
 echo "[ADV] All done!"

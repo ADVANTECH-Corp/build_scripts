@@ -4,6 +4,15 @@ ADV_PATH="\
 u-boot \
 kernel-4.19 \
 . \
+cts \
+developers \
+device \
+frameworks \
+packages \
+system \
+test \
+tools \
+vendor \
 "
 
 VER_PREFIX="RK3399_S12_"

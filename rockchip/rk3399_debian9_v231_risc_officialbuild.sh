@@ -35,7 +35,7 @@ echo "[ADV] OFFICIAL_VER = $OFFICIAL_VER"
 echo "[ADV] isFirstMachine = $isFirstMachine"
 CURR_PATH="$PWD"
 ROOT_DIR="${PLATFORM_PREFIX}${VER_PREFIX}${RELEASE_VERSION}"_"$DATE"
-OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
+OUTPUT_DIR="$CURR_PATH/$STORED/$DATE/V"$(echo $RELEASE_VERSION | sed 's/[.]//')
 
 echo "$Release_Note" > Release_Note
 REALEASE_NOTE="Release_Note"
@@ -43,8 +43,8 @@ REALEASE_NOTE="Release_Note"
 #--------------------------------------------------
 #======================
 AND_BSP="debian"
-AND_BSP_VER="9.x"
-AND_VERSION="debian_V9.x"
+AND_BSP_VER="10.x"
+AND_VERSION="debian_V10.x"
 
 #======================
 
@@ -54,6 +54,27 @@ if [ -e $OUTPUT_DIR ] ; then
 else
     echo "[ADV] mkdir $OUTPUT_DIR"
     mkdir -p $OUTPUT_DIR
+fi
+
+if [ -e $OUTPUT_DIR/${MODEL_NAME}/bsp ] ; then
+    echo "[ADV] $OUTPUT_DIR/${MODEL_NAME}/bsp  had already been created"
+else
+    echo "[ADV] mkdir $OUTPUT_DIR/${MODEL_NAME}/bsp"
+    mkdir -p $OUTPUT_DIR/${MODEL_NAME}/bsp
+fi
+
+if [ -e $OUTPUT_DIR/${MODEL_NAME}/image ] ; then
+    echo "[ADV] $OUTPUT_DIR/${MODEL_NAME}/image  had already been created"
+else
+    echo "[ADV] mkdir $OUTPUT_DIR/${MODEL_NAME}/image"
+    mkdir -p $OUTPUT_DIR/${MODEL_NAME}/image
+fi
+
+if [ -e $OUTPUT_DIR/${MODEL_NAME}/others ] ; then
+    echo "[ADV] $OUTPUT_DIR/${MODEL_NAME}/others  had already been created"
+else
+    echo "[ADV] mkdir $OUTPUT_DIR/${MODEL_NAME}/others"
+    mkdir -p $OUTPUT_DIR/${MODEL_NAME}/others
 fi
 
 # ===========
@@ -161,7 +182,7 @@ function generate_csv()
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV
 ESSD Software/OS Update News
-OS,Debian GNU/Linux 9.x (stretch)
+OS,Debian GNU/Linux 10.x (buster)
 Version,V${RELEASE_VERSION}
 
 Part Number,N/A
@@ -215,8 +236,8 @@ function save_temp_log()
     tar czf $LOG_DIR.tgz $LOG_DIR
     generate_md5 $LOG_DIR.tgz
 
-    mv -f $LOG_DIR.tgz $OUTPUT_DIR
-    mv -f $LOG_DIR.tgz.md5 $OUTPUT_DIR
+    mv -f $LOG_DIR.tgz $OUTPUT_DIR/${MODEL_NAME}/others
+    mv -f $LOG_DIR.tgz.md5 $OUTPUT_DIR/${MODEL_NAME}/others
 
     # Remove all temp logs
     rm -rf $LOG_DIR
@@ -224,7 +245,7 @@ function save_temp_log()
 
 function get_source_code()
 {
-    echo "[ADV] get rk3399 debian9 source code"
+    echo "[ADV] get rk3399 debian10 source code"
     cd $CURR_PATH
 
     git clone https://github.com/ADVANTECH-Rockchip/repo.git
@@ -394,12 +415,16 @@ function copy_image_to_storage()
 	fi
 
     generate_csv ${IMAGE_DIR}.tgz
-    mv ${IMAGE_DIR}.csv $OUTPUT_DIR
+    mv ${IMAGE_DIR}.csv $OUTPUT_DIR/${MODEL_NAME}/others
 
-    mv -f ${IMAGE_DIR}.img.tgz $OUTPUT_DIR
-    mv -f ${BSP_DIR}.bsp.tgz $OUTPUT_DIR
-    mv -f *.md5 $OUTPUT_DIR
+    # image
+    mv -f ${IMAGE_DIR}.img.tgz $OUTPUT_DIR/${MODEL_NAME}/image
+    mv -f ${IMAGE_DIR}.img.tgz.md5 $OUTPUT_DIR/${MODEL_NAME}/image
 
+    # bsp
+    mv -f ${BSP_DIR}.bsp.tgz $OUTPUT_DIR/${MODEL_NAME}/bsp
+    mv -f ${BSP_DIR}.bsp.tgz.md5 $OUTPUT_DIR/${MODEL_NAME}/bsp
+    #mv -f *.md5 $OUTPUT_DIR
 }
 
 # ================

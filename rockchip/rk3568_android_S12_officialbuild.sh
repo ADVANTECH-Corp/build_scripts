@@ -283,8 +283,8 @@ function get_source_code()
     done
 
     cd $CURR_PATH
-    
-    tar zxvf prebuilts-rk3568-android12*.tar.gz -C $CURR_PATH/$ROOT_DIR/android
+
+    tar zxvf prebuilts-rk3399-android12*.tar.gz -C $CURR_PATH/$ROOT_DIR/android
 }
 
 function building()

@@ -358,8 +358,8 @@ function copy_image_to_storage()
     generate_csv ${IMAGE_DIR}.tgz
     mv ${IMAGE_DIR}.csv $OUTPUT_DIR/${MODEL_NAME}/others
 
-    mv -f ${IMAGE_DIR}.img.tgz $OUTPUT_DIR/${MODEL_NAME}/image
-    mv -f ${IMAGE_DIR}.img.tgz.md5 $OUTPUT_DIR/${MODEL_NAME}/image
+    mv -f ${IMAGE_DIR}.tgz $OUTPUT_DIR/${MODEL_NAME}/image
+    mv -f ${IMAGE_DIR}.tgz.md5 $OUTPUT_DIR/${MODEL_NAME}/image
 
 }
 

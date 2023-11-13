@@ -16,7 +16,7 @@ echo "[ADV] VER_TAG = $VER_TAG"
 
 CURR_PATH="$PWD"
 ROOT_DIR="${VER_PREFIX}ABV${RELEASE_VERSION}"_"$DATE"
-OUTPUT_DIR="$CURR_PATH/$STORED/$DATE"
+OUTPUT_DIR="$CURR_PATH/$STORED/$DATE/V"$(echo $RELEASE_VERSION | sed 's/[.]//')
 
 #-- Advantech github android source code repository
 echo "[ADV-ROOT]  $ROOT_DIR"
@@ -47,6 +47,20 @@ if [ -e $OUTPUT_DIR ] ; then
 else
 	echo "[ADV] mkdir $OUTPUT_DIR"
 	mkdir -p $OUTPUT_DIR
+fi
+
+if [ -e $OUTPUT_DIR/${MODEL_NAME}/image ] ; then
+    echo "[ADV] $OUTPUT_DIR/${MODEL_NAME}/image  had already been created"
+else
+    echo "[ADV] mkdir $OUTPUT_DIR/${MODEL_NAME}/image"
+    mkdir -p $OUTPUT_DIR/${MODEL_NAME}/image
+fi
+
+if [ -e $OUTPUT_DIR/${MODEL_NAME}/others ] ; then
+    echo "[ADV] $OUTPUT_DIR/${MODEL_NAME}/others  had already been created"
+else
+    echo "[ADV] mkdir $OUTPUT_DIR/${MODEL_NAME}/others"
+    mkdir -p $OUTPUT_DIR/${MODEL_NAME}/others
 fi
 
 # ===========
@@ -281,8 +295,8 @@ function save_temp_log()
 	tar czf $LOG_DIR.tgz $LOG_DIR
 	generate_md5 $LOG_DIR.tgz
 
-	mv -f $LOG_DIR.tgz $OUTPUT_DIR
-	mv -f $LOG_DIR.tgz.md5 $OUTPUT_DIR
+    mv -f $LOG_DIR.tgz $OUTPUT_DIR/${MODEL_NAME}/others
+    mv -f $LOG_DIR.tgz.md5 $OUTPUT_DIR/${MODEL_NAME}/others
 
 	# Remove all temp logs
 	rm -rf $LOG_DIR
@@ -376,9 +390,9 @@ function copy_image_to_storage()
 {
 	echo "[ADV] copy images to $OUTPUT_DIR"
 	generate_csv ${IMAGE_DIR}.tar.gz
-	mv ${IMAGE_DIR}.csv $OUTPUT_DIR
-	mv -f ${IMAGE_DIR}.tar.gz $OUTPUT_DIR
-	mv -f *.md5 $OUTPUT_DIR
+	mv ${IMAGE_DIR}.csv $OUTPUT_DIR/${MODEL_NAME}/others
+    mv -f ${IMAGE_DIR}.tar.gz $OUTPUT_DIR/${MODEL_NAME}/image
+    mv -f ${IMAGE_DIR}.tar.gz.md5 $OUTPUT_DIR/${MODEL_NAME}/image
 }
 
 # ================

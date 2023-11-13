@@ -4,6 +4,29 @@ ADV_PATH="\
 u-boot \
 kernel-4.19 \
 . \
+external \
+external/camera_engine_rkaiq \
+external/deqp \
+external/jackson-databind \
+external/libabigail \
+external/swiftshader \
+external/vixl \
+external/python \
+external/icu \
+external/tensorflow \
+external/cldr \
+external/chromium-webview \
+external/llvm \
+external/llvm-project \
+cts \
+test \
+tools \
+developers \
+system \
+device \
+frameworks \
+packages \
+vendor \
 "
 
 VER_PREFIX="RK3568_S12_"

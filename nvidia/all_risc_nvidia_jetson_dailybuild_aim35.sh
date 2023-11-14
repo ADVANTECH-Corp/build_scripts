@@ -12,7 +12,7 @@ if [ "$EPCR7300A1" == "true" ]; then
 fi
 
 #EPCR7200A1_projects
-if [ "$EPCR7300A1" == "true" ]; then
+if [ "$EPCR7200A1" == "true" ]; then
     IMAGE_TYPE="external"
     MODEL_NAME="7200"
     BOARD_VER="A1"

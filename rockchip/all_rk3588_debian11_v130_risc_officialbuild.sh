@@ -13,12 +13,12 @@ if [ "$ROM6881A1" == "true" ]; then
 	MACHINE_LIST="$MACHINE_LIST ROM6881"
 	MODEL_NAME="ROM6881"
 	HW_VER="A1"
-	BOARD_CONFIG="BoardConfig-rk3588-rom6881a1.mk"
+	BOARD_CONFIG="adv_rk3588_rom6881a1_defconfig"
 
 	export MACHINE_LIST
 	export MODEL_NAME
 	export HW_VER
 	export BOARD_CONFIG
-	./rk3588_debian11_v106_risc_officialbuild.sh $VERSION_NUM
+	./rk3588_debian11_v130_risc_officialbuild.sh $VERSION_NUM
 fi
 

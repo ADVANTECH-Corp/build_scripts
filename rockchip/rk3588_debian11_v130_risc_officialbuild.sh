@@ -307,8 +307,8 @@ function building()
     elif [ "$1" == "rootfs" ]; then
 		echo "[ADV] build rootfs"
 		cd $CURR_PATH/$ROOT_DIR/
-		sudo dpkg -i debian/ubuntu-build-service/packages/*
-		sudo apt-get install -f -y
+#		sudo dpkg -i debian/ubuntu-build-service/packages/*
+#		sudo apt-get install -f -y
 		./build.sh debian >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
 
 	else
@@ -335,8 +335,7 @@ function build_linux_images()
     # package image to rockdev folder
 	cd $CURR_PATH/$ROOT_DIR
 	echo "[ADV] build link images to rockdev"
-	source device/rockchip/.BoardConfig.mk
-	./mkfirmware.sh
+	./build.sh firmware
 	echo "[ADV] build linux images end"
 }
 

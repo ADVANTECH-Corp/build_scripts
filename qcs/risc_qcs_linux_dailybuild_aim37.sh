@@ -84,6 +84,7 @@ function generate_csv()
 	pushd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
 
 	HASH_AMSS=$(cd amss && git rev-parse --short HEAD)
+	HASH_BOOTLOADER=$(cd src/bootable/bootloader/edk2 && git rev-parse --short HEAD)
 	HASH_BSP=$(cd .repo/manifests && git rev-parse --short HEAD)
 	HASH_DOWNLOAD=$(cd download && git rev-parse --short HEAD)
 	HASH_KERNEL=$(cd src/kernel/msm-5.4 && git rev-parse --short HEAD)
@@ -107,6 +108,7 @@ Function Addition,
 Manifest, ${HASH_BSP}
 
 QCS_AMSS, ${HASH_AMSS}
+QCS_BOOTLOADER, ${HASH_BOOTLOADER}
 QCS_DOWNLOAD, ${HASH_DOWNLOAD}
 QCS_KERNEL, ${HASH_KERNEL}
 QCS_META_ADVANTECH, ${HASH_META_ADVANTECH}

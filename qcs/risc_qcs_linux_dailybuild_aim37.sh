@@ -89,6 +89,8 @@ function generate_csv()
 	HASH_DOWNLOAD=$(cd download && git rev-parse --short HEAD)
 	HASH_KERNEL=$(cd src/kernel/msm-5.4 && git rev-parse --short HEAD)
 	HASH_META_ADVANTECH=$(cd poky/meta-advantech && git rev-parse --short HEAD)
+	HASH_META_QTI_BSP=$(cd poky/meta-qti-bsp && git rev-parse --short HEAD)
+	HASH_META_QTI_UBUNTU=$(cd poky/meta-qti-ubuntu && git rev-parse --short HEAD)
 	HASH_SCRIPTS=$(cd scripts && git rev-parse --short HEAD)
 	HASH_TOOLS=$(cd tools && git rev-parse --short HEAD)
 
@@ -112,6 +114,8 @@ QCS_BOOTLOADER, ${HASH_BOOTLOADER}
 QCS_DOWNLOAD, ${HASH_DOWNLOAD}
 QCS_KERNEL, ${HASH_KERNEL}
 QCS_META_ADVANTECH, ${HASH_META_ADVANTECH}
+QCS_META_QTI_BSP, ${HASH_META_QTI_BSP}
+QCS_META_QTI_UBUNTU, ${HASH_META_QTI_UBUNTU}
 QCS_SCRIPTS, ${HASH_SCRIPTS}
 QCS_TOOLS, ${HASH_TOOLS}
 

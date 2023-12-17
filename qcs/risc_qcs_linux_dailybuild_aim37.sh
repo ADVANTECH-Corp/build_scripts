@@ -31,6 +31,12 @@ function get_source_code()
 	popd
 }
 
+function get_downloads()
+{
+	echo "[ADV] get yocto downloads"
+	sudo mv $CURR_PATH/downloads $CURR_PATH/$ROOT_DIR/downloads
+}
+
 function set_environment()
 {
 	cd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
@@ -165,6 +171,7 @@ else
 fi
 
 get_source_code
+get_downloads
 set_environment
 build_image
 prepare_images

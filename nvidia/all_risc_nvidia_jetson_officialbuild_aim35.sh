@@ -15,6 +15,19 @@ if [ "$EPCR7300A1" == "true" ]; then
     ./risc_nvidia_jetson_officialbuild_aim35.sh EPCR7300A1
 fi
 
+#EPCR7200A1_projects
+if [ "$EPCR7200A1" == "true" ]; then
+    MODEL_NAME="7200"
+    BOARD_VER="A1"
+    TARGET_BOARD="jetson-xavier-nx-devkit-emmc"
+    PROJECT_BRANCH="epcr7200"
+    export MODEL_NAME
+    export BOARD_VER
+    export TARGET_BOARD
+    export PROJECT_BRANCH
+    ./risc_nvidia_jetson_officialbuild_aim35.sh EPCR7200A1
+fi
+
 #AIR030A1_projects
 if [ "$AIR030A1" == "true" ]; then
     MODEL_NAME="AIR030"

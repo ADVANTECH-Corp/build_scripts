@@ -2,8 +2,16 @@
 
 REPO=repo
 PLATFORM_PREFIX="RK3588_RISC_"
-VER_PREFIX="DIV"
-BSP_VER_PREFIX="DBV"
+
+if [ "$ROOTFS" = "ubuntu" ];then
+    VER_PREFIX="UIV"
+    BSP_VER_PREFIX="UBV"
+else
+    VER_PREFIX="DIV"
+    BSP_VER_PREFIX="DBV"
+fi
+
+
 
 
 idx=0
@@ -309,7 +317,13 @@ function building()
 		cd $CURR_PATH/$ROOT_DIR/
 #		sudo dpkg -i debian/ubuntu-build-service/packages/*
 #		sudo apt-get install -f -y
-		./build.sh debian >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
+		if [ "$ROOTFS" = "ubuntu" ];then
+			echo "[ADV] build rootfs ubuntu"
+			./build.sh ubuntu >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
+		else
+			echo "[ADV] build rootfs debian"
+			./build.sh debian >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
+		fi
 
 	else
         echo "[ADV] pass building..."

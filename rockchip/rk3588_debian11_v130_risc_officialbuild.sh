@@ -103,8 +103,21 @@ function auto_add_tag()
     else
         echo "[ADV] Add tag $VER_TAG"
         cd $CURR_PATH/$ROOT_DIR
-	$REPO forall -c git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
-	$REPO forall -c git push $REMOTE_SERVER $VER_TAG
+        $REPO forall -c git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
+        $REPO forall -c git push $REMOTE_SERVER $VER_TAG
+
+        #u-boot_priv
+        cd u-boot_priv
+        REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+        git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
+        git push $REMOTE_SERVER $VER_TAG
+        cd ..
+        #ubuntu20.04
+        cd ubuntu20.04
+        REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+        git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
+        git push $REMOTE_SERVER $VER_TAG
+        cd ..
     fi
     cd $CURR_PATH
 }

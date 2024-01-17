@@ -22,3 +22,16 @@ if [ "$ROM6881A1" == "true" ]; then
 	./rk3588_debian11_v130_risc_officialbuild.sh $VERSION_NUM
 fi
 
+if [ "$EBCRS11A1" == "true" ]; then
+	MACHINE_LIST="$MACHINE_LIST EBCRS11"
+	MODEL_NAME="EBCRS11"
+	HW_VER="A1"
+	BOARD_CONFIG="adv_rk3588_ebcrs11a1_defconfig"
+
+	export MACHINE_LIST
+	export MODEL_NAME
+	export HW_VER
+	export BOARD_CONFIG
+	./rk3588_debian11_v130_risc_officialbuild.sh $VERSION_NUM
+fi
+

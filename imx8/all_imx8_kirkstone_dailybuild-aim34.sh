@@ -33,4 +33,10 @@ if [ $DMSSA66A1 == true ]; then
         $BUILD_SH dmssa66a1-8MP imx8mpdmssa66a1"$AIM_VERSION"LIV"$VERSION_NUM" "6G" ""
         [ "$?" -ne 0 ] && exit 1
 fi
+if [ $EBCRS08A2 == true ]; then
+       $BUILD_SH ebcrs08a2-8MM RS08A2"$AIM_VERSION"LIV"$VERSION_NUM" "2G" ""
+       [ "$?" -ne 0 ] && exit 1
+fi
+
+
 echo "[ADV] All done!"

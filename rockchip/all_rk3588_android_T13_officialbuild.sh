@@ -1,0 +1,19 @@
+#!/bin/bash
+
+MACHINE_LIST=""
+
+#rk3588_projects
+if [ "$RSB6881A1" == "true" ]; then
+	UBOOT_DEFCONFIG=rk3588_rsb6881a1
+	KERNEL_DEFCONFIG=rk3588_adv_defconfig
+	KERNEL_DTB=rk3588-rsb6881-a1.img
+	ANDROID_PRODUCT=rsb6881_t-userdebug
+	MACHINE_LIST="$MACHINE_LIST rsb_6881"
+
+	export UBOOT_DEFCONFIG
+	export KERNEL_DEFCONFIG
+	export KERNEL_DTB
+	export ANDROID_PRODUCT
+	export MACHINE_LIST
+	./rk3588_android_T13_officialbuild.sh
+fi

@@ -8,7 +8,7 @@ if [ "$RSB6881A1" == "true" ]; then
 	KERNEL_DEFCONFIG=rk3588_adv_defconfig
 	KERNEL_DTB=rk3588-rom6881-a1.img
 	ANDROID_PRODUCT=rom6881_t-userdebug
-	MACHINE_LIST="$MACHINE_LIST rsb_6881"
+	MACHINE_LIST="$MACHINE_LIST rom_6881"
 
 	export UBOOT_DEFCONFIG
 	export KERNEL_DEFCONFIG

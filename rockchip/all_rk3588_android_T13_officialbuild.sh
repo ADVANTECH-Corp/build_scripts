@@ -3,7 +3,7 @@
 MACHINE_LIST=""
 
 #rk3588_projects
-if [ "$RSB6881A1" == "true" ]; then
+if [ "$ROM6881A1" == "true" ]; then
 	UBOOT_DEFCONFIG=rk3588_rom6881a1
 	KERNEL_DEFCONFIG=rk3588_adv_defconfig
 	KERNEL_DTB=rk3588-rom6881-a1.img

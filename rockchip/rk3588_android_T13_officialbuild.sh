@@ -311,7 +311,7 @@ function get_source_code()
 
     cd $CURR_PATH
 
-    cp lz4 /usr/bin/lz4
+    sudo cp lz4 /usr/bin/lz4
     sync
     tar zxvf prebuilts-rk3588-AndroidT13*.tar.gz -C $CURR_PATH/$ROOT_DIR/android
 }

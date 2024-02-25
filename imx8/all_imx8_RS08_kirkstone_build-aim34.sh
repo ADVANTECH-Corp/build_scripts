@@ -3,11 +3,11 @@ function build_project()
 {
 	echo "[ADV] $1 start"
 	if [ $1 == "OfficialBuild" ]; then
-		NUM1=`expr $VERSION : 'V\([0-9A-Z]*\)'`
-		NUM2=`expr $VERSION : '.*[.]\([0-9A-Z]*\)'`
+#		NUM1=`expr $VERSION : 'V\([0-9A-Z]*\)'`
+#		NUM2=`expr $VERSION : '.*[.]\([0-9A-Z]*\)'`
 		# Official release
-		BUILD_SH="./imx8_kirkstone_officialbuild-aim34.sh"
-		VERSION_NUM=$NUM1$NUM2
+		BUILD_SH="./RS08_imx8_kirkstone_officialbuild-aim34.sh"
+		VERSION_NUM=${RELEASE_VERSION}
 
 	else
 		# Dailybuild

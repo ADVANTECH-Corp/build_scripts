@@ -11,7 +11,7 @@ function build_project()
 
 	else
 		# Dailybuild
-		BUILD_SH="./imx8_kirkstone_dailybuild-aim34.sh"
+		BUILD_SH="./RS08_imx8_kirkstone_dailybuild-aim34.sh"
 		VERSION_NUM=${RELEASE_VERSION}
 	fi
 

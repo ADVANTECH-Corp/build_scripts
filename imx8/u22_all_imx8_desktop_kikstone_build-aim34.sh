@@ -19,7 +19,7 @@ $BUILD_SH imx8 imx8UBV"$VERSION_NUM" 1G
 
 #imx8_projects
 if [ $EPCR5710A1 == true ]; then
-    $BUILD_SH epcr5710a1-8MP 5710A1"$AIM_VERSION"UIV"$VERSION_NUM" "4G" "FSPI"
+    $BUILD_SH epcr5710a1_desktop-8MP 5710A1"$AIM_VERSION"UIV"$VERSION_NUM" "4G" "FSPI"
     [ "$?" -ne 0 ] && exit 1
 fi
 

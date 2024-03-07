@@ -355,9 +355,9 @@ function build_linux_images()
 
 	building uboot
 	building kernel
-	if [ $isFirstMachine == "true" ]; then
+	#if [ $isFirstMachine == "true" ]; then
 	    building rootfs
-	fi
+	#fi
 	building recovery
 
     # package image to rockdev folder

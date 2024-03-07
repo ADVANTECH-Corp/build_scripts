@@ -33,5 +33,16 @@ if [ "$EBCRS11A1" == "true" ]; then
 	export HW_VER
 	export BOARD_CONFIG
 	./rk3588_debian11_v130_risc_officialbuild.sh $VERSION_NUM
+	
+	MACHINE_LIST="$MACHINE_LIST EBCRS11"
+	MODEL_NAME="EBCRS11"
+	HW_VER="A1"
+	BOARD_CONFIG="adv_rk3588_ebcrs11a1_sz_defconfig"
+
+	export MACHINE_LIST
+	export MODEL_NAME
+	export HW_VER
+	export BOARD_CONFIG
+	./rk3588_debian11_v130_risc_officialbuild.sh $VERSION_NUM
 fi
 

@@ -292,7 +292,13 @@ echo "+++ ${FUNCNAME[0]} $@"
 
     git config --global submodule."common".path common
     git config --global submodule."common".url https://gitlab.freedesktop.org/gstreamer/common.git
+
+#  Delet  kernel-module-nxp89xx in meta-freescale && meta-imx/
 #    sed -i 's/git.alsa-project.org/github.com\/alsa-project/g' ../sources/meta-imx/meta-sdk/recipes-multimedia/tinycompress/tinycompress_1.1.6.bb
+    echo "sed -i 's/kernel-module-nxp89xx/ /'  ../sources/meta-imx/meta-bsp/conf/layer.conf"
+    sed -i 's/kernel-module-nxp89xx/ /'  ../sources/meta-imx/meta-bsp/conf/layer.conf
+    echo "sed -i 's/kernel-module-nxp89xx/ /'  ../sources/meta-freescale/conf/machine/include/imx-base.inc"
+    sed -i 's/kernel-module-nxp89xx/ /'  ../sources/meta-freescale/conf/machine/include/imx-base.inc
 
     # Re-build U-Boot & kernel
     echo "[ADV] build_yocto_image: build u-boot"

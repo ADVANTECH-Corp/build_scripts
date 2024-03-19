@@ -91,6 +91,9 @@ function get_source_code()
 
     repo sync
 
+     sed -i 's/kernel-module-nxp89xx/ /'  $CURR_PATH/$ROOT_DIR/sources/meta-imx/meta-bsp/conf/layer.conf
+     sed -i 's/kernel-module-nxp89xx/ /'  $CURR_PATH/$ROOT_DIR/sources/meta-freescale/conf/machine/include/imx-base.inc
+
     cd $CURR_PATH
 }
 
@@ -295,10 +298,10 @@ echo "+++ ${FUNCNAME[0]} $@"
 
 #  Delet  kernel-module-nxp89xx in meta-freescale && meta-imx/
 #    sed -i 's/git.alsa-project.org/github.com\/alsa-project/g' ../sources/meta-imx/meta-sdk/recipes-multimedia/tinycompress/tinycompress_1.1.6.bb
-    echo "sed -i 's/kernel-module-nxp89xx/ /'  ../sources/meta-imx/meta-bsp/conf/layer.conf"
-    sed -i 's/kernel-module-nxp89xx/ /'  ../sources/meta-imx/meta-bsp/conf/layer.conf
-    echo "sed -i 's/kernel-module-nxp89xx/ /'  ../sources/meta-freescale/conf/machine/include/imx-base.inc"
-    sed -i 's/kernel-module-nxp89xx/ /'  ../sources/meta-freescale/conf/machine/include/imx-base.inc
+    echo "sed -i 's/kernel-module-nxp89xx/ /'  $CURR_PATH/$ROOT_DIR/sources/meta-imx/meta-bsp/conf/layer.conf"
+    sed -i 's/kernel-module-nxp89xx/ /'  $CURR_PATH/$ROOT_DIR/sources/meta-imx/meta-bsp/conf/layer.conf
+    echo "sed -i 's/kernel-module-nxp89xx/ /' $CURR_PATH/$ROOT_DIR/sources/meta-freescale/conf/machine/include/imx-base.inc"
+    sed -i 's/kernel-module-nxp89xx/ /'  $CURR_PATH/$ROOT_DIR/sources/meta-freescale/conf/machine/include/imx-base.inc
 
     # Re-build U-Boot & kernel
     echo "[ADV] build_yocto_image: build u-boot"

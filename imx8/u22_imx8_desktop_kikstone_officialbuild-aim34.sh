@@ -92,6 +92,9 @@ function get_source_code()
 
     repo sync
 
+     sed -i 's/kernel-module-nxp89xx/ /'  $CURR_PATH/$ROOT_DIR/sources/meta-imx/meta-bsp/conf/layer.conf
+     sed -i 's/kernel-module-nxp89xx/ /'  $CURR_PATH/$ROOT_DIR/sources/meta-freescale/conf/machine/include/imx-base.inc
+
     cd $CURR_PATH
 }
 

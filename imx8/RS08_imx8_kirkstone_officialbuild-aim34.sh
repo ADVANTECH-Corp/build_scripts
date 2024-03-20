@@ -8,7 +8,7 @@ BOOT_DEVICE_LIST=$4
 #--- [platform specific] ---
 VER_PREFIX="imx8"
 TMP_DIR="tmp"
-DEFAULT_DEVICE="imx8mprsb3720a1"
+DEFAULT_DEVICE="imx8mmebcrs08a2"
 #---------------------------
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"

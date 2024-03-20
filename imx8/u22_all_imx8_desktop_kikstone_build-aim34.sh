@@ -18,10 +18,8 @@ function build_project()
 	echo VERSION_NUM=$VERSION_NUM
 
 	#imx8_BSP
-	if [ $1 == "DailyBuild" ]; then
-		$BUILD_SH imx8 imx8UBV"$VERSION_NUM" 1G
-		[ "$?" -ne 0 ] && exit 1
-	fi
+	$BUILD_SH imx8 imx8UBV"$VERSION_NUM" 1G
+	[ "$?" -ne 0 ] && exit 1
 
 	#imx8_projects
 	if [[ $EPCR5710A1 == true ]]; then

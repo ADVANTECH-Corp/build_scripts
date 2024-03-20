@@ -222,7 +222,7 @@ echo "+++ ${FUNCNAME[0]} $@"
 	else
 		# First build
         FIRST_BUILD=1
-		echo EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} source imx-setup-desktop.sh -b $BUILDALL_DIR
+		echo "EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} source imx-setup-desktop.sh -b $BUILDALL_DIR"
 		EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} source imx-setup-desktop.sh -b $BUILDALL_DIR
 	fi
 echo "--- ${FUNCNAME[0]}"

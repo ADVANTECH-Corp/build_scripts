@@ -246,9 +246,150 @@ function create_xml_and_commit()
     fi
 }
 
+function save_temp_log()
+{
+	LOG_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR"
+	cd $LOG_PATH
+
+	echo "[ADV] mkdir $LOG_DIR"
+	mkdir $LOG_DIR
+
+	# Backup conf, run script & log file
+	cp -a conf $LOG_DIR
+	find $TMP_DIR/work -name "log.*_*" -o -name "run.*_*" | xargs -i cp -a --parents {} $LOG_DIR
+
+	echo "[ADV] creating ${LOG_DIR}.tgz ..."
+	tar czf $LOG_DIR.tgz $LOG_DIR
+	generate_md5 $LOG_DIR.tgz
+
+	mv -f $LOG_DIR.tgz $STORAGE_PATH
+	mv -f $LOG_DIR.tgz.md5 $STORAGE_PATH
+
+	# Remove all temp logs
+	rm -rf $LOG_DIR
+	find . -name "temp" | xargs rm -rf
+}
 # ===============================
 #  Functions [platform specific]
 # ===============================
+function building()
+{
+echo "+++ ${FUNCNAME[0]} $@" 
+    echo "[ADV] building $1 $2..."
+    LOG_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"_log
+
+    if [ "$1" == "populate_sdk" ]; then
+        if [ "$DEPLOY_IMAGE_NAME" == "fsl-image-full" ]; then
+            echo "[ADV] bitbake meta-toolchain"
+            bitbake meta-toolchain
+        else
+            echo "[ADV] bitbake $DEPLOY_IMAGE_NAME -c populate_sdk"
+            bitbake $DEPLOY_IMAGE_NAME -c populate_sdk
+        fi
+    elif [ "x" != "x$2" ]; then
+        bitbake $1 -c $2 -f
+    else
+        bitbake $1
+    fi
+echo "--- ${FUNCNAME[0]}"
+
+    if [ "$?" -ne 0 ]; then
+        echo "[ADV] Build failure! Check details in ${LOG_DIR}.tgz"
+        save_temp_log
+        exit 1
+    fi
+}
+
+function set_environment()
+{
+        cd $CURR_PATH/$ROOT_DIR
+	echo "[ADV] set environment"
+
+        if [ "$1" == "sdk" ]; then
+	        # Use default device for sdk
+            sed -i "s/MACHINE ??=.*/MACHINE ??= '${KERNEL_CPU_TYPE}${PRODUCT}'/g" $BUILDALL_DIR/conf/local.conf
+                EULA=1 source setup-environment $BUILDALL_DIR
+        else
+                if [ -e $BUILDALL_DIR/conf/local.conf ] ; then
+                        # Change MACHINE setting
+                        sed -i "s/MACHINE ??=.*/MACHINE ??= '${KERNEL_CPU_TYPE}${PRODUCT}'/g" $BUILDALL_DIR/conf/local.conf
+                        EULA=1 source setup-environment $BUILDALL_DIR
+                else
+                        # First build
+                         EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} source imx-setup-desktop.sh -b $BUILDALL_DIR
+                fi
+        fi
+}
+
+function build_yocto_sdk()
+{
+        set_environment sdk
+
+        # Build default full image first
+        ## building $DEPLOY_IMAGE_NAME
+
+        # Generate sdk image
+        building populate_sdk
+}
+
+function prepare_images()
+{
+        cd $CURR_PATH
+
+        IMAGE_TYPE=$1
+        OUTPUT_DIR=$2
+	echo "[ADV] prepare $IMAGE_TYPE image"
+        if [ "x$OUTPUT_DIR" == "x" ]; then
+                echo "[ADV] prepare_images: invalid parameter #2!"
+                exit 1;
+        else
+                echo "[ADV] mkdir $OUTPUT_DIR"
+                mkdir $OUTPUT_DIR
+        fi
+	
+        case $IMAGE_TYPE in
+                "sdk")
+			cp $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/sdk/* $OUTPUT_DIR
+                        ;;
+                *)
+                        echo "[ADV] prepare_images: invalid parameter #1!"
+                        exit 1;
+                        ;;
+        esac
+
+        # Package image file
+        case $IMAGE_TYPE in
+                "sdk")
+                        echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
+			tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
+			generate_md5 ${OUTPUT_DIR}.tgz
+                        ;;
+                *) # Normal images
+                        echo "[ADV] creating ${OUTPUT_DIR}.img.gz ..."
+                        gzip -c9 $OUTPUT_DIR/$FILE_NAME > $OUTPUT_DIR.img.gz
+                        generate_md5 $OUTPUT_DIR.img.gz
+                        ;;
+        esac
+        rm -rf $OUTPUT_DIR
+}
+
+function copy_image_to_storage()
+{
+	echo "[ADV] copy $1 images to $STORAGE_PATH"
+
+	case $1 in
+		"sdk")
+			mv -f ${SDK_DIR}.tgz $STORAGE_PATH
+			;;
+		*)
+			echo "[ADV] copy_image_to_storage: invalid parameter #1!"
+			exit 1;
+			;;
+	esac
+
+	mv -f *.md5 $STORAGE_PATH
+}
+
 function get_bsp_tarball()
 {
 	if [ -e $STORAGE_PATH/${ROOT_DIR}.tgz ] ; then
@@ -293,9 +434,14 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 	echo "[ADV] get bsp tarball"
 	get_bsp_tarball
 
-	echo "[ADV]buildng yocto sdk --> skip"
+	# Build Yocto SDK
+	echo "[ADV] build yocto sdk"
+	build_yocto_sdk
 
-	echo "[ADV] generate sdk image --> skip"
+	echo "[ADV] generate sdk image"
+	SDK_DIR="$ROOT_DIR"_sdk
+	prepare_images sdk $SDK_DIR
+	copy_image_to_storage sdk
 
 	rm -rf $ROOT_DIR
 

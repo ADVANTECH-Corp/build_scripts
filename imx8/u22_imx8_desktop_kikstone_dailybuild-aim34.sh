@@ -362,7 +362,7 @@ echo "+++ ${FUNCNAME[0]} $@"
         ;;
     "normal")
         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.wic"
-        bunzip2 -f $DEPLOY_IMAGE_PATH/$FILE_NAME.bz2
+        unzstd -f $DEPLOY_IMAGE_PATH/$FILE_NAME.zst
         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
         ;;
     "individually")

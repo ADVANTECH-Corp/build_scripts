@@ -434,14 +434,9 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 	echo "[ADV] get bsp tarball"
 	get_bsp_tarball
 
-	# Build Yocto SDK
-	echo "[ADV] build yocto sdk"
-	build_yocto_sdk
+	echo "[ADV]buildng yocto sdk --> skip"
 
-	echo "[ADV] generate sdk image"
-	SDK_DIR="$ROOT_DIR"_sdk
-	prepare_images sdk $SDK_DIR
-	copy_image_to_storage sdk
+	echo "[ADV] generate sdk image --> skip"
 
 	rm -rf $ROOT_DIR
 

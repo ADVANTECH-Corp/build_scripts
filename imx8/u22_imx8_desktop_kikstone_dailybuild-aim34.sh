@@ -273,7 +273,9 @@ echo "+++ ${FUNCNAME[0]} $@"
         building imx-atf cleansstate
         building optee-os cleansstate
         building imx-boot clean
+        building u-boot-imx cleansstate
         building $DEPLOY_IMAGE_NAME clean
+        building u-boot-imx
         building $DEPLOY_IMAGE_NAME 
         ;;
     *)
@@ -486,7 +488,11 @@ else #"$PRODUCT" != "$VER_PREFIX"
 
 echo "MEMORY_LIST=$MEMORY_LIST"
 	for MEMORY in $MEMORY_LIST;do
-        if [ "$PRE_MEMORY" != "" ]; then
+        echo "[ADV] MEMORY=$MEMORY"
+        echo "[ADV] PRE_MEMORY=$PRE_MEMORY"
+
+        if [ "$MEMORY" != "" ]; then
+            echo "[ADV] rebuild_bootloader $MEMORY"
             rebuild_bootloader $MEMORY
         fi
         PRE_MEMORY=$MEMORY

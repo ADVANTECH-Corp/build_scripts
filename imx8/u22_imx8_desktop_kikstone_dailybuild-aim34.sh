@@ -222,8 +222,8 @@ echo "+++ ${FUNCNAME[0]} $@"
 	else
 		# First build
         FIRST_BUILD=1
-		echo "EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} source imx-setup-desktop.sh -b $BUILDALL_DIR"
-		EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} source imx-setup-desktop.sh -b $BUILDALL_DIR
+		echo "EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} UBOOT_CONFIG=${PRE_MEMORY}  source imx-setup-desktop.sh -b $BUILDALL_DIR"
+		EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} UBOOT_CONFIG=${PRE_MEMORY}  source imx-setup-desktop.sh -b $BUILDALL_DIR
 	fi
 echo "--- ${FUNCNAME[0]}"
 }
@@ -483,19 +483,19 @@ else #"$PRODUCT" != "$VER_PREFIX"
     echo "[ADV] add version"
     add_version
 
-    echo "[ADV] build images"
-    build_yocto_images
-
 echo "MEMORY_LIST=$MEMORY_LIST"
 	for MEMORY in $MEMORY_LIST;do
-        echo "[ADV] MEMORY=$MEMORY"
-        echo "[ADV] PRE_MEMORY=$PRE_MEMORY"
+                if [ "$PRE_MEMORY" != "" ]; then
+                        PRE_MEMORY=$MEMORY
+                        echo "[ADV] PRE_MEMORY=$MEMORY"
+                        rebuild_bootloader $PRE_MEMORY
+                else
+                        PRE_MEMORY=$MEMORY
+                        echo "[ADV] PRE_MEMORY=$MEMORY"
+                        echo "[ADV] build images"
+                        build_yocto_images
+                fi
 
-        if [ "$MEMORY" != "" ]; then
-            echo "[ADV] rebuild_bootloader $MEMORY"
-            rebuild_bootloader $MEMORY
-        fi
-        PRE_MEMORY=$MEMORY
 
         echo "[ADV] generate normal image"
         DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"

@@ -371,8 +371,8 @@ echo "+++ ${FUNCNAME[0]} $@"
         mkdir $OUTPUT_DIR/image $OUTPUT_DIR/mk_inand
         sudo cp $CURR_PATH/individually-script-tool/* $OUTPUT_DIR/mk_inand/
         sudo chmod 755 $OUTPUT_DIR/mk_inand/*
-        FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.tar.bz2"
-        cp $DEPLOY_IMAGE_PATH/$FILE_NAME                $OUTPUT_DIR/image/rootfs.tar.bz2
+        FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.tar.zst"
+        cp $DEPLOY_IMAGE_PATH/$FILE_NAME                $OUTPUT_DIR/image/rootfs.tar.zst
         cp $DEPLOY_IMAGE_PATH/${KERNEL_CPU_TYPE}*dtb    $OUTPUT_DIR/image
         cp $DEPLOY_IMAGE_PATH/Image                     $OUTPUT_DIR/image
         cp $DEPLOY_IMAGE_PATH/imx-boot-"${KERNEL_CPU_TYPE}${PRODUCT}"-"$MEMORY".bin* $OUTPUT_DIR/image/flash.bin

@@ -80,7 +80,7 @@ function get_csv_info()
         HASH_BSP=`cat ${CSV_FILE} | grep "BSP" | cut -d ',' -f 2`
         HASH_DISPLAY_HARDWARE=`cat ${CSV_FILE} | grep "DISPLAY_HARDWARE" | cut -d ',' -f 2`
         HASH_DOWNLOAD=`cat ${CSV_FILE} | grep "DOWNLOAD" | cut -d ',' -f 2`
-        HASH_KERNEL=`cat ${CSV_FILE} | grep "KERNEL" | cut -d ',' -f 2`
+        HASH_KERNEL=`cat ${CSV_FILE} | grep "QCS_KERNEL" | cut -d ',' -f 2`
         HASH_META_ADVANTECH=`cat ${CSV_FILE} | grep "META_ADVANTECH" | cut -d ',' -f 2`
         HASH_META_QTI_BSP=`cat ${CSV_FILE} | grep "META_QTI_BSP" | cut -d ',' -f 2`
         HASH_META_QTI_UBUNTU=`cat ${CSV_FILE} | grep "META_QTI_UBUNTU" | cut -d ',' -f 2`

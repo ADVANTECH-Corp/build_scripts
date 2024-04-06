@@ -24,4 +24,8 @@ if [ $ROM5721A1 == true ]; then
 	$BUILD_SH rom5721a1-8MM 5721A1"$AIM_VERSION"LIV"$VERSION_NUM" "2G 1G" ""
 	[ "$?" -ne 0 ] && exit 1
 fi
+if [ $ROM5720A1 == true ]; then
+        $BUILD_SH rom5720a1-8MQ 5720A1"$AIM_VERSION"LIV"$VERSION_NUM" "2G" ""
+        [ "$?" -ne 0 ] && exit 1
+fi
 echo "[ADV] All done!"

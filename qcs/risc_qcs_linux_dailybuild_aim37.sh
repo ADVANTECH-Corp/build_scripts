@@ -13,9 +13,8 @@ CURR_PATH="$PWD"
 ROOT_DIR="${PLATFORM_PREFIX}_${RELEASE_VERSION}_${DATE}"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
 IMAGE_DIR="out"
+DISTRO_IMAGE="debug"
 IMAGE_VER="${MODEL_NAME}${BOARD_VER}${AIM_VERSION}UIV${RELEASE_VERSION}_${DATE}"
-UFS_IMAGE_VER="${MODEL_NAME}${BOARD_VER}${AIM_VERSION}UIV${RELEASE_VERSION}_ufs_${DATE}"
-EMMC_IMAGE_VER="${MODEL_NAME}${BOARD_VER}${AIM_VERSION}UIV${RELEASE_VERSION}_emmc_${DATE}"
 
 # ===========
 #  Functions
@@ -29,6 +28,13 @@ function get_source_code()
 	repo sync -c -j8
 	cp -r amss/apps_proc/* .
 	popd
+}
+
+function copy_amss_to_amssperf()
+{
+	echo "[ADV] copy amss to amssperf"
+	cd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
+	cp -rf amss amssperf
 }
 
 function get_downloads()
@@ -48,7 +54,7 @@ function build_image()
 {
 	cd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
 	echo "[ADV] building ..."
-	scripts/build_release.sh -all ${RELEASE_VERSION}
+	scripts/build_release.sh -all -${DISTRO_IMAGE} ${RELEASE_VERSION}
 }
 
 function generate_md5()
@@ -61,8 +67,10 @@ function generate_md5()
 	fi
 }
 
-function prepare_images()
+function prepare_and_copy_images()
 {
+	UFS_IMAGE_VER="${IMAGE_VER}_ufs_${DISTRO_IMAGE}"
+	EMMC_IMAGE_VER="${IMAGE_VER}_emmc_${DISTRO_IMAGE}"
 	echo "[ADV] creating ${UFS_IMAGE_VER}.tgz and ${EMMC_IMAGE_VER}.tgz ..."
 	pushd $CURR_PATH/$ROOT_DIR/ 2>&1 > /dev/null
 	mv ${IMAGE_DIR}/ufs ./${UFS_IMAGE_VER}
@@ -71,7 +79,18 @@ function prepare_images()
 	sudo tar czf ${EMMC_IMAGE_VER}.tgz $EMMC_IMAGE_VER
 	generate_md5 ${UFS_IMAGE_VER}.tgz
 	generate_md5 ${EMMC_IMAGE_VER}.tgz
+	mv -f ${UFS_IMAGE_VER}.tgz* $OUTPUT_DIR
+	mv -f ${EMMC_IMAGE_VER}.tgz* $OUTPUT_DIR
 	popd
+}
+
+function copy_amssperf_to_amss()
+{
+	echo "[ADV] copy amssperf to amss"
+	cd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
+	mv amss amssdebug
+	mv amssperf amss
+	mv amms/contents_perf.xml amms/contents.xml
 }
 
 function generate_csv()
@@ -134,21 +153,17 @@ END_OF_CSV
 	popd
 }
 
-function copy_image_to_storage()
+function prepare_and_copy_csv()
 {
-	echo "[ADV] copy images to $OUTPUT_DIR"
-	pushd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
-	generate_csv ${UFS_IMAGE_VER}.tgz
-	generate_csv ${EMMC_IMAGE_VER}.tgz
-	mv ${UFS_IMAGE_VER}.tgz.csv $OUTPUT_DIR
-	mv ${EMMC_IMAGE_VER}.tgz.csv $OUTPUT_DIR
-	mv -f ${UFS_IMAGE_VER}.tgz $OUTPUT_DIR
-	mv -f ${EMMC_IMAGE_VER}.tgz $OUTPUT_DIR
-	mv -f *.md5 $OUTPUT_DIR
+	echo "[ADV] creating csv files ..."
+	pushd $CURR_PATH/$ROOT_DIR/ 2>&1 > /dev/null
+	generate_csv ${IMAGE_VER}
+	generate_md5 ${IMAGE_VER}.csv
+	mv -f ${IMAGE_VER}.csv* $OUTPUT_DIR
 	popd
 }
 
-function save_temp_log()
+function prepare_and_copy_log()
 {
 	LOG_DIR="log"
 	LOG_FILE="${IMAGE_VER}"_log
@@ -156,8 +171,7 @@ function save_temp_log()
 	echo "[ADV] creating ${LOG_FILE}.tgz ..."
 	sudo tar czf $LOG_FILE.tgz $LOG_DIR
 	generate_md5 $LOG_FILE.tgz
-	mv -f $LOG_FILE.tgz $OUTPUT_DIR
-	mv -f $LOG_FILE.tgz.md5 $OUTPUT_DIR
+	mv -f $LOG_FILE.tgz* $OUTPUT_DIR
 	sudo rm -rf $LOG_DIR
 	popd
 }
@@ -174,12 +188,22 @@ else
 	mkdir -p $OUTPUT_DIR
 fi
 
+#prepare source code and build environment
 get_source_code
+copy_amss_to_amssperf
 get_downloads
 set_environment
+#debug
 build_image
-prepare_images
-copy_image_to_storage
-save_temp_log
+prepare_and_copy_images
+#perf
+DISTRO_IMAGE="perf"
+copy_amssperf_to_amss
+build_image
+prepare_and_copy_images
+#other
+prepare_and_copy_csv
+prepare_and_copy_log
+
 cd $CURR_PATH
 echo "[ADV] build script done!"

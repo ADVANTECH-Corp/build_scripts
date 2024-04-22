@@ -190,17 +190,17 @@ fi
 
 #prepare source code and build environment
 get_source_code
-copy_amss_to_amssperf
+#copy_amss_to_amssperf
 get_downloads
 set_environment
 #debug
 build_image
 prepare_and_copy_images
 #perf
-DISTRO_IMAGE="perf"
-copy_amssperf_to_amss
-build_image
-prepare_and_copy_images
+#DISTRO_IMAGE="perf"
+#copy_amssperf_to_amss
+#build_image
+#prepare_and_copy_images
 #other
 prepare_and_copy_csv
 prepare_and_copy_log

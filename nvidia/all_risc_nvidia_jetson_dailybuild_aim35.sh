@@ -1,5 +1,16 @@
 #!/bin/bash
 
+#ROMAB2210A1_projects
+if [ "$ROMAB2210A1" == "true" ]; then
+    IMAGE_TYPE="external"
+    MODEL_NAME="2210"
+    BOARD_VER="A1"
+    export IMAGE_TYPE
+    export MODEL_NAME
+    export BOARD_VER
+    ./risc_nvidia_jetson_dailybuild_aim35.sh ROMAB2210A1
+fi
+
 #EPCR7300A1_projects
 if [ "$EPCR7300A1" == "true" ]; then
     IMAGE_TYPE="external"

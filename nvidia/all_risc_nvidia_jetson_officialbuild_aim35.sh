@@ -2,6 +2,19 @@
 VER_PREFIX="nv"
 export VER_PREFIX
 
+#ROMAB2210A1_projects
+if [ "$ROMAB2210A1" == "true" ]; then
+    MODEL_NAME="2210"
+    BOARD_VER="A1"
+    TARGET_BOARD="jetson-orin-romab2210-a1"
+    PROJECT_BRANCH="romab2210"
+    export MODEL_NAME
+    export BOARD_VER
+    export TARGET_BOARD
+    export PROJECT_BRANCH
+    ./risc_nvidia_jetson_officialbuild_aim35.sh ROMAB2210A1
+fi
+
 #EPCR7300A1_projects
 if [ "$EPCR7300A1" == "true" ]; then
     MODEL_NAME="7300"

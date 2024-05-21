@@ -48,6 +48,9 @@ if [ -e $STORAGE_PATH ] ; then
 else
 	echo "[ADV] mkdir $STORAGE_PATH"
 	mkdir -p $STORAGE_PATH
+        mkdir -p $STORAGE_PATH/bsp
+        mkdir -p $STORAGE_PATH/image
+        mkdir -p $STORAGE_PATH/others
 fi
 
 # Make mnt folder
@@ -398,9 +401,29 @@ function copy_image_to_storage()
 	echo "[ADV] copy $1 images to $STORAGE_PATH"
 
 	case $1 in
-		"sdk")
-			mv -f ${SDK_DIR}.tgz $STORAGE_PATH
-			;;
+		"bsp")
+			mv -f ${ROOT_DIR}.tgz $STORAGE_PATH/bsp
+		;;
+		"flash")
+			mv -f ${FLASH_DIR}.tgz $STORAGE_PATH/image
+		;;
+		"individually")
+			mv -f ${INDIVIDUAL_DIR}.tgz $STORAGE_PATH/image
+		;;
+		"misc")
+			mv -f ${MISC_DIR}.tgz $STORAGE_PATH/others
+		;;
+                "imx-boot")
+                        mv -f ${IMX_BOOT_DIR}.tgz $STORAGE_PATH/others
+                ;;
+		"modules")
+			mv -f ${MODULES_DIR}.tgz $STORAGE_PATH/others
+		;;
+		"normal")
+			generate_csv $IMAGE_DIR.img.gz
+			mv ${IMAGE_DIR}.img.csv $STORAGE_PATH/image
+			mv -f $IMAGE_DIR.img.gz $STORAGE_PATH/image
+		;;
 		*)
 			echo "[ADV] copy_image_to_storage: invalid parameter #1!"
 			exit 1;

@@ -328,7 +328,7 @@ function building()
         if [ "$1" == "populate_sdk" ]; then
 		        if [ "$DEPLOY_IMAGE_NAME" == "fsl-image-full" ]; then
                         echo "[ADV] bitbake meta-toolchain"
-                        bitbake meta-toolchain
+                        bitbake meta-toolchain-qt6
                 else
                         echo "[ADV] bitbake $DEPLOY_IMAGE_NAME -c populate_sdk"
                         bitbake $DEPLOY_IMAGE_NAME -c populate_sdk

@@ -23,7 +23,7 @@ function build_project()
 
 	#imx8_projects
 	if [[ $EPCR5710A1 == true ]]; then
-		$BUILD_SH epcr5710a1-8MP 5710A1"$AIM_VERSION"UIV"$VERSION_NUM" "4G" "FSPI"
+		$BUILD_SH epcr5710a1-8MP 5710A1"$AIM_VERSION"UIV"$VERSION_NUM" "2G 4G 6G" "FSPI"
 		[ "$?" -ne 0 ] && exit 1
 	fi
 }

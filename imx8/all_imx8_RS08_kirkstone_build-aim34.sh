@@ -26,6 +26,10 @@ function build_project()
 		$BUILD_SH ebcrs08a2-8MM RS08A2"$AIM_VERSION"LIV"$VERSION_NUM" "2G" ""
 		[ "$?" -ne 0 ] && exit 1
 	fi
+	if [ $EBCRS12A1 == true ]; then
+		$BUILD_SH ebcrs12a1-8MM RS12A1"$AIM_VERSION"LIV"$VERSION_NUM" "4G" ""
+		[ "$?" -ne 0 ] && exit 1
+	fi
 }
 
 build_project DailyBuild

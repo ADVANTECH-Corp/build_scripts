@@ -334,15 +334,25 @@ function prepare_images()
                         cp $DEPLOY_MISC_PATH/${KERNEL_CPU_TYPE}*.dtb $OUTPUT_DIR
                         cp $DEPLOY_MISC_PATH/Image $OUTPUT_DIR
                         cp $DEPLOY_MISC_PATH/imx-boot-imx9* $OUTPUT_DIR
-                        cp $DEPLOY_MISC_PATH/tee.bin $OUTPUT_DIR
+
+                        if [ -e $DEPLOY_MISC_PATH/tee.bin ] ; then
+                                cp $DEPLOY_MISC_PATH/tee.bin $OUTPUT_DIR
+                        fi
+
                         cp -a $DEPLOY_MISC_PATH/imx-boot-tools $OUTPUT_DIR
                         ;;
                 "imx-boot")
                         cp -a $DEPLOY_IMX_BOOT_PATH/* $OUTPUT_DIR
-                        chmod 755 $CURR_PATH/cp_uboot.sh
-                        chmod 755 $CURR_PATH/mk_imx-boot.sh
-                        sudo cp $CURR_PATH/cp_uboot.sh $OUTPUT_DIR
-                        sudo cp $CURR_PATH/mk_imx-boot.sh $OUTPUT_DIR
+
+                        if [ -e $CURR_PATH/cp_uboot.sh ] ; then
+                                chmod 755 $CURR_PATH/cp_uboot.sh
+                                sudo cp $CURR_PATH/cp_uboot.sh $OUTPUT_DIR
+                        fi
+
+                        if [ -e $CURR_PATH/cp_uboot.sh ] ; then
+                                chmod 755 $CURR_PATH/mk_imx-boot.sh
+                                sudo cp $CURR_PATH/mk_imx-boot.sh $OUTPUT_DIR
+                        fi
                         ;;
                 "modules")
                         FILE_NAME="modules-imx9*.tgz"
@@ -355,10 +365,16 @@ function prepare_images()
                         ;;
                 "individually")
                         mkdir $OUTPUT_DIR/image $OUTPUT_DIR/mk_inand
-                        sudo cp $CURR_PATH/individually-script-tool/* $OUTPUT_DIR/mk_inand/
-                        sudo chmod 755 $OUTPUT_DIR/mk_inand/*
-                        FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.tar.bz2"
-                        cp $DEPLOY_IMAGE_PATH/$FILE_NAME 					$OUTPUT_DIR/image/rootfs.tar.bz2
+
+			if [ -d "$CURR_PATH/individually-script-tool" ]; then
+                                if [ "$(ls -A $CURR_PATH/individually-script-tool)" ]; then
+                                        sudo cp $CURR_PATH/individually-script-tool/* $OUTPUT_DIR/mk_inand/
+                                        sudo chmod 755 $OUTPUT_DIR/mk_inand/*
+                                fi
+			fi
+
+                        FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.tar.zst"
+                        cp $DEPLOY_IMAGE_PATH/$FILE_NAME 					$OUTPUT_DIR/image/rootfs.tar.zst
                         cp $DEPLOY_IMAGE_PATH/${KERNEL_CPU_TYPE}*dtb				$OUTPUT_DIR/image
                         cp $DEPLOY_IMAGE_PATH/Image						$OUTPUT_DIR/image
                         cp $DEPLOY_IMAGE_PATH/imx-boot-"${KERNEL_CPU_TYPE}${PRODUCT}"-"$MEMORY".bin*	$OUTPUT_DIR/image/flash.bin
@@ -369,8 +385,12 @@ function prepare_images()
                         # normal image
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.wic"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR/image
-                        chmod 755 $CURR_PATH/mksd-linux.sh
-                        sudo cp $CURR_PATH/mksd-linux.sh $OUTPUT_DIR/mk_inand/
+
+			if [ -e $CURR_PATH/mksd-linux.sh ] ; then
+                                chmod 755 $CURR_PATH/mksd-linux.sh
+                                sudo cp $CURR_PATH/mksd-linux.sh $OUTPUT_DIR/mk_inand/
+			fi
+
 			rm $DEPLOY_IMAGE_PATH/$FILE_NAME && sync
                         ;;
                 *)

@@ -11,6 +11,17 @@ if [ "$ROMAB2210A1" == "true" ]; then
     ./risc_nvidia_jetson_dailybuild_aim35.sh ROMAB2210A1
 fi
 
+#EBCRC04A1_projects
+if [ "$EBCRC04A1" == "true" ]; then
+    IMAGE_TYPE="external"
+    MODEL_NAME="RC04"
+    BOARD_VER="A1"
+    export IMAGE_TYPE
+    export MODEL_NAME
+    export BOARD_VER
+    ./risc_nvidia_jetson_dailybuild_aim35.sh EBCRC04A1
+fi
+
 #EPCR7300A1_projects
 if [ "$EPCR7300A1" == "true" ]; then
     IMAGE_TYPE="external"

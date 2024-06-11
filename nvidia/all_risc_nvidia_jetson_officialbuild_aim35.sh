@@ -15,6 +15,19 @@ if [ "$ROMAB2210A1" == "true" ]; then
     ./risc_nvidia_jetson_officialbuild_aim35.sh ROMAB2210A1
 fi
 
+#EBCRC04A1_projects
+if [ "$EBCRC04A1" == "true" ]; then
+    MODEL_NAME="RC04"
+    BOARD_VER="A1"
+    TARGET_BOARD="jetson-orin-ebcrc04-a1"
+    PROJECT_BRANCH="ebcrc04"
+    export MODEL_NAME
+    export BOARD_VER
+    export TARGET_BOARD
+    export PROJECT_BRANCH
+    ./risc_nvidia_jetson_officialbuild_aim35.sh EBCRC04A1
+fi
+
 #EPCR7300A1_projects
 if [ "$EPCR7300A1" == "true" ]; then
     MODEL_NAME="7300"

@@ -362,7 +362,7 @@ function prepare_images()
                         ;;
                 "normal")
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.wic"
-                        unzstd -f $DEPLOY_IMAGE_PATH/$FILE_NAME.zst
+                        unzstd -q -f $DEPLOY_IMAGE_PATH/$FILE_NAME.zst
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR
                         ;;
                 "individually")

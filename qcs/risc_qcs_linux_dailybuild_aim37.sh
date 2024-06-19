@@ -120,6 +120,7 @@ function generate_csv()
 	HASH_META_QTI_UBUNTU=$(cd poky/meta-qti-ubuntu && git rev-parse --short HEAD)
 	HASH_SCRIPTS=$(cd scripts && git rev-parse --short HEAD)
 	HASH_TOOLS=$(cd tools && git rev-parse --short HEAD)
+	HASH_WESTON=$(cd src/display/weston && git rev-parse --short HEAD)
 
 	cat > ${FILENAME}.csv << END_OF_CSV
 ESSD Software/OS Update News
@@ -147,6 +148,7 @@ QCS_META_QTI_BSP, ${HASH_META_QTI_BSP}
 QCS_META_QTI_UBUNTU, ${HASH_META_QTI_UBUNTU}
 QCS_SCRIPTS, ${HASH_SCRIPTS}
 QCS_TOOLS, ${HASH_TOOLS}
+QCS_WESTON, ${HASH_WESTON}
 
 END_OF_CSV
 

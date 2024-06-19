@@ -6,7 +6,7 @@ MEMORY_LIST=$3
 BOOT_DEVICE_LIST=$4
 
 #--- [platform specific] ---
-VER_PREFIX="imx8"
+VER_PREFIX="imx6"
 TMP_DIR="tmp"
 #---------------------------
 echo "[ADV] DATE = ${DATE}"
@@ -245,7 +245,7 @@ function clean_yocto_packages()
         PACKAGE_LIST=" \
 		gstreamer1.0-rtsp-server gst-examples freerdp \
 		imx-gpu-apitrace gstreamer1.0-plugins-good gstreamer1.0-plugins-base \
-		gstreamer1.0-plugins-bad kmscube imx-gpu-sdk opencv imx-gst1.0-plugin \
+		gstreamer1.0-plugins-bad imx-gpu-sdk opencv imx-gst1.0-plugin \
 		weston "
         for PACKAGE in ${PACKAGE_LIST}
         do
@@ -336,7 +336,7 @@ function prepare_images()
                 "misc")
                         cp $DEPLOY_MISC_PATH/${KERNEL_CPU_TYPE}*.dtb $OUTPUT_DIR
                         cp $DEPLOY_MISC_PATH/Image $OUTPUT_DIR
-                        cp $DEPLOY_MISC_PATH/imx-boot-imx8* $OUTPUT_DIR
+                        cp $DEPLOY_MISC_PATH/imx-boot-imx6* $OUTPUT_DIR
                         cp $DEPLOY_MISC_PATH/tee.bin $OUTPUT_DIR
                         cp -a $DEPLOY_MISC_PATH/imx-boot-tools $OUTPUT_DIR
                         ;;
@@ -348,7 +348,7 @@ function prepare_images()
                         sudo cp $CURR_PATH/mk_imx-boot.sh $OUTPUT_DIR
                         ;;
                 "modules")
-                        FILE_NAME="modules-imx8*.tgz"
+                        FILE_NAME="modules-imx6*.tgz"
                         cp $DEPLOY_MODULES_PATH/$FILE_NAME $OUTPUT_DIR
                         ;;
                 "normal")
@@ -484,12 +484,6 @@ else #"$PRODUCT" != "$VER_PREFIX"
 		FLASH_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_flash_tool
 		prepare_images flash $FLASH_DIR
 		copy_image_to_storage flash
-
-		echo "[ADV] create imx-boot files"
-		DEPLOY_IMX_BOOT_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/imx-boot/*/git"
-		IMX_BOOT_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_imx-boot
-		prepare_images imx-boot $IMX_BOOT_DIR
-		copy_image_to_storage imx-boot
 
 		for BOOT_DEVICE in $BOOT_DEVICE_LIST; do
                         rebuild_bootloader $BOOT_DEVICE

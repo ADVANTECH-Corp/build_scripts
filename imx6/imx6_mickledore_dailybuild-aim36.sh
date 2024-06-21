@@ -485,10 +485,34 @@ else #"$PRODUCT" != "$VER_PREFIX"
 		prepare_images flash $FLASH_DIR
 		copy_image_to_storage flash
 
+		echo "[ADV] create individually script tool "
+		INDIVIDUAL_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_individually_script_tool
+		prepare_images individually $INDIVIDUAL_DIR
+		copy_image_to_storage individually
+
+		echo "[ADV] create imx-boot files"
+		DEPLOY_IMX_BOOT_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/imx-boot/*/git"
+		IMX_BOOT_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_imx-boot
+		prepare_images imx-boot $IMX_BOOT_DIR
+		copy_image_to_storage imx-boot
+
 		for BOOT_DEVICE in $BOOT_DEVICE_LIST; do
                         rebuild_bootloader $BOOT_DEVICE
 		done
+
+		echo "[ADV] create misc files"
+		DEPLOY_MISC_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
+		MISC_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_misc
+		prepare_images misc $MISC_DIR
+		copy_image_to_storage misc
+
         done
+
+	echo "[ADV] create module"
+	DEPLOY_MODULES_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/images/${KERNEL_CPU_TYPE}${PRODUCT}"
+	MODULES_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_modules
+	prepare_images modules $MODULES_DIR
+	copy_image_to_storage modules
 
         save_temp_log
 fi

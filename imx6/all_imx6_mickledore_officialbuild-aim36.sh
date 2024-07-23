@@ -18,4 +18,9 @@ if [ $RSB4411A1 == true ]; then
 	[ "$?" -ne 0 ] && exit 1
 fi
 
+if [ $RSB3430A1 == true ]; then
+	$BUILD_SH rsb3430a1-6q 3430A1"$AIM_VERSION"LIV"$VERSION_NUM" "1G" ""
+	[ "$?" -ne 0 ] && exit 1
+fi
+
 echo "[ADV] All done!"

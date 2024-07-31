@@ -423,7 +423,7 @@ function copy_image_to_storage()
 		;;
 		"normal")
 			generate_csv $IMAGE_DIR.img.gz
-			mv ${IMAGE_DIR}.img.csv $STORAGE_PATH/image
+			mv ${IMAGE_DIR}.img.csv $STORAGE_PATH
 			mv -f $IMAGE_DIR.img.gz $STORAGE_PATH/image
 		;;
 		*)

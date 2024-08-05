@@ -197,8 +197,9 @@ function add_version()
 	sed -i "/UBOOT_LOCALVERSION/d" $ROOT_DIR/$U_BOOT_PATH
 	echo "UBOOT_LOCALVERSION = \"-$OFFICIAL_VER\"" >> $ROOT_DIR/$U_BOOT_PATH
 
-	# Set Linux version (replace)
-	sed -i "0,/LOCALVERSION/ s/LOCALVERSION = .*/LOCALVERSION = \"-$OFFICIAL_VER\"/g" $ROOT_DIR/$KERNEL_PATH
+	# Set Linux version
+	sed -i "/LOCALVERSION/d" $ROOT_DIR/$KERNEL_PATH
+	echo "LOCALVERSION = \"-$OFFICIAL_VER\"" >> $ROOT_DIR/$KERNEL_PATH
 }
 
 function building()
@@ -463,8 +464,9 @@ else #"$PRODUCT" != "$VER_PREFIX"
                 ln -s $CURR_PATH/downloads $CURR_PATH/$ROOT_DIR/downloads
         fi
 
-        echo "[ADV] add version"
-        add_version
+# no need in dailybuild
+#        echo "[ADV] add version"
+#        add_version
 
 	for MEMORY in $MEMORY_LIST;do
                 if [ "$PRE_MEMORY" != "" ]; then

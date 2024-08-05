@@ -489,10 +489,13 @@ else #"$PRODUCT" != "$VER_PREFIX"
 		prepare_images flash $FLASH_DIR
 		copy_image_to_storage flash
 
+# temporarily skip "create individually script tool"
+[ ! : ] && {
 		echo "[ADV] create individually script tool "
 		INDIVIDUAL_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_individually_script_tool
 		prepare_images individually $INDIVIDUAL_DIR
 		copy_image_to_storage individually
+}
 
 		echo "[ADV] create imx-boot files"
 		DEPLOY_IMX_BOOT_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/imx-boot/*/git"

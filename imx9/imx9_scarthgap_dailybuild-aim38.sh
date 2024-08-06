@@ -501,11 +501,14 @@ else #"$PRODUCT" != "$VER_PREFIX"
 		copy_image_to_storage individually
 }
 
+# temporarily skip "create imx-boot files"
+[ ! : ] && {
 		echo "[ADV] create imx-boot files"
 		DEPLOY_IMX_BOOT_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/imx-boot/*/git"
 		IMX_BOOT_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_imx-boot
 		prepare_images imx-boot $IMX_BOOT_DIR
 		copy_image_to_storage imx-boot
+}
 
 		for BOOT_DEVICE in $BOOT_DEVICE_LIST; do
                         rebuild_bootloader $BOOT_DEVICE

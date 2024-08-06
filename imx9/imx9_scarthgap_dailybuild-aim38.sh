@@ -449,7 +449,7 @@ if [ "$PRODUCT" == "$VER_PREFIX" ]; then
 
         # BSP source code
         echo "[ADV] tar $ROOT_DIR.tgz file"
-        tar czf $ROOT_DIR.tgz $ROOT_DIR --exclude-vcs --exclude .repo
+        tar czf $ROOT_DIR.tgz --exclude-vcs --exclude .repo $ROOT_DIR
         generate_md5 $ROOT_DIR.tgz
 
         copy_image_to_storage bsp

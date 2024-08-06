@@ -484,10 +484,14 @@ else #"$PRODUCT" != "$VER_PREFIX"
 		prepare_images normal $IMAGE_DIR
 		copy_image_to_storage normal
 
+
+# temporarily skip "create flash tool"
+[ ! : ] && {
 		echo "[ADV] create flash tool"
 		FLASH_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_flash_tool
 		prepare_images flash $FLASH_DIR
 		copy_image_to_storage flash
+}
 
 # temporarily skip "create individually script tool"
 [ ! : ] && {

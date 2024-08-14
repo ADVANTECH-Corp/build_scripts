@@ -485,24 +485,21 @@ else #"$PRODUCT" != "$VER_PREFIX"
 		copy_image_to_storage normal
 
 
-# temporarily skip "create flash tool"
-[ ! : ] && {
+[[ ${SKIP_FLASH_TOOL^^} != "Y" ]] && {
 		echo "[ADV] create flash tool"
 		FLASH_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_flash_tool
 		prepare_images flash $FLASH_DIR
 		copy_image_to_storage flash
 }
 
-# temporarily skip "create individually script tool"
-[ ! : ] && {
+[[ ${SKIP_SCRIPT_TOOL^^} != "Y" ]] && {
 		echo "[ADV] create individually script tool "
 		INDIVIDUAL_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_individually_script_tool
 		prepare_images individually $INDIVIDUAL_DIR
 		copy_image_to_storage individually
 }
 
-# temporarily skip "create imx-boot files"
-[ ! : ] && {
+[[ ${SKIP_IMX_BOOT^^} != "Y" ]] && {
 		echo "[ADV] create imx-boot files"
 		DEPLOY_IMX_BOOT_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/imx-boot/*/git"
 		IMX_BOOT_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_imx-boot

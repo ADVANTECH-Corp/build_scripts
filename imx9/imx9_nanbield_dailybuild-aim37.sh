@@ -275,7 +275,7 @@ function rebuild_bootloader()
         #rebuild bootloader
 	BOOTLOADER_TYPE=$1 
         case $BOOTLOADER_TYPE in
-                "512M" | "1G" | "2G" | "4G" | "6G" | "16G")
+                "512M" | "1G" | "2G" | "4G" | "6G" | "8G" | "16G")
 			echo "[ADV] Rebuild image for $BOOTLOADER_TYPE"
 			echo "UBOOT_CONFIG = \"$BOOTLOADER_TYPE\"" >> $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf
 			building imx-atf cleansstate

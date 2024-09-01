@@ -14,7 +14,7 @@ echo "[ADV] DEPLOY_IMAGE_NAME = ${DEPLOY_IMAGE_NAME}"
 echo "[ADV] BACKEND_TYPE = ${BACKEND_TYPE}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] BUILDALL_DIR = ${BUILDALL_DIR}"
-echo "[ADV] SDK_IMAGE_NAME = ${SDK_IMAGE_NAME}"
+echo "[ADV] OS_IMAGE_NAME = ${OS_IMAGE_NAME}"
 echo "[ADV] U_BOOT_VERSION = ${U_BOOT_VERSION}"
 echo "[ADV] U_BOOT_URL = ${U_BOOT_URL}"
 echo "[ADV] U_BOOT_BRANCH = ${U_BOOT_BRANCH}"
@@ -222,7 +222,7 @@ function prepare_images()
     echo "[ADV] DEPLOY_IMAGE_PATH=$DEPLOY_IMAGE_PATH"
 
     # tisdk-core-bundle-am335xepcr3220a1-20240828094234.tar.xz   ,  tisdk-default-image-am335xepcr3220a1-20240828094234.rootfs.tar.xz
-    FILE_NAME=${SDK_IMAGE_NAME}"-"${MACHINE_PROJECT}"-*.tar.xz"
+    FILE_NAME=${OS_IMAGE_NAME}"-"${MACHINE_PROJECT}"-*.tar.xz"
 
     echo "[ADV] OS images:$FILE_NAME"
     echo "[ADV] creating ${IMAGE_DIR}_OS_img.tgz for all OS images..."

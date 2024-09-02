@@ -33,6 +33,9 @@ CURR_PATH="$PWD"
 ROOT_DIR="${VER_TAG}"_"$DATE"_tisdk
 STORAGE_PATH="$CURR_PATH/$STORED/$DATE"
 
+echo "$Release_Note" > Release_Note
+REALEASE_NOTE="Release_Note"
+
 # Make storage folder
 if [ -e $STORAGE_PATH ] ; then
 	echo "[ADV] $STORAGE_PATH had already been created"

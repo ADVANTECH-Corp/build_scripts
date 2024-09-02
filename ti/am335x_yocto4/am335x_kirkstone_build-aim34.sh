@@ -335,7 +335,6 @@ function check_tag_and_replace()
     FILE_PATH=$1
     REMOTE_URL=$2
     REMOTE_BRANCH=$3
-    cd $CURR_PATH/$ROOT_DIR/$FILE_PATH
 
     HASH_ID=`git ls-remote $REMOTE_URL $VER_TAG | awk '{print $1}'`
     if [ "$HASH_ID" != "" ]; then

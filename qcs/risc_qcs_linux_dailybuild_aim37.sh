@@ -8,6 +8,7 @@ echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
 echo "[ADV] BSP_XML = ${BSP_XML}"
 echo "[ADV] PLATFORM_PREFIX = ${PLATFORM_PREFIX}"
 echo "[ADV] VERSION_NUMBER=$VERSION_NUMBER"
+echo "[ADV] KERNEL_PATH = ${KERNEL_PATH}"
 
 CURR_PATH="$PWD"
 ROOT_DIR="${PLATFORM_PREFIX}_${RELEASE_VERSION}_${DATE}"
@@ -28,6 +29,14 @@ function get_source_code()
 	repo sync -c -j8
 	cp -r amss/apps_proc/* .
 	popd
+}
+
+function add_version()
+{
+	# Set Linux version
+	OFFICIAL_VER=$(echo "${MODEL_NAME}${BOARD_VER}${AIM_VERSION}UIV${RELEASE_VERSION}" | tr '[:upper:]' '[:lower:]')
+	sed -i "/LINUX_VERSION_EXTENSION/d" $ROOT_DIR/$KERNEL_PATH
+	echo "LINUX_VERSION_EXTENSION = \"-$OFFICIAL_VER\"" >> $ROOT_DIR/$KERNEL_PATH
 }
 
 function copy_amss_to_amssperf()
@@ -194,6 +203,7 @@ fi
 get_source_code
 #copy_amss_to_amssperf
 get_downloads
+add_version
 set_environment
 #debug
 build_image

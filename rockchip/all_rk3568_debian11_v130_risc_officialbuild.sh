@@ -48,6 +48,19 @@ if [ "$KEDGE350A1" == "true" ]; then
 	./rk3568_debian11_v130_risc_officialbuild.sh $VERSION_NUM
 fi
 
+if [ "$AFEE630A1" == "true" ]; then
+	MACHINE_LIST="$MACHINE_LIST AFEE630"
+	MODEL_NAME="AFEE630"
+	HW_VER="A1"
+	BOARD_CONFIG="adv_rk3568_afee630a1_defconfig"
+
+	export MACHINE_LIST
+	export MODEL_NAME
+	export HW_VER
+	export BOARD_CONFIG
+	./rk3568_debian11_v130_risc_officialbuild.sh $VERSION_NUM
+fi
+
 if [ "$EBCRB07A1" == "true" ]; then
 	MACHINE_LIST="$MACHINE_LIST EBCRB07"
 	MODEL_NAME="EBCRB07"

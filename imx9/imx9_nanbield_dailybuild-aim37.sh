@@ -279,7 +279,12 @@ function rebuild_bootloader()
 			echo "[ADV] Rebuild image for $BOOTLOADER_TYPE"
 			echo "UBOOT_CONFIG = \"$BOOTLOADER_TYPE\"" >> $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/conf/local.conf
 			building imx-atf cleansstate
-			building optee-os cleansstate
+
+			# iMX95 not support optee temporary
+			if [ "$CPU_TYPE" != "iMX95" ]; then
+				building optee-os cleansstate
+			fi
+
 			building imx-boot clean
 			building $DEPLOY_IMAGE_NAME clean
 			building $DEPLOY_IMAGE_NAME 

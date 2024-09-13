@@ -72,7 +72,12 @@ function define_cpu_type()
                         KERNEL_CPU_TYPE="imx6q"
                         CPU_TYPE="iMX6q"
                         ;;
-		*)
+                "6dl")
+                        PRODUCT=`expr $1 : '\(.*\).*-'`
+                        KERNEL_CPU_TYPE="imx6dl"
+                        CPU_TYPE="iMX6dl"
+                        ;;
+                *)
                         # Do nothing
                         ;;
         esac

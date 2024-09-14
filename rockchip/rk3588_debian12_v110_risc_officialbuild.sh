@@ -374,6 +374,7 @@ function build_linux_images()
     # package image to rockdev folder
 	cd $CURR_PATH/$ROOT_DIR
 	echo "[ADV] build link images to rockdev"
+	./build.sh misc
 	./build.sh firmware
 	echo "[ADV] build linux images end"
 }

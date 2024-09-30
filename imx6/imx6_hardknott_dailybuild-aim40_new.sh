@@ -315,7 +315,7 @@ function build_yocto_images()
         building linux-imx
 
         # Clean package to avoid build error
-	clean_yocto_packages
+	#clean_yocto_packages
 
 	# Build full image
         building $DEPLOY_IMAGE_NAME

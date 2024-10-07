@@ -340,7 +340,7 @@ function prepare_images()
         case $IMAGE_TYPE in
                 "misc")
                         cp $DEPLOY_MISC_PATH/${KERNEL_CPU_TYPE}*.dtb $OUTPUT_DIR
-                        cp $DEPLOY_MISC_PATH/zImage $OUTPUT_DIR
+                        cp $DEPLOY_MISC_PATH/Image $OUTPUT_DIR
                         cp $DEPLOY_MISC_PATH/imx-boot-imx6* $OUTPUT_DIR
                         cp $DEPLOY_MISC_PATH/tee.bin $OUTPUT_DIR
                         cp -a $DEPLOY_MISC_PATH/imx-boot-tools $OUTPUT_DIR
@@ -368,7 +368,7 @@ function prepare_images()
                         FILE_NAME=${DEPLOY_IMAGE_NAME}"-"${KERNEL_CPU_TYPE}${PRODUCT}"*.rootfs.tar.bz2"
                         cp $DEPLOY_IMAGE_PATH/$FILE_NAME 					$OUTPUT_DIR/image/rootfs.tar.bz2
                         cp $DEPLOY_IMAGE_PATH/${KERNEL_CPU_TYPE}*dtb				$OUTPUT_DIR/image
-                        cp $DEPLOY_IMAGE_PATH/zImage						$OUTPUT_DIR/image
+                        cp $DEPLOY_IMAGE_PATH/Image						$OUTPUT_DIR/image
                         cp $DEPLOY_IMAGE_PATH/imx-boot-"${KERNEL_CPU_TYPE}${PRODUCT}"-"$MEMORY".bin*	$OUTPUT_DIR/image/flash.bin
                         cp $DEPLOY_IMAGE_PATH/"${KERNEL_CPU_TYPE}"*bin				$OUTPUT_DIR/image
                         ;;

@@ -81,7 +81,12 @@ function define_cpu_type()
                         KERNEL_CPU_TYPE="imx6qp"
                         CPU_TYPE="DualQuadPlus"
                         ;;
-                *)
+		"6q")
+                        PRODUCT=`expr $1 : '\(.*\).*-'`
+                        KERNEL_CPU_TYPE="imx6q"
+                        CPU_TYPE="iMX6q"
+                        ;;
+		*)
                         UBOOT_CPU_TYPE="mx6q"
                         KERNEL_CPU_TYPE="imx6q"
                         CPU_TYPE="DualQuad"

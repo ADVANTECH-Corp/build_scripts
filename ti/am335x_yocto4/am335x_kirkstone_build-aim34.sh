@@ -253,6 +253,7 @@ function prepare_images()
     # dtb & zImage
     echo "[ADV] creating ${IMAGE_DIR}_zimage.tgz for dtb & zImage images ..."
     mv $DEPLOY_IMAGE_PATH/zImage* $IMAGE_DIR
+    mv $DEPLOY_IMAGE_PATH/*.dtb $IMAGE_DIR
 
     echo "List all dtb & zImage files in $IMAGE_DIR:"
     for entry in "$IMAGE_DIR"/* ; do
@@ -261,6 +262,19 @@ function prepare_images()
 
     tar czf ${IMAGE_DIR}_zimage.tgz $IMAGE_DIR
     generate_md5 ${IMAGE_DIR}_zimage.tgz
+    rm -rf $IMAGE_DIR/*
+
+    # modules
+    echo "[ADV] creating ${IMAGE_DIR}_modules.tgz for kernel modules ..."
+    mv $DEPLOY_IMAGE_PATH/modules* $IMAGE_DIR
+
+    echo "List all module files in $IMAGE_DIR:"
+    for entry in "$IMAGE_DIR"/* ; do
+        echo $entry
+    done
+
+    tar czf ${IMAGE_DIR}_modules.tgz $IMAGE_DIR
+    generate_md5 ${IMAGE_DIR}_modules.tgz
     rm -rf $IMAGE_DIR
 
     # SDK

@@ -309,6 +309,9 @@ function copy_image_to_storage()
     echo "[ADV] copy ${IMAGE_DIR}_sdk.tgz to $STORAGE_PATH"
     mv -f ${IMAGE_DIR}_sdk.tgz $STORAGE_PATH
 
+    echo "[ADV] copy ${IMAGE_DIR}_modules.tgz to $STORAGE_PATH"
+    mv -f ${IMAGE_DIR}_modules.tgz $STORAGE_PATH
+
     echo "[ADV] copy all *.md5 images to $STORAGE_PATH"
     mv -f *.md5 $STORAGE_PATH
 

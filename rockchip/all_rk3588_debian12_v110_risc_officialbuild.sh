@@ -22,6 +22,19 @@ if [ "$AFER460A1" == "true" ]; then
 	./rk3588_debian12_v110_risc_officialbuild.sh $VERSION_NUM
 fi
 
+if [ "$AFER460A2" == "true" ]; then
+	MACHINE_LIST="$MACHINE_LIST AFER460"
+	MODEL_NAME="AFER460A2"
+	HW_VER="A2"
+	BOARD_CONFIG="adv_rk3588_afer460a2_defconfig"
+
+	export MACHINE_LIST
+	export MODEL_NAME
+	export HW_VER
+	export BOARD_CONFIG
+	./rk3588_debian12_v110_risc_officialbuild.sh $VERSION_NUM
+fi
+
 if [ "$ROM6881A1" == "true" ]; then
 	MACHINE_LIST="$MACHINE_LIST ROM6881"
 	MODEL_NAME="ROM6881"

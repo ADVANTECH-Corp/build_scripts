@@ -9,13 +9,14 @@ echo "[ADV] BSP_XML = ${BSP_XML}"
 echo "[ADV] PLATFORM_PREFIX = ${PLATFORM_PREFIX}"
 echo "[ADV] VERSION_NUMBER=$VERSION_NUMBER"
 echo "[ADV] CHIP=$CHIP"
+echo "[ADV] PRODUCT=$PRODUCT"
 
 CURR_PATH="$PWD"
 ROOT_DIR="${PLATFORM_PREFIX}_${RELEASE_VERSION}_${DATE}"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
 DISTRO_IMAGE="debug"
-IMAGE_VER="${MODEL_NAME}${BOARD_VER}${AIM_VERSION}UIV${RELEASE_VERSION}_${DATE}"
-YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-wayland/tmp-glibc/deploy/images/${CHIP}"
+IMAGE_VER="${MODEL_NAME}${BOARD_VER}${AIM_VERSION}LIV${RELEASE_VERSION}_${DATE}"
+YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-wayland/tmp-glibc/deploy/images/${CHIP}${PRODUCT}"
 
 # ===========
 #  Functions
@@ -64,7 +65,7 @@ function generate_md5()
 
 function prepare_and_copy_images()
 {
-	UFS_IMAGE_VER="${IMAGE_VER}_ufs_${DISTRO_IMAGE}"
+	UFS_IMAGE_VER="${IMAGE_VER}_ufs"
 	echo "[ADV] creating ${UFS_IMAGE_VER}.tgz ..."
 
 	pushd $YOCTO_IMAGE_DIR 2>&1 > /dev/null

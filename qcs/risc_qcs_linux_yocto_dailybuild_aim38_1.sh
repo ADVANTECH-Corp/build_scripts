@@ -66,13 +66,18 @@ function generate_md5()
 function prepare_and_copy_images()
 {
 	UFS_IMAGE_VER="${IMAGE_VER}_ufs"
-	echo "[ADV] creating ${UFS_IMAGE_VER}.tgz ..."
+	EMMC_IMAGE_VER="${IMAGE_VER}_emmc"
+	echo "[ADV] creating ${UFS_IMAGE_VER}.tgz and ${EMMC_IMAGE_VER}.tgz..."
 
 	pushd $YOCTO_IMAGE_DIR 2>&1 > /dev/null
 	mv qcom-multimedia-image ${UFS_IMAGE_VER}
+	mv qcom-multimedia-image-emmc ${EMMC_IMAGE_VER}
 	sudo tar czf ${UFS_IMAGE_VER}.tgz $UFS_IMAGE_VER
+	sudo tar czf ${EMMC_IMAGE_VER}.tgz $EMMC_IMAGE_VE
 	generate_md5 ${UFS_IMAGE_VER}.tgz
+	generate_md5 ${EMMC_IMAGE_VER}.tgz
 	mv -f ${UFS_IMAGE_VER}.tgz* $OUTPUT_DIR
+	mv -f ${EMMC_IMAGE_VER}.tgz* $OUTPUT_DIR
 	popd
 }
 

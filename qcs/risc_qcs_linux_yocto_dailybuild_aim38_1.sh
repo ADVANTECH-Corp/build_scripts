@@ -73,7 +73,7 @@ function prepare_and_copy_images()
 	mv qcom-multimedia-image ${UFS_IMAGE_VER}
 	mv qcom-multimedia-image-emmc ${EMMC_IMAGE_VER}
 	sudo tar czf ${UFS_IMAGE_VER}.tgz $UFS_IMAGE_VER
-	sudo tar czf ${EMMC_IMAGE_VER}.tgz $EMMC_IMAGE_VE
+	sudo tar czf ${EMMC_IMAGE_VER}.tgz $EMMC_IMAGE_VER
 	generate_md5 ${UFS_IMAGE_VER}.tgz
 	generate_md5 ${EMMC_IMAGE_VER}.tgz
 	mv -f ${UFS_IMAGE_VER}.tgz* $OUTPUT_DIR

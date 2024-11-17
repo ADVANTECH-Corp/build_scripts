@@ -70,8 +70,13 @@ function prepare_and_copy_images()
 	echo "[ADV] creating ${UFS_IMAGE_VER}.tgz and ${EMMC_IMAGE_VER}.tgz..."
 
 	pushd $YOCTO_IMAGE_DIR 2>&1 > /dev/null
-	mv qcom-multimedia-image ${UFS_IMAGE_VER}
-	mv qcom-multimedia-image-emmc ${EMMC_IMAGE_VER}
+	# QIMP
+	#mv qcom-multimedia-image ${UFS_IMAGE_VER}
+	#mv qcom-multimedia-image-emmc ${EMMC_IMAGE_VER}
+	
+	# QIRP
+	mv qcom-robotics-full-image ${UFS_IMAGE_VER}
+        mv qcom-robotics-full-image-emmc ${EMMC_IMAGE_VER}
 	sudo tar czf ${UFS_IMAGE_VER}.tgz $UFS_IMAGE_VER
 	sudo tar czf ${EMMC_IMAGE_VER}.tgz $EMMC_IMAGE_VER
 	generate_md5 ${UFS_IMAGE_VER}.tgz

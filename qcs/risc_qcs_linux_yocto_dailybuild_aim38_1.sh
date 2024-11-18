@@ -106,6 +106,7 @@ function generate_csv()
 	HASH_DOWNLOAD=$(cd download && git rev-parse --short HEAD)
 	HASH_META_ADVANTECH=$(cd layers/meta-advantech && git rev-parse --short HEAD)
 	HASH_META_QCOM_EXTRAS=$(cd layers/meta-qcom-extras && git rev-parse --short HEAD)
+	HASH_META_QCOM_ROBOTICS_EXTRAS=$(cd layers/meta-qcom-robotics-extras && git rev-parse --short HEAD)
 	HASH_SCRIPTS=$(cd scripts && git rev-parse --short HEAD)
 
 	cat > ${FILENAME}.csv << END_OF_CSV
@@ -127,6 +128,7 @@ QCS_AMSS, ${HASH_AMSS}
 QCS_DOWNLOAD, ${HASH_DOWNLOAD}
 QCS_META_ADVANTECH, ${HASH_META_ADVANTECH}
 QCS_META_QCOM_EXTRAS, ${HASH_META_QCOM_EXTRAS}
+QCS_META_QCOM_ROBOTICS_EXTRAS, ${HASH_META_QCOM_ROBOTICS_EXTRAS}
 QCS_SCRIPTS, ${HASH_SCRIPTS}
 
 END_OF_CSV

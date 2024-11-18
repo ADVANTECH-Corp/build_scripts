@@ -16,7 +16,10 @@ ROOT_DIR="${PLATFORM_PREFIX}_${RELEASE_VERSION}_${DATE}"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
 DISTRO_IMAGE="debug"
 IMAGE_VER="${MODEL_NAME}${BOARD_VER}${AIM_VERSION}LIV${RELEASE_VERSION}_${DATE}"
-YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-wayland/tmp-glibc/deploy/images/${CHIP}"
+# QIMP
+#YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-wayland/tmp-glibc/deploy/images/${CHIP}"
+# QIRP
+YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-robotics-ros2-humble/tmp-glibc/deploy/images/${CHIP}"
 
 # ===========
 #  Functions

@@ -169,7 +169,7 @@ function create_xml_and_commit()
         echo "[ADV] Create XML file"
         cd $ROOT_DIR
         # add revision into xml
-        ../repo/repo manifest -o $VER_TAG.xml -r
+        repo manifest -o $VER_TAG.xml -r
         mv $VER_TAG.xml .repo/manifests
         cd .repo/manifests
 	    git checkout $BSP_BRANCH
@@ -255,7 +255,7 @@ END_OF_CSV
 function generate_manifest()
 {
     cd $CURR_PATH/$ROOT_DIR/
-    ../repo/repo manifest -o ${VER_TAG}.xml -r
+    repo manifest -o ${VER_TAG}.xml -r
 }
 
 function save_temp_log()
@@ -292,13 +292,13 @@ function get_source_code()
     cd $ROOT_DIR
 
     if [ "$BSP_BRANCH" == "" ] ; then
-       ../repo/repo init -u $BSP_URL
+       repo init -u $BSP_URL
     elif [ "$BSP_XML" == "" ] ; then
-       ../repo/repo init -u $BSP_URL -b $BSP_BRANCH
+       repo init -u $BSP_URL -b $BSP_BRANCH
     else
-       ../repo/repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
+       repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
     fi
-    ../repo/repo sync
+    repo sync
 
     for TEMP_PATH in ${ADV_PATH}
     do

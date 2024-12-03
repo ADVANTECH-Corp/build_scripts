@@ -32,3 +32,18 @@ if [ "$ROM5880A1" == "true" ]; then
 	export MACHINE_LIST
 	./rk3568_android_S12_officialbuild.sh
 fi
+
+if [ "$AFEE630A1" == "true" ]; then
+        UBOOT_DEFCONFIG=rk3568_afee630a1
+        KERNEL_DEFCONFIG=rk3568_adv_defconfig
+        KERNEL_DTB=rk3568-afee630-a1.img
+        ANDROID_PRODUCT=AFEE630_s-userdebug
+        MACHINE_LIST="$MACHINE_LIST afe_e630"
+
+        export UBOOT_DEFCONFIG
+        export KERNEL_DEFCONFIG
+        export KERNEL_DTB
+        export ANDROID_PRODUCT
+        export MACHINE_LIST
+        ./rk3568_android_S12_officialbuild.sh
+fi

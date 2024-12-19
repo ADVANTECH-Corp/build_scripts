@@ -1,7 +1,7 @@
 #!/bin/bash
 
 REPO=repo
-PLATFORM_PREFIX="RK3588_RISC_"
+PLATFORM_PREFIX="RK3576_RISC_"
 
 if [ "$ROOTFS" = "ubuntu" ];then
     VER_PREFIX="UIV"
@@ -268,7 +268,7 @@ function save_temp_log()
 
 function get_source_code()
 {
-    echo "[ADV] get rk3588 debian12 source code"
+    echo "[ADV] get rk3576 debian12 source code"
     cd $CURR_PATH
 
     #git clone https://github.com/ADVANTECH-Rockchip/repo.git
@@ -317,15 +317,15 @@ function building()
 		make clean
 		
 		# rt patch
-		git apply patch/RT/*.patch
+		# git apply patch/RT/*.patch
 		
 		cd $CURR_PATH/$ROOT_DIR
 		./build.sh kernel >&1 | tee -a $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL
     elif [ "$1" == "recovery" ]; then
 		echo "[ADV] build recovery"
 		cd $CURR_PATH/$ROOT_DIR
-		if [  -d "buildroot/output/rockchip_rk3588_recovery " ];then
-		    rm buildroot/output/rockchip_rk3588_recovery  -rf
+		if [  -d "buildroot/output/rockchip_rk3576_recovery " ];then
+		    rm buildroot/output/rockchip_rk3576_recovery  -rf
 		fi
 		./build.sh recovery >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_RECOVERY
     elif [ "$1" == "rootfs" ]; then

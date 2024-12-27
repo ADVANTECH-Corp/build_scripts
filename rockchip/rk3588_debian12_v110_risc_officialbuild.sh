@@ -316,8 +316,10 @@ function building()
 		cd $CURR_PATH/$ROOT_DIR/kernel
 		make clean
 		
-		# rt patch
-		git apply patch/RT/*.patch
+		if [ $RT_PATCH == "true" ]; then
+			# rt patch
+			git apply patch/RT/*.patch
+		fi
 		
 		cd $CURR_PATH/$ROOT_DIR
 		./build.sh kernel >&1 | tee -a $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL

@@ -333,9 +333,15 @@ function building()
 		cd $CURR_PATH/$ROOT_DIR/
 
 		# update live-build
-		sudo apt-get install binfmt-support qemu-user-static live-build
-		sudo dpkg -i debian/ubuntu-build-service/packages/*
-		sudo apt-get install -f -y
+		sudo apt-get remove live-build
+		git clone https://salsa.debian.org/live-team/live-build.git --depth 1 -b debian/1%20230131
+		cd live-build
+		rm -rf manpages/po/
+		sudo make install -j8
+		cd $CURR_PATH/$ROOT_DIR/
+
+#		sudo dpkg -i debian/ubuntu-build-service/packages/*
+#		sudo apt-get install -f -y
 		if [ "$ROOTFS" = "ubuntu" ];then
 			echo "[ADV] build rootfs ubuntu"
 			./build.sh ubuntu >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS

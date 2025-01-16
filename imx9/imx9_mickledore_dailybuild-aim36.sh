@@ -195,10 +195,10 @@ function add_version()
 {
 	# Set U-boot version
 	sed -i "/UBOOT_LOCALVERSION/d" $ROOT_DIR/$U_BOOT_PATH
-	echo "UBOOT_LOCALVERSION = \"-$OFFICIAL_VER\"" >> $ROOT_DIR/$U_BOOT_PATH
+	echo "UBOOT_LOCALVERSION = \"-$(echo "$OFFICIAL_VER" | tr '[:upper:]' '[:lower:]')\"" >> $ROOT_DIR/$U_BOOT_PATH
 
 	# Set Linux version (replace)
-	sed -i "0,/LOCALVERSION/ s/LOCALVERSION = .*/LOCALVERSION = \"-$OFFICIAL_VER\"/g" $ROOT_DIR/$KERNEL_PATH
+	sed -i "0,/LOCALVERSION/ s/LOCALVERSION = .*/LOCALVERSION = \"-$(echo "$OFFICIAL_VER" | tr '[:upper:]' '[:lower:]')\"/g" $ROOT_DIR/$KERNEL_PATH
 }
 
 function building()

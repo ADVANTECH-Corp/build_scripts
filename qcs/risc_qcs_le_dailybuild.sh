@@ -14,6 +14,7 @@ echo "[ADV] KERNEL_VERSION=$KERNEL_VERSION"
 echo "[ADV] SOC_MEM=$SOC_MEM"
 echo "[ADV] STORAGE=$STORAGE"
 echo "[ADV] RELEASE_VERSION=$RELEASE_VERSION"
+echo "[ADV] KERNEL_PATH = ${KERNEL_PATH}"
 
 CURR_PATH="$PWD"
 ROOT_DIR="${PLATFORM_PREFIX}_${TARGET_BOARD}_${RELEASE_VERSION}_${DATE}"
@@ -39,6 +40,14 @@ function get_source_code()
 	repo sync -c -j8
 	repo sync -c -j8
 	popd
+}
+
+function add_version()
+{
+	# Set Linux version
+	OFFICIAL_VER="${OS_VERSION}${RELEASE_VERSION}"
+	sed -i "/LINUX_VERSION_EXTENSION/d" $ROOT_DIR/$KERNEL_PATH
+	echo "LINUX_VERSION_EXTENSION = \"-$OFFICIAL_VER\"" >> $ROOT_DIR/$KERNEL_PATH
 }
 
 function get_downloads()
@@ -179,6 +188,7 @@ fi
 
 #prepare source code and build environment
 get_source_code
+add_version
 get_downloads
 set_environment
 build_image

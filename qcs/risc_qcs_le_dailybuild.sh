@@ -46,9 +46,11 @@ function get_source_code()
 function add_version()
 {
 	# Set Linux version
+	echo "[ADV] add linux version"
 	OFFICIAL_VER="${OS_VERSION}${RELEASE_VERSION}"
-	sed -i "/LINUX_VERSION_EXTENSION/d" $ROOT_DIR/$KERNEL_PATH
+	sed -i "/LINUX_VERSION_EXTENSION =/d" $ROOT_DIR/$KERNEL_PATH
 	echo "LINUX_VERSION_EXTENSION = \"-$OFFICIAL_VER\"" >> $ROOT_DIR/$KERNEL_PATH
+	cat $ROOT_DIR/$KERNEL_PATH
 }
 
 function get_downloads()

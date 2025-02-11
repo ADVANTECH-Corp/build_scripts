@@ -11,7 +11,7 @@ MACHINE_LIST=""
 #rk3588_projects
 if [ "$AOM3821A1" == "true" ]; then
 	MACHINE_LIST="$MACHINE_LIST AOM3821"
-	MODEL_NAME="AOM3821A1"
+	MODEL_NAME="AOM3821"
 	HW_VER="A1"
 	BOARD_CONFIG="adv_rk3588_aom3821a1_defconfig"
 	RT_PATCH="false"
@@ -26,7 +26,7 @@ fi
 
 if [ "$AFER460A1" == "true" ]; then
 	MACHINE_LIST="$MACHINE_LIST AFER460"
-	MODEL_NAME="AFER460A1"
+	MODEL_NAME="AFER460"
 	HW_VER="A1"
 	BOARD_CONFIG="adv_rk3588_afer460a1_defconfig"
 	RT_PATCH="true"
@@ -41,7 +41,7 @@ fi
 
 if [ "$AFER460A2" == "true" ]; then
 	MACHINE_LIST="$MACHINE_LIST AFER460"
-	MODEL_NAME="AFER460A2"
+	MODEL_NAME="AFER460"
 	HW_VER="A2"
 	BOARD_CONFIG="adv_rk3588_afer460a2_defconfig"
 	RT_PATCH="true"
@@ -52,6 +52,51 @@ if [ "$AFER460A2" == "true" ]; then
 	export BOARD_CONFIG
 	export RT_PATCH
 	./rk3588_debian12_v110_risc_officialbuild.sh $VERSION_NUM
+fi
+
+if [ "$ASRA501A2EG90" == "true" ]; then
+        MACHINE_LIST="$MACHINE_LIST ASRA501EG90"
+        MODEL_NAME="ASRA501"
+        HW_VER="A2EG90"
+        BOARD_CONFIG="adv_rk3588_asra501a2_eg90_defconfig"
+        RT_PATCH="true"
+
+        export MACHINE_LIST
+        export MODEL_NAME
+        export HW_VER
+        export BOARD_CONFIG
+        export RT_PATCH
+        ./rk3588_debian12_v110_risc_officialbuild.sh $VERSION_NUM
+fi
+
+if [ "$ASRA501A2RM01" == "true" ]; then
+        MACHINE_LIST="$MACHINE_LIST ASRA501RM01"
+        MODEL_NAME="ASRA501"
+        HW_VER="A2RM01"
+        BOARD_CONFIG="adv_rk3588_asra501a2_rm01_defconfig"
+        RT_PATCH="true"
+
+        export MACHINE_LIST
+        export MODEL_NAME
+        export HW_VER
+        export BOARD_CONFIG
+        export RT_PATCH
+        ./rk3588_debian12_v110_risc_officialbuild.sh $VERSION_NUM
+fi
+
+if [ "$ASRA501A2RM02" == "true" ]; then
+        MACHINE_LIST="$MACHINE_LIST ASRA501RM02"
+        MODEL_NAME="ASRA501"
+        HW_VER="A2RM02"
+        BOARD_CONFIG="adv_rk3588_asra501a2_rm02_defconfig"
+        RT_PATCH="true"
+
+        export MACHINE_LIST
+        export MODEL_NAME
+        export HW_VER
+        export BOARD_CONFIG
+        export RT_PATCH
+        ./rk3588_debian12_v110_risc_officialbuild.sh $VERSION_NUM
 fi
 
 if [ "$ROM6881A1" == "true" ]; then

@@ -401,6 +401,13 @@ function prepare_images()
                         sudo cp $CURR_PATH/mksd-linux.sh $OUTPUT_DIR/mk_inand/
 			rm $DEPLOY_IMAGE_PATH/$FILE_NAME && sync
                         ;;
+                "cve")
+                        mkdir $OUTPUT_DIR/image
+                        mkdir $OUTPUT_DIR/cve
+                        sudo cp $DEPLOY_CVE_PATH $OUTPUT_DIR/cve
+                        sudo cp $DEPLOY_IMAGE_PATH/*.json $OUTPUT_DIR/image
+                        sudo cp $DEPLOY_IMAGE_PATH/*.json $OUTPUT_DIR/image
+                        ;;
                 *)
                         echo "[ADV] prepare_images: invalid parameter #1!"
                         exit 1;
@@ -409,7 +416,7 @@ function prepare_images()
 
         # Package image file
         case $IMAGE_TYPE in
-                "flash" | "modules" | "misc" | "imx-boot" | "individually")
+                "flash" | "modules" | "misc" | "imx-boot" | "individually" | "cve")
                         echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
                         tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
                         generate_md5 ${OUTPUT_DIR}.tgz
@@ -450,6 +457,9 @@ function copy_image_to_storage()
 			generate_csv $IMAGE_DIR.img.gz
 			mv ${IMAGE_DIR}.img.csv $STORAGE_PATH
 			mv -f $IMAGE_DIR.img.gz $STORAGE_PATH
+		;;
+		"cve")
+			mv -f ${CVE_DIR}.tgz $STORAGE_PATH
 		;;
 		*)
 		echo "[ADV] copy_image_to_storage: invalid parameter #1!"
@@ -530,6 +540,12 @@ else #"$PRODUCT" != "$VER_PREFIX"
 		MISC_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_misc
 		prepare_images misc $MISC_DIR
 		copy_image_to_storage misc
+
+		echo "[ADV] create cve files"
+		DEPLOY_CVE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/cve"
+		CVE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_cve
+		prepare_images cve $CVE_DIR
+		copy_image_to_storage cve
 
         done
 

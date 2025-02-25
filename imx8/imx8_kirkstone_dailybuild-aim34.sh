@@ -404,9 +404,9 @@ function prepare_images()
                 "cve")
                         mkdir $OUTPUT_DIR/image
                         mkdir $OUTPUT_DIR/cve
-                        sudo cp $DEPLOY_CVE_PATH $OUTPUT_DIR/cve
+                        sudo cp $DEPLOY_CVE_PATH/* $OUTPUT_DIR/cve
                         sudo cp $DEPLOY_IMAGE_PATH/*.json $OUTPUT_DIR/image
-                        sudo cp $DEPLOY_IMAGE_PATH/*.json $OUTPUT_DIR/image
+                        sudo cp $DEPLOY_IMAGE_PATH/*.cve $OUTPUT_DIR/image
                         ;;
                 *)
                         echo "[ADV] prepare_images: invalid parameter #1!"

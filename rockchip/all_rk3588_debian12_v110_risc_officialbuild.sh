@@ -14,7 +14,7 @@ if [ "$AOM3821A1" == "true" ]; then
 	MODEL_NAME="AOM3821"
 	HW_VER="A1"
 	BOARD_CONFIG="adv_rk3588_aom3821a1_defconfig"
-	RT_PATCH="false"
+	RT_PATCH="true"
 
 	export MACHINE_LIST
 	export MODEL_NAME

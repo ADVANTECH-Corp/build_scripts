@@ -26,9 +26,9 @@ UFS_IMAGE_VER="${PROJECT}_${OS_BSP}${DISTRO}${RELEASE_VERSION}_${KERNEL_VERSION}
 EMMC_IMAGE_VER="${PROJECT}_${OS_BSP}${DISTRO}${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_emmc_${DATE}"
 
 # QIMP
-#YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-wayland/tmp-glibc/deploy/images/${CHIP}"
+#YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-wayland/tmp-glibc/deploy/images/${YOCTO_MACHINE_NAME}"
 # QIRP
-YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-robotics-ros2-humble/tmp-glibc/deploy/images/${CHIP}"
+YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-robotics-ros2-humble/tmp-glibc/deploy/images/${YOCTO_MACHINE_NAME}"
 
 # ===========
 #  Functions

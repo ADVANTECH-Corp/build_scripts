@@ -13,7 +13,7 @@ if [ $ROM2820A1 == true ]; then
         [ "$?" -ne 0 ] && exit 1
 fi
 if [ $AFEE420A1 == true ]; then
-	$BUILD_SH afee420a1-93 E420A1"$AIM_VERSION"LIV"$VERSION_NUM" "2G" "LVDS"
+	$BUILD_SH afee420a1-93 E420A1"$AIM_VERSION"LIV"$VERSION_NUM" "2G LVDS_2G" ""
 	[ "$?" -ne 0 ] && exit 1
 fi
 

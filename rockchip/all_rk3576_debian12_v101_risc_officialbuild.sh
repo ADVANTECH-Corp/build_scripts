@@ -11,7 +11,7 @@ MACHINE_LIST=""
 #rk3576_projects
 if [ "$AOM3841A1" == "true" ]; then
 	MACHINE_LIST="$MACHINE_LIST AOM3841"
-	MODEL_NAME="AOM3841A1"
+	MODEL_NAME="AOM3841"
 	HW_VER="A1"
 	BOARD_CONFIG="adv_rk3576_aom3841a1_defconfig"
 

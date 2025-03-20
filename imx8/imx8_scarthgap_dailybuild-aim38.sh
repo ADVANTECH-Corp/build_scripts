@@ -425,7 +425,7 @@ function prepare_images()
 
         # Package image file
         case $IMAGE_TYPE in
-                "flash" | "modules" | "misc" | "imx-boot" | "individually")
+                "flash" | "modules" | "misc" | "imx-boot" | "individually" | "cve" | "spdx")
                         echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
                         tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
                         generate_md5 ${OUTPUT_DIR}.tgz

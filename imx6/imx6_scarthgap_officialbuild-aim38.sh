@@ -427,7 +427,7 @@ function get_bsp_tarball()
 
 function get_csv_info()
 {
-	IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$DATE"
+	IMAGE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$1"_"$DATE"
 	CSV_FILE="$STORAGE_PATH/${IMAGE_DIR}.img.csv"
 
 	echo "[ADV] Show HASH in ${CSV_FILE}"

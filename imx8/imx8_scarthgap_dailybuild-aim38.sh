@@ -414,7 +414,7 @@ function prepare_images()
                 "spdx")
                         mkdir $OUTPUT_DIR/image
                         mkdir $OUTPUT_DIR/spdx
-                        sudo cp $DEPLOY_SPDX_PATH/* $OUTPUT_DIR/spdx
+                        sudo cp -r $DEPLOY_SPDX_PATH/* $OUTPUT_DIR/spdx
                         sudo cp $DEPLOY_IMAGE_PATH/*.spdx.tar.zst $OUTPUT_DIR/image
                         ;;
                 *)

@@ -17,6 +17,8 @@ echo "[ADV] RAM_SIZE=$RAM_SIZE"
 echo "[ADV] STORAGE=$STORAGE"
 echo "[ADV] RELEASE_VERSION=$RELEASE_VERSION"
 echo "[ADV] KERNEL_PATH = ${KERNEL_PATH}"
+echo "[ADV] YOCTO_MACHINE_NAME=$YOCTO_MACHINE_NAME"
+echo "[ADV] DISTRO_IMAGE = ${DISTRO_IMAGE}"
 
 CURR_PATH="$PWD"
 ROOT_DIR="${PLATFORM_PREFIX}_${TARGET_BOARD}_${RELEASE_VERSION}_${DATE}"
@@ -72,7 +74,7 @@ function build_image()
 {
 	cd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
 	echo "[ADV] building ..."
-	scripts/build_release.sh -all -${YOCTO_MACHINE_NAME}
+	scripts/build_release.sh -all -${YOCTO_MACHINE_NAME} -${DISTRO_IMAGE}
 }
 
 function generate_md5()

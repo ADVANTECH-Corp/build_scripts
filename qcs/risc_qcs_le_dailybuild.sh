@@ -126,6 +126,7 @@ function generate_csv()
 	HASH_AMSS=$(cd amss && git rev-parse --short HEAD)
 	HASH_BSP=$(cd .repo/manifests && git rev-parse --short HEAD)
 	HASH_DOWNLOAD=$(cd download && git rev-parse --short HEAD)
+	HASH_KERNEL=$(cd build-qcom-robotics-ros2-humble/tmp-glibc/work-shared/${YOCTO_MACHINE_NAME}/kernel-source && git rev-parse --short HEAD)
 	HASH_META_ADVANTECH=$(cd layers/meta-advantech && git rev-parse --short HEAD)
 	HASH_META_QCOM_EXTRAS=$(cd layers/meta-qcom-extras && git rev-parse --short HEAD)
 	HASH_META_QCOM_ROBOTICS_EXTRAS=$(cd layers/meta-qcom-robotics-extras && git rev-parse --short HEAD)
@@ -148,6 +149,7 @@ Manifest, ${HASH_BSP}
 
 QCS_AMSS, ${HASH_AMSS}
 QCS_DOWNLOAD, ${HASH_DOWNLOAD}
+QCS_LINUX_QCOM, ${HASH_KERNEL}
 QCS_META_ADVANTECH, ${HASH_META_ADVANTECH}
 QCS_META_QCOM_EXTRAS, ${HASH_META_QCOM_EXTRAS}
 QCS_META_QCOM_ROBOTICS_EXTRAS, ${HASH_META_QCOM_ROBOTICS_EXTRAS}

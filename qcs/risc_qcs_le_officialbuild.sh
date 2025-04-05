@@ -74,6 +74,7 @@ function get_csv_info()
         HASH_MANIFEST=`cat ${CSV_FILE} | grep "Manifest" | cut -d ',' -f 2`
         HASH_AMSS=`cat ${CSV_FILE} | grep "AMSS" | cut -d ',' -f 2`
         HASH_DOWNLOAD=`cat ${CSV_FILE} | grep "DOWNLOAD" | cut -d ',' -f 2`
+        HASH_KERNEL=`cat ${CSV_FILE} | grep "QCS_LINUX_QCOM" | cut -d ',' -f 2`
         HASH_META_ADVANTECH=`cat ${CSV_FILE} | grep "META_ADVANTECH" | cut -d ',' -f 2`
         HASH_META_QCOM_EXTRAS=`cat ${CSV_FILE} | grep "META_QCOM_EXTRAS" | cut -d ',' -f 2`
         HASH_META_QCOM_ROBOTICS_EXTRAS=`cat ${CSV_FILE} | grep "META_QCOM_ROBOTICS_EXTRAS" | cut -d ',' -f 2`
@@ -82,6 +83,7 @@ function get_csv_info()
         echo "[ADV] HASH_MANIFEST : ${HASH_MANIFEST}"
         echo "[ADV] HASH_AMSS : ${HASH_AMSS}"
         echo "[ADV] HASH_DOWNLOAD : ${HASH_DOWNLOAD}"
+        echo "[ADV] HASH_KERNEL : ${HASH_KERNEL}"
         echo "[ADV] HASH_META_ADVANTECH : ${HASH_META_ADVANTECH}"
         echo "[ADV] HASH_META_QCOM_EXTRAS : ${HASH_META_QCOM_EXTRAS}"
         echo "[ADV] HASH_META_QCOM_ROBOTICS_EXTRAS : ${HASH_META_QCOM_ROBOTICS_EXTRAS}"
@@ -121,17 +123,129 @@ function commit_tag()
     cd $CURR_PATH
 }
 
+
+function check_tag_and_checkout()
+{
+	FILE_PATH=$1
+	META_BRANCH=$2
+	HASH_CSV=$3
+
+        if [ -d "$ROOT_DIR/$FILE_PATH" ];then
+                cd $ROOT_DIR/$FILE_PATH
+                META_TAG=`git tag | grep $VER_TAG`
+                if [ "$META_TAG" != "" ]; then
+                        echo "[ADV] meta-advantech has been tagged ($VER_TAG). Nothing to do."
+                else
+			echo "[ADV] Set meta-advantech to $HASH_CSV"
+			BRANCH_SUFFIX=`echo $META_BRANCH | cut -d '_' -f 2`
+			BRANCH_ORI="${META_BRANCH/_$BRANCH_SUFFIX}"
+			git checkout $BRANCH_ORI
+			git pull
+			git reset --hard $HASH_CSV
+			echo "[ADV] Checkout to '$META_BRANCH' and merge from '$BRANCH_ORI'"
+			git checkout $META_BRANCH
+			git pull
+			git merge $BRANCH_ORI --no-edit --log
+                fi
+                cd $CURR_PATH
+        else
+                echo "[ADV] Directory $ROOT_DIR/$FILE_PATH doesn't exist"
+                exit 1
+        fi
+}
+
+function check_tag_and_replace()
+{
+        FILE_PATH=$1
+        REMOTE_URL=$2
+        HASH_CSV=$3
+
+        HASH_ID=`git ls-remote $REMOTE_URL $VER_TAG | awk '{print $1}'`
+        if [ "x$HASH_ID" != "x" ]; then
+                echo "[ADV] $REMOTE_URL has been tagged ,ID is $HASH_ID"
+        else
+		HASH_ID=$HASH_CSV
+                echo "[ADV] $REMOTE_URL isn't tagged , set HASH_ID to $HASH_ID"
+        fi
+        sed -i "s/"\$\{AUTOREV\}"/$HASH_ID/g" $ROOT_DIR/$FILE_PATH
+}
+
+function commit_tag_and_rollback()
+{
+        FILE_PATH=$1
+
+        if [ -d "$ROOT_DIR/$FILE_PATH" ];then
+                cd $ROOT_DIR/$FILE_PATH
+                META_TAG=`git tag | grep $VER_TAG`
+                if [ "x$META_TAG" != "x" ]; then
+                        echo "[ADV] meta-advantech has been tagged ($VER_TAG). Nothing to do."
+                else
+                        echo "[ADV] create tag $VER_TAG"
+                        REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+                        git add .
+                        git commit -m "[Official Release] $VER_TAG"
+                        git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
+                        git push --follow-tags
+                        # Rollback
+                        HEAD_HASH_ID=`git rev-parse HEAD`
+                        git revert $HEAD_HASH_ID --no-edit
+                        git push
+                        git reset --hard $HEAD_HASH_ID
+                fi
+                cd $CURR_PATH
+        else
+                echo "[ADV] Directory $ROOT_DIR/$FILE_PATH doesn't exist"
+                exit 1
+        fi
+}
+
+function commit_tag_and_package()
+{
+        REMOTE_URL=$1
+        META_BRANCH=$2
+        HASH_CSV=$3
+
+        # Get source
+        git clone $REMOTE_URL
+        SOURCE_DIR=${REMOTE_URL##*/}
+        SOURCE_DIR=${SOURCE_DIR/.git}
+        cd $SOURCE_DIR
+        git checkout $META_BRANCH
+        git reset --hard $HASH_CSV
+
+        # Add tag
+        HASH_ID=`git tag -v $VER_TAG | grep object | cut -d ' ' -f 2`
+        if [ "x$HASH_ID" != "x" ] ; then
+                echo "[ADV] tag exists! There is no need to add tag"
+        else
+                echo "[ADV] Add tag $VER_TAG"
+                REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
+                git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
+                git push $REMOTE_SERVER $VER_TAG
+        fi
+
+        # Package
+        cd ..
+        echo "[ADV] creating "$ROOT_DIR"_"$SOURCE_DIR".tgz ..."
+        tar czf "$ROOT_DIR"_"$SOURCE_DIR".tgz $SOURCE_DIR --exclude-vcs
+        generate_md5 "$ROOT_DIR"_"$SOURCE_DIR".tgz
+        rm -rf $SOURCE_DIR
+        mv -f "$ROOT_DIR"_"$SOURCE_DIR".tgz $STORAGE_PATH
+        mv -f "$ROOT_DIR"_"$SOURCE_DIR".tgz.md5 $STORAGE_PATH
+
+        cd $CURR_PATH
+}
+
 function create_xml_and_commit()
 {
-    HASH_CSV=$1
-
-    if [ -d "$CURR_PATH/$ROOT_DIR/.repo/manifests" ];then
+    if [ -d "$ROOT_DIR/.repo/manifests" ];then
         echo "[ADV] Create XML file"
-        cd $CURR_PATH/$ROOT_DIR/.repo/manifests
- 	git checkout $BSP_BRANCH
-	git reset --hard $HASH_CSV
+        cd $ROOT_DIR
         # add revision into xml
         repo manifest -o $VER_TAG.xml -r
+
+        cd .repo/manifests
+        git checkout $BSP_BRANCH
 
         # push to github
         REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
@@ -142,12 +256,11 @@ function create_xml_and_commit()
         git push
         git tag -a $VER_TAG -F $CURR_PATH/$REALEASE_NOTE
         git push $REMOTE_SERVER $VER_TAG
+        cd $CURR_PATH
     else
-        echo "[ADV] Directory $CURR_PATH/$ROOT_DIR/.repo/manifests doesn't exist"
-	exit 1
+        echo "[ADV] Directory $ROOT_DIR/.repo/manifests doesn't exist"
+        exit 1
     fi
-
-    cd $CURR_PATH
 }
 
 function create_aim_linux_release_xml()
@@ -193,13 +306,30 @@ if [ -z "$EXISTED_VERSION" ] ; then
     echo "[ADV] Add tag"
     commit_tag amss $BSP_BRANCH $HASH_AMSS
     commit_tag download $BSP_BRANCH $HASH_DOWNLOAD
-    commit_tag layers/meta-advantech $BSP_BRANCH $HASH_META_ADVANTECH
     commit_tag layers/meta-qcom-extras $BSP_BRANCH $HASH_META_QCOM_EXTRAS
     commit_tag layers/meta-qcom-robotics-extras $BSP_BRANCH $HASH_META_QCOM_ROBOTICS_EXTRAS
     commit_tag scripts $BSP_BRANCH $HASH_SCRIPTS
 
+    if [ "${DISTRO}" == "l011" ] ; then
+        commit_tag layers/meta-advantech $BSP_BRANCH $HASH_META_ADVANTECH
+    else
+        # Check meta-advantech tag exist or not, and checkout to tag version
+        check_tag_and_checkout layers/meta-advantech $BSP_BRANCH $HASH_META_ADVANTECH
+
+        # Check tag exist or not, and replace bbappend file SRCREV
+        check_tag_and_replace $KERNEL_PATH/linux-kernel-headers-install_%.bbappend $KERNEL_URL $HASH_KERNEL
+        check_tag_and_replace $KERNEL_PATH/linux-kernel-qcom-headers_%.bbappend $KERNEL_URL $HASH_KERNEL
+        check_tag_and_replace $KERNEL_PATH/linux-qcom-custom_%.bbappend $KERNEL_URL $HASH_KERNEL
+
+        commit_tag_and_rollback layers/meta-advantech
+
+        # Add git tag and Package kernel
+        echo "[ADV] Add kernel tag and Package kernel"
+        commit_tag_and_package $KERNEL_URL $BSP_BRANCH $HASH_KERNEL
+    fi
+
     # Create manifests xml and commit
-    create_xml_and_commit $HASH_MANIFEST
+    create_xml_and_commit
 
     # Create AIM_Linux_Release xml file
     create_aim_linux_release_xml

@@ -123,14 +123,14 @@ function generate_csv()
 	
 	pushd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
 
-	HASH_AMSS=$(cd amss && git rev-parse --short HEAD)
-	HASH_BSP=$(cd .repo/manifests && git rev-parse --short HEAD)
-	HASH_DOWNLOAD=$(cd download && git rev-parse --short HEAD)
-	HASH_KERNEL=$(cd build-qcom-robotics-ros2-humble/tmp-glibc/work-shared/${YOCTO_MACHINE_NAME}/kernel-source && git rev-parse --short HEAD)
-	HASH_META_ADVANTECH=$(cd layers/meta-advantech && git rev-parse --short HEAD)
-	HASH_META_QCOM_EXTRAS=$(cd layers/meta-qcom-extras && git rev-parse --short HEAD)
-	HASH_META_QCOM_ROBOTICS_EXTRAS=$(cd layers/meta-qcom-robotics-extras && git rev-parse --short HEAD)
-	HASH_SCRIPTS=$(cd scripts && git rev-parse --short HEAD)
+	HASH_AMSS=$(cd amss && git rev-parse HEAD)
+	HASH_BSP=$(cd .repo/manifests && git rev-parse HEAD)
+	HASH_DOWNLOAD=$(cd download && git rev-parse HEAD)
+	HASH_KERNEL=$(cd build-qcom-robotics-ros2-humble/tmp-glibc/work-shared/${YOCTO_MACHINE_NAME}/kernel-source && git rev-parse HEAD)
+	HASH_META_ADVANTECH=$(cd layers/meta-advantech && git rev-parse HEAD)
+	HASH_META_QCOM_EXTRAS=$(cd layers/meta-qcom-extras && git rev-parse HEAD)
+	HASH_META_QCOM_ROBOTICS_EXTRAS=$(cd layers/meta-qcom-robotics-extras && git rev-parse HEAD)
+	HASH_SCRIPTS=$(cd scripts && git rev-parse HEAD)
 
 	cat > ${FILENAME}.csv << END_OF_CSV
 ESSD Software/OS Update News

@@ -224,28 +224,18 @@ function commit_tag_and_package()
                 git push $REMOTE_SERVER $VER_TAG
         fi
 
-        # Package
-        cd ..
-        echo "[ADV] creating "$ROOT_DIR"_"$SOURCE_DIR".tgz ..."
-        tar czf "$ROOT_DIR"_"$SOURCE_DIR".tgz $SOURCE_DIR --exclude-vcs
-        generate_md5 "$ROOT_DIR"_"$SOURCE_DIR".tgz
-        rm -rf $SOURCE_DIR
-        mv -f "$ROOT_DIR"_"$SOURCE_DIR".tgz $STORAGE_PATH
-        mv -f "$ROOT_DIR"_"$SOURCE_DIR".tgz.md5 $STORAGE_PATH
-
         cd $CURR_PATH
 }
 
 function create_xml_and_commit()
 {
-    if [ -d "$ROOT_DIR/.repo/manifests" ];then
+    if [ -d "$CURR_PATH/$ROOT_DIR/.repo/manifests" ];then
         echo "[ADV] Create XML file"
-        cd $ROOT_DIR
+        cd $CURR_PATH/$ROOT_DIR/.repo/manifests
+        git checkout $BSP_BRANCH
+
         # add revision into xml
         repo manifest -o $VER_TAG.xml -r
-
-        cd .repo/manifests
-        git checkout $BSP_BRANCH
 
         # push to github
         REMOTE_SERVER=`git remote -v | grep push | cut -d $'\t' -f 1`
@@ -258,7 +248,7 @@ function create_xml_and_commit()
         git push $REMOTE_SERVER $VER_TAG
         cd $CURR_PATH
     else
-        echo "[ADV] Directory $ROOT_DIR/.repo/manifests doesn't exist"
+        echo "[ADV] Directory $CURR_PATH/$ROOT_DIR/.repo/manifests doesn't exist"
         exit 1
     fi
 }

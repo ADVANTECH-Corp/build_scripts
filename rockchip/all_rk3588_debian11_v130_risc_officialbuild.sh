@@ -48,3 +48,16 @@ if [ "$EBCRS11A1SZ" == "true" ]; then
 	./rk3588_debian11_v130_risc_officialbuild.sh $VERSION_NUM
 fi
 
+if [ "$ECUC021A1" == "true" ]; then
+	MACHINE_LIST="$MACHINE_LIST ECUC021"
+	MODEL_NAME="ECUC021"
+	HW_VER="A1"
+	BOARD_CONFIG="adv_rk3588_ebcrs11a2_defconfig"
+
+	export MACHINE_LIST
+	export MODEL_NAME
+	export HW_VER
+	export BOARD_CONFIG
+	./rk3588_debian11_v130_risc_officialbuild.sh $VERSION_NUM
+fi
+

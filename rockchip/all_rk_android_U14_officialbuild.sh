@@ -17,3 +17,18 @@ if [ "$ROM6881A1" == "true" ]; then
 	export MACHINE_LIST
 	./rk_android_U14_officialbuild.sh
 fi
+
+if [ "$ASRA501A2" == "true" ]; then
+        UBOOT_DEFCONFIG=rk3588_asra501a2
+        KERNEL_DEFCONFIG=rk3588_adv_defconfig
+        KERNEL_DTB=rk3588-asra501-a2.img
+        ANDROID_PRODUCT=asra501_u-userdebug
+        MACHINE_LIST="$MACHINE_LIST asra501"
+
+        export UBOOT_DEFCONFIG
+        export KERNEL_DEFCONFIG
+        export KERNEL_DTB
+        export ANDROID_PRODUCT
+        export MACHINE_LIST
+        ./rk_android_U14_officialbuild.sh
+fi

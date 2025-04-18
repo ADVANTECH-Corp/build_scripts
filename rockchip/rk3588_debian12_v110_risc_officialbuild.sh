@@ -321,6 +321,31 @@ function building()
 			git apply patch/RT/*.patch
 		fi
 		
+		if [ $ETHERCAT == "true" ]; then
+			# ethercat patch
+			TARGET_LINE="obj-m += ethercat/"
+			TARGET_PATH="drivers/net/ethernet/stmicro"
+
+			if [ -d "ethercat" ]; then
+				echo "delete old ethercat driver"
+				rm -rf ethercat
+			fi
+
+			echo "git clone ethercat driver"
+			git clone $ETHERCAT_HUB -b $ETHERCAT_BRH ethercat
+
+			echo "add ethercat driver"
+			cp -rf ethercat/ $TARGET_PATH
+			rm -rf ethercat/
+			sync
+
+			echo "change Makefile"
+			if ! grep -Fxq "$TARGET_LINE" "$TARGET_PATH/Makefile"; then
+				echo "$TARGET_LINE" >> "$TARGET_PATH/Makefile"
+				echo "Added Makefile configuration"
+			fi
+		fi
+
 		cd $CURR_PATH/$ROOT_DIR
 		./build.sh kernel >&1 | tee -a $CURR_PATH/$ROOT_DIR/$LOG_FILE_KERNEL
     elif [ "$1" == "recovery" ]; then
@@ -421,6 +446,11 @@ function prepare_images()
     cd $CURR_PATH/$ROOT_DIR
     cd kernel
     make clean
+    ETHERCAT_DIR="drivers/net/ethernet/stmicro/ethercat"
+    if [ -d "$ETHERCAT_DIR" ]; then
+	    echo "Deleting: $ETHERCAT_DIR"
+	    rm -rf "$ETHERCAT_DIR"
+    fi
     git add . -f
     git reset --hard
 

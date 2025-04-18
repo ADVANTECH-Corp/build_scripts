@@ -69,6 +69,29 @@ if [ "$ASRA501A2EG90" == "true" ]; then
         ./rk3588_debian12_v110_risc_officialbuild.sh $VERSION_NUM
 fi
 
+if [ "$ASRA501A2EG90ECAT" == "true" ]; then
+        MACHINE_LIST="$MACHINE_LIST ASRA501EG90ECAT"
+        MODEL_NAME="ASRA501"
+        HW_VER="A2EG90ECAT"
+        BOARD_CONFIG="adv_rk3588_asra501a2_eg90_ethercat_defconfig"
+        RT_PATCH="true"
+        ETHERCAT="true"
+        ETHERCAT_HUB="https://AIM-Linux@dev.azure.com/AIM-Linux/risc-private-bsp/_git/ethercat"
+        ETHERCAT_BRH="rk3588_ethercat_linux6.1_risc"
+        ROS2="true"
+
+        export MACHINE_LIST
+        export MODEL_NAME
+        export HW_VER
+        export BOARD_CONFIG
+        export RT_PATCH
+        export ETHERCAT
+        export ETHERCAT_HUB
+        export ETHERCAT_BRH
+        export ROS2
+        ./rk3588_debian12_v110_risc_officialbuild.sh $VERSION_NUM
+fi
+
 if [ "$ASRA501A2RM01" == "true" ]; then
         MACHINE_LIST="$MACHINE_LIST ASRA501RM01"
         MODEL_NAME="ASRA501"

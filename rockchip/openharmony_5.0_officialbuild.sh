@@ -31,6 +31,7 @@ echo "[ADV] BSP_XML = ${BSP_XML}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
 
+echo "[ADV] openharmony_PRODUCT = ${openharmony_PRODUCT}"
 VER_TAG="${VER_PREFIX}OIV"$(echo $RELEASE_VERSION | sed 's/[.]//')
 echo "[ADV] VER_TAG = $VER_TAG"
 echo "[ADV] isFirstMachine = $isFirstMachine"
@@ -324,7 +325,7 @@ function prepare_images()
     mkdir -p $IMAGE_DIR/image
 
     # Copy image files to image directory
-    cp -aRL $CURR_PATH/$ROOT_DIR/$SUB_DIR/out/$TARGET_PRODUCT/packages/phone/images/* $IMAGE_DIR/image
+    cp -aRL $CURR_PATH/$ROOT_DIR/$SUB_DIR/out/$openharmony_PRODUCT/packages/phone/images/* $IMAGE_DIR/image
 
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR

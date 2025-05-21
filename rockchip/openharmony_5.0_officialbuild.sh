@@ -283,7 +283,7 @@ function building()
     if [ "$1" == "openharmony" ]; then
 	 echo "[ADV] build openharmony openharmony_PRODUCT=$openharmony_PRODUCT"
         ./build/prebuilts_download.sh
-        ./build.sh –product-name $openharmony_PRODUCT --ccache 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE_ANDROID
+        ./build.sh –product-name $openharmony_PRODUCT --ccache 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE_openharmony
     else
         echo "[ADV] pass building..."
     fi

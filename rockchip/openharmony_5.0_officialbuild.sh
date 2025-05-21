@@ -36,7 +36,7 @@ echo "[ADV] VER_TAG = $VER_TAG"
 echo "[ADV] isFirstMachine = $isFirstMachine"
 CURR_PATH="$PWD"
 ROOT_DIR="${VER_TAG}"_"$DATE"
-SUB_DIR="openharmony"
+SUB_DIR="OpenHarmony5.0.2"
 OUTPUT_DIR="$CURR_PATH/$STORED/$DATE/V"$(echo $RELEASE_VERSION | sed 's/[.]//')
 
 
@@ -84,7 +84,7 @@ function check_tag_and_checkout()
 {
     for TEMP_PATH in ${ADV_PATH}
     do
-	cd $CURR_PATH/$ROOT_DIR/$SUB_DIR/OpenHarmony5.0.2
+	cd $CURR_PATH/$ROOT_DIR/$SUB_DIR
         if [ -d "${TEMP_PATH}" ];then
             cd ${TEMP_PATH}
             RESPOSITORY_TAG=`git tag | grep $VER_TAG`
@@ -108,7 +108,7 @@ function auto_add_tag()
 {
     for TEMP_PATH in ${ADV_PATH}
     do
-	cd $CURR_PATH/$ROOT_DIR/$SUB_DIR/OpenHarmony5.0.2
+	cd $CURR_PATH/$ROOT_DIR/$SUB_DIR
         if [ -d "${TEMP_PATH}" ];then
             cd ${TEMP_PATH}
             HEAD_HASH_ID=`git rev-parse HEAD`
@@ -136,7 +136,7 @@ function create_xml_and_commit()
         echo "[ADV] Create XML file"
         cd $ROOT_DIR
         # add revision into xml
-        ../repo/repo manifest -o $VER_TAG.xml -r
+        ../repo manifest -o $VER_TAG.xml -r
         mv $VER_TAG.xml .repo/manifests
         cd .repo/manifests
 	    git checkout $BSP_BRANCH
@@ -209,7 +209,7 @@ END_OF_CSV
 function generate_manifest()
 {
     cd $CURR_PATH/$ROOT_DIR/
-    ../repo/repo manifest -o ${VER_TAG}.xml -r
+    ../repo manifest -o ${VER_TAG}.xml -r
 }
 
 function save_temp_log()
@@ -240,17 +240,20 @@ function get_source_code()
     echo "[ADV] get openharmony source code"
     cd $CURR_PATH
 
+    curl https://storage.googleapis.com/git-repo-downloads/repo > repo
+    chmod 777 repo
+
     mkdir $ROOT_DIR
     cd $ROOT_DIR
 
     if [ "$BSP_BRANCH" == "" ] ; then
-       repo init -u $BSP_URL
+       ../repo init -u $BSP_URL
     elif [ "$BSP_XML" == "" ] ; then
-       repo init -u $BSP_URL -b $BSP_BRANCH
+       ../repo init -u $BSP_URL -b $BSP_BRANCH
     else
-       repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
+       ../repo init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML
     fi
-    repo sync
+    ../repo sync
 
     for TEMP_PATH in ${ADV_PATH}
     do
@@ -266,7 +269,7 @@ function get_source_code()
 
     cd $CURR_PATH
     
-    tar zxvf third_party.tar.gz -C $CURR_PATH/$ROOT_DIR/$SUB_DIR/OpenHarmony5.0.2
+    tar zxvf third_party.tar.gz -C $CURR_PATH/$ROOT_DIR/$SUB_DIR
 }
 
 function building()
@@ -286,10 +289,27 @@ function building()
     [ "$?" -ne 0 ] && echo "[ADV] Build failure! Check log file '$LOG_FILE'" && exit 1
 }
 
+function set_environment()
+{
+    echo "[ADV] set environment"
+    cd $CURR_PATH/$ROOT_DIR/$SUB_DIR/
+    apt-get install -y apt-utils binutils bison flex bc build-essential make mtd-utils gcc-arm-linux-gnueabi u-boot-tools python3.9 python3-pip git zip unzip curl wget gcc g++ ruby dosfstools mtools default-jre default-jdk scons python3-distutils perl openssl libssl-dev cpio git-lfs m4 ccache zlib1g-dev tar rsync liblz4-tool genext2fs binutils-dev device-tree-compiler e2fsprogs git-core gnupg gnutls-bin gperf lib32ncurses5-dev libffi-dev zlib* libelf-dev libx11-dev libgl1-mesa-dev lib32z1-dev xsltproc x11proto-core-dev libc6-dev-i386 libxml2-dev lib32z-dev libdwarf-dev
+ 
+    apt-get install -y grsync xxd libglib2.0-dev libpixman-1-dev kmod jfsutils reiserfsprogs xfsprogs squashfs-tools  pcmciautils quota ppp libtinfo-dev libtinfo5 libncurses5 libncurses5-dev libncursesw5 libstdc++6  gcc-arm-none-eabi vim ssh locales doxygen
+ 
+    apt-get install -y libxinerama-dev libxcursor-dev libxrandr-dev libxi-dev
+ 
+    pip3 install --trusted-host https://repo.huaweicloud.com -i https://repo.huaweicloud.com/repository/pypi/simple requests setuptools pymongo kconfiglib pycryptodome ecdsa ohos-build pyyaml prompt_toolkit==1.0.14 redis json2html yagmail python-jenkins
+ 
+    pip3 install esdk-obs-python --trusted-host pypi.org
+ 
+    pip3 install six --upgrade --ignore-installed six
+}
 
 function build_openharmony_images()
 {
-    cd $CURR_PATH/$ROOT_DIR/$SUB_DIR/OpenHarmony5.0.2
+    cd $CURR_PATH/$ROOT_DIR/$SUB_DIR
+    set_environment
     building openharmony
 }
 
@@ -304,7 +324,7 @@ function prepare_images()
     mkdir -p $IMAGE_DIR/image
 
     # Copy image files to image directory
-    cp -aRL $CURR_PATH/$ROOT_DIR/$SUB_DIR/OpenHarmony5.0.2/out/$TARGET_PRODUCT/packages/phone/images/* $IMAGE_DIR/image
+    cp -aRL $CURR_PATH/$ROOT_DIR/$SUB_DIR/out/$TARGET_PRODUCT/packages/phone/images/* $IMAGE_DIR/image
 
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
     tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR

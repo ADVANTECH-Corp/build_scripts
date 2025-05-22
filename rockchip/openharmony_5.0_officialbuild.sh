@@ -283,6 +283,7 @@ function building()
     if [ "$1" == "openharmony" ]; then
 	 echo "[ADV] build openharmony openharmony_PRODUCT=$openharmony_PRODUCT"
         ./build/prebuilts_download.sh
+        $CURR_PATH/$ROOT_DIR/$SUB_DIR/prebuilts/python/linux-x86/current/bin/python3 -m pip install --upgrade pip
         ./build.sh –product-name $openharmony_PRODUCT --ccache 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE_openharmony
     else
         echo "[ADV] pass building..."

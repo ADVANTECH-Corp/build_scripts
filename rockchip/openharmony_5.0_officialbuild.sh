@@ -284,6 +284,7 @@ function building()
 	 echo "[ADV] build openharmony openharmony_PRODUCT=$openharmony_PRODUCT"
         ./build/prebuilts_download.sh
         $CURR_PATH/$ROOT_DIR/$SUB_DIR/prebuilts/python/linux-x86/current/bin/python3 -m pip install --upgrade pip
+        sleep 10
         ./build.sh --product-name $openharmony_PRODUCT --ccache
     else
         echo "[ADV] pass building..."

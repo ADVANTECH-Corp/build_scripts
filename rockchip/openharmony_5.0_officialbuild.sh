@@ -6,6 +6,7 @@ kernel \
 . \
 test \
 docs \
+third_party \
 "
 
 VER_PREFIX="RK3568_OH5.0_"

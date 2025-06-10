@@ -32,4 +32,9 @@ if [ $ROM5722A2 == true ]; then
         $BUILD_SH rom5722a2-8MP 5722A2"$AIM_VERSION"LIV"$VERSION_NUM" "6G" "FSPI"
         [ "$?" -ne 0 ] && exit 1
 fi
+
+if [ $RSB3730A2 == true ]; then
+        $BUILD_SH rsb3730a2-8MM 3730A2"$AIM_VERSION"LIV"$VERSION_NUM" "2G 4G" ""
+        [ "$?" -ne 0 ] && exit 1
+fi
 echo "[ADV] All done!"

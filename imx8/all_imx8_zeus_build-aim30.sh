@@ -43,7 +43,7 @@ if [ $ROM5620A1 == true ]; then
 fi
 if [ $ROM3620A1 == true ]; then
 	export BUILD_NN_IMX_CLEANSTATE=true
-	$BUILD_SH rom3620a1-8X 3620A1"$AIM_VERSION"LIV"$VERSION_NUM" "2G" "FSPI"
+	$BUILD_SH rom3620a1-8X 3620A1"$AIM_VERSION"LIV"$VERSION_NUM" "4G 2G" "FSPI"
 	[ "$?" -ne 0 ] && exit 1
 fi
 if [ $ROM5722A1 == true ]; then

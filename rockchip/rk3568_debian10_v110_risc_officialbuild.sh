@@ -116,6 +116,7 @@ function create_xml_and_commit()
         cd $ROOT_DIR
         # add revision into xml
         ../repo/repo manifest -o $VER_TAG.xml -r
+        sed -i '/remote="advantech-azure-priv"/d' $VER_TAG.xml
         mv $VER_TAG.xml .repo/manifests
         cd .repo/manifests
 		git checkout $BSP_BRANCH

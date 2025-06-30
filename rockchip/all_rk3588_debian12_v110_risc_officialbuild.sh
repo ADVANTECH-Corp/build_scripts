@@ -54,6 +54,21 @@ if [ "$AFER460A2" == "true" ]; then
 	./rk3588_debian12_v110_risc_officialbuild.sh $VERSION_NUM
 fi
 
+if [ "$ASRA501A2" == "true" ]; then
+        MACHINE_LIST="$MACHINE_LIST ASRA501"
+        MODEL_NAME="ASRA501"
+        HW_VER="A2"
+        BOARD_CONFIG="adv_rk3588_asra501a2_eg90_defconfig"
+        RT_PATCH="true"
+
+        export MACHINE_LIST
+        export MODEL_NAME
+        export HW_VER
+        export BOARD_CONFIG
+        export RT_PATCH
+        ./rk3588_debian12_v110_risc_officialbuild.sh $VERSION_NUM
+fi
+
 if [ "$ASRA501A2EG90" == "true" ]; then
         MACHINE_LIST="$MACHINE_LIST ASRA501EG90"
         MODEL_NAME="ASRA501"

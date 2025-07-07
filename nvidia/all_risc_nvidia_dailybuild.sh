@@ -10,4 +10,9 @@ if [ "$afer750a1" == "true" ]; then
     ./risc_nvidia_dailybuild.sh
 fi
 
+#AIR020RA1_projects
+if [ "$air020ra1" == "true" ]; then
+    ./risc_nvidia_dailybuild.sh
+fi
+
 echo "[ADV] All done!"

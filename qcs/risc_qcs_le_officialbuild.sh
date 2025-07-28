@@ -1,9 +1,5 @@
 #!/bin/bash
 PRODUCT=$1
-CURR_PATH="$PWD"
-ROOT_DIR="${PLATFORM_PREFIX}_${TARGET_BOARD}_${RELEASE_VERSION}_${DATE}"
-OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
-VER_TAG="${PROJECT}_${OS_BSP}${DISTRO}${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}"
 
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
@@ -18,6 +14,45 @@ echo "[ADV] OUTPUT_DIR = ${OUTPUT_DIR}"
 echo "[ADV] VER_TAG = ${VER_TAG}"
 echo "[ADV] Release_Note = ${Release_Note}"
 
+if [ ${#PROJECT} -ne 9 ]; then
+    echo "${PROJECT} project is not 9 characters"
+    exit 1
+fi
+
+if [ ${#OS_BSP} -ne 1 ]; then
+    echo "${OS_BSP} os bsp is not 1 character"
+    exit 1
+fi
+
+if [ ${#DISTRO} -ne 4 ]; then
+    echo "${DISTRO} distro is not 4 characters"
+    exit 1
+fi
+
+if [ ${#RELEASE_VERSION} -ne 2 ]; then
+    echo "${RELEASE_VERSION} version is not 2 characters"
+    exit 1
+fi
+
+if [ ${#KERNEL_VERSION} -ne 8 ]; then
+    echo "${KERNEL_VERSION} kernel version is not 8 characters"
+    exit 1
+fi
+
+if [ ${#CHIP_NAME} -ne 5 ]; then
+    echo "${CHIP_NAME} chip name is not 5 characters"
+    exit 1
+fi
+
+if [ ${#RAM_SIZE} -ne 3 ]; then
+    echo "${RAM_SIZE} ram size is not 3 characters"
+    exit 1
+fi
+
+CURR_PATH="$PWD"
+ROOT_DIR="${PLATFORM_PREFIX}_${TARGET_BOARD}_${RELEASE_VERSION}_${DATE}"
+OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
+VER_TAG="${PROJECT}_${OS_BSP}${DISTRO}${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}"
 echo "$Release_Note" > Release_Note
 REALEASE_NOTE="Release_Note"
 

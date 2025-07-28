@@ -20,6 +20,51 @@ echo "[ADV] KERNEL_PATH = ${KERNEL_PATH}"
 echo "[ADV] YOCTO_MACHINE_NAME=$YOCTO_MACHINE_NAME"
 echo "[ADV] DISTRO_IMAGE = ${DISTRO_IMAGE}"
 
+if [ ${#PROJECT} -ne 9 ]; then
+    echo "${PROJECT} project is not 9 characters"
+    exit 1
+fi
+
+if [ ${#OS_BSP} -ne 1 ]; then
+    echo "${OS_BSP} os bsp is not 1 character"
+    exit 1
+fi
+
+if [ ${#DISTRO} -ne 4 ]; then
+    echo "${DISTRO} distro is not 4 characters"
+    exit 1
+fi
+
+if [ ${#RELEASE_VERSION} -ne 2 ]; then
+    echo "${RELEASE_VERSION} version is not 2 characters"
+    exit 1
+fi
+
+if [ ${#KERNEL_VERSION} -ne 8 ]; then
+    echo "${KERNEL_VERSION} kernel version is not 8 characters"
+    exit 1
+fi
+
+if [ ${#CHIP_NAME} -ne 5 ]; then
+    echo "${CHIP_NAME} chip name is not 5 characters"
+    exit 1
+fi
+
+if [ ${#RAM_SIZE} -ne 3 ]; then
+    echo "${RAM_SIZE} ram size is not 3 characters"
+    exit 1
+fi
+
+if [ ${#STORAGE} -ne 4 ]; then
+    echo "${STORAGE} storage is not 4 characters"
+    exit 1
+fi
+
+if [ ${#DATE} -ne 10 ]; then
+    echo "${DATE} date is not 10 characters"
+    exit 1
+fi
+
 CURR_PATH="$PWD"
 ROOT_DIR="${PLATFORM_PREFIX}_${TARGET_BOARD}_${RELEASE_VERSION}_${DATE}"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"

@@ -53,6 +53,7 @@ CURR_PATH="$PWD"
 ROOT_DIR="${PLATFORM_PREFIX}_${TARGET_BOARD}_${RELEASE_VERSION}_${DATE}"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
 VER_TAG="${PROJECT}_${OS_BSP}${DISTRO}${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}"
+DEFAULT_VER_TAG="${PROJECT}_${OS_BSP}${DISTRO}00_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}"
 echo "$Release_Note" > Release_Note
 REALEASE_NOTE="Release_Note"
 
@@ -296,17 +297,37 @@ function create_aim_linux_release_xml()
     git clone $AIM_LINUX_RELEASE_BSP_URL -b ${DISTRO}
     pushd $AIM_LINUX_RELEASE_BSP_PLATFORM
 
+    # check the default latest xml file
+    EXISTED_VERSION=`find . -name ${DEFAULT_VER_TAG}.xml`
+    if [ -z "$EXISTED_VERSION" ] ; then
+        echo "[ADV] No the default latest xml file"
+        # push to github
+        cp $CURR_PATH/$ROOT_DIR/.repo/manifests/${BSP_XML} ./${DEFAULT_VER_TAG}.xml
+        git add ${DEFAULT_VER_TAG}.xml
+        git commit -m "[Official Release] ${DEFAULT_VER_TAG}"
+        git push
+    else
+        if [ "$(cat $BSP_XML)" != "$(cat ${DEFAULT_VER_TAG}.xml)" ]; then
+            echo "[ADV] Update the ${DEFAULT_VER_TAG}.xml"
+            cp $CURR_PATH/$ROOT_DIR/.repo/manifests/${BSP_XML} ./${DEFAULT_VER_TAG}.xml
+            git add ${DEFAULT_VER_TAG}.xml
+            git commit -m "[Official Release] Update the ${DEFAULT_VER_TAG}"
+            git push
+        fi
+    fi
+
+    # check the Official release xml file
     EXISTED_VERSION=`find . -name ${VER_TAG}.xml`
     if [ -z "$EXISTED_VERSION" ] ; then
-       	echo "[ADV] This is a new VERSION"
+        echo "[ADV] This is a new VERSION"
         # push to github
-	cp $CURR_PATH/$ROOT_DIR/.repo/manifests/$VER_TAG.xml .
+        cp $CURR_PATH/$ROOT_DIR/.repo/manifests/$VER_TAG.xml .
         git add $VER_TAG.xml
         git commit -m "[Official Release] ${VER_TAG}"
         git push
     else
         echo "[ADV] $RELEASE_VERSION already exists!"
-	exit 1
+        exit 1
     fi
 }
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Dailybuild
 echo "[ADV] Dailybuild start"
-BUILD_SH=${0%/*}/imx9_walnascar_officialbuild-y052.sh # keep original path
+BUILD_SH=${0%/*}/imx9_walnascar_dailybuild-y052.sh # keep original path
 VERSION_NUM=${RELEASE_VERSION}
 
 [[ ! -f $BUILD_SH ]] && { echo "$BUILD_SH not exist"; exit 1; }

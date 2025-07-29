@@ -15,7 +15,6 @@ echo "[ADV] KERNEL_VERSION=$KERNEL_VERSION"
 echo "[ADV] CHIP_NAME=$CHIP_NAME"
 echo "[ADV] RAM_SIZE=$RAM_SIZE"
 echo "[ADV] STORAGE=$STORAGE"
-echo "[ADV] RELEASE_VERSION=$RELEASE_VERSION"
 echo "[ADV] KERNEL_PATH = ${KERNEL_PATH}"
 echo "[ADV] YOCTO_MACHINE_NAME=$YOCTO_MACHINE_NAME"
 echo "[ADV] DISTRO_IMAGE = ${DISTRO_IMAGE}"
@@ -32,11 +31,6 @@ fi
 
 if [ ${#DISTRO} -ne 4 ]; then
     echo "${DISTRO} distro is not 4 characters"
-    exit 1
-fi
-
-if [ ${#RELEASE_VERSION} -ne 2 ]; then
-    echo "${RELEASE_VERSION} version is not 2 characters"
     exit 1
 fi
 
@@ -66,11 +60,11 @@ if [ ${#DATE} -ne 10 ]; then
 fi
 
 CURR_PATH="$PWD"
-ROOT_DIR="${PLATFORM_PREFIX}_${TARGET_BOARD}_${RELEASE_VERSION}_${DATE}"
+ROOT_DIR="${PLATFORM_PREFIX}_${PROJECT}_${DATE}"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
-IMAGE_VER="${PROJECT}_${OS_BSP}${DISTRO}${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${DATE}"
-UFS_IMAGE_VER="${PROJECT}_${OS_BSP}${DISTRO}${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${STORAGE}_${DATE}"
-EMMC_IMAGE_VER="${PROJECT}_${OS_BSP}${DISTRO}${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_emmc_${DATE}"
+IMAGE_VER=""
+UFS_IMAGE_VER=""
+EMMC_IMAGE_VER=""
 
 # QIMP
 #YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-wayland/tmp-glibc/deploy/images/${YOCTO_MACHINE_NAME}"
@@ -90,6 +84,28 @@ function get_source_code()
 	repo sync -c -j8
 	repo sync -c -j8
 	popd
+}
+
+function get_release_version_and_set_image_version()
+{
+	pushd $CURR_PATH/$ROOT_DIR/.repo/manifests 2>&1 > /dev/null
+	RELEASE_VERSION="01"
+
+	for file in *; do
+		if echo "$file" | grep -q "${PROJECT}_${OS_BSP}${DISTRO}"; then
+			RELEASE_VERSION=$(($(echo "ibase=10; $(echo "$file" | cut -c16-17)" | bc) + 1))
+			if ((RELEASE_VERSION >= 2 && RELEASE_VERSION <= 9)); then
+				RELEASE_VERSION=$(printf "%02d" $RELEASE_VERSION)
+			fi
+		fi
+	done
+
+	echo "RELEASE_VERSION = $RELEASE_VERSION"
+	popd 2>&1 > /dev/null
+
+	IMAGE_VER="${PROJECT}_${OS_BSP}${DISTRO}${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${DATE}"
+	UFS_IMAGE_VER="${PROJECT}_${OS_BSP}${DISTRO}${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${STORAGE}_${DATE}"
+	EMMC_IMAGE_VER="${PROJECT}_${OS_BSP}${DISTRO}${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_emmc_${DATE}"
 }
 
 function add_version()
@@ -242,6 +258,7 @@ fi
 
 #prepare source code and build environment
 get_source_code
+get_release_version_and_set_image_version
 add_version
 get_downloads
 set_environment

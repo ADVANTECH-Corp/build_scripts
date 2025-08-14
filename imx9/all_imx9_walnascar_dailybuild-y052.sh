@@ -22,7 +22,7 @@ if [ $IMX93EVK == true ]; then
     [ "$?" -ne 0 ] && exit 1
 fi
 if [ $AOM5521A2 == true ]; then
-    $BUILD_SH aom5521a2-95 5521A2"$AIM_VERSION"LIV"$VERSION_NUM" "8G 16G" ""
+    $BUILD_SH aom5521a2-95 5521A2"$AIM_VERSION"LIV"$VERSION_NUM" "8G" ""
     [ "$?" -ne 0 ] && exit 1
 fi
 echo "[ADV] All done!"

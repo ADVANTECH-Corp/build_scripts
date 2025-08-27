@@ -106,10 +106,12 @@ function prepare_and_copy_files()
 # Make storage folder
 if [ -e $OUTPUT_DIR ] ; then
 	echo "[ADV] $OUTPUT_DIR had already been created"
-else
-	echo "[ADV] mkdir $OUTPUT_DIR"
-	mkdir -p $OUTPUT_DIR
+	echo "[ADV] remove $OUTPUT_DIR"
+	rm -rf $OUTPUT_DIR
 fi
+
+echo "[ADV] mkdir $OUTPUT_DIR"
+mkdir -p $OUTPUT_DIR
 
 get_source_code
 prepare_and_copy_files

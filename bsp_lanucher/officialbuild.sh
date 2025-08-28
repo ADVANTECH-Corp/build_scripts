@@ -163,7 +163,7 @@ function copy_official_files() {
     local base_name="aim_linux_bsp_launcher_v${version}_${date}"
 
     # 拷貝所有相關檔案
-    cp -v ${base_name}* "${OUTPUT_DIR}/"
+    cp -v ${base_name}.* "${OUTPUT_DIR}/"
 
     echo "[INFO] All official files copied to ${OUTPUT_DIR}/"
 }

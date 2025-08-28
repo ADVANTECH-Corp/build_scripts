@@ -11,7 +11,7 @@ OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
 # ===========
 #  Functions
 # ===========
-function get_source_code()
+function get_source_code_and_gen_csv_file()
 {
     echo "[ADV] get bsp launcher source code"
     mkdir $RELEASE_FOLDER
@@ -28,8 +28,16 @@ function get_source_code()
 
     CSV_FILE="../$RELEASE_FOLDER.csv"
 
-    # 產生 CSV header
-    echo "Platform,Branch,Commit Hash,Author,Date,Message" > "$CSV_FILE"
+    # 寫 metadata header
+    {
+        echo "DailyBuildVersion"
+        echo "v${RELEASE_VERSION}"
+        echo ""
+        echo "BuildDate"
+        echo "${DATE}"
+        echo ""
+        echo "Platform,Branch,Commit Hash,Author,CommitDate,Message"
+    } > "$CSV_FILE"
 
     for REPO_URL in "${REPOS[@]}"; do
         echo "==============================================="
@@ -57,7 +65,7 @@ function get_source_code()
                 git clone --branch "$branch" --single-branch "$REPO_URL" "$FOLDER"
             else
                 echo "[INFO] Updating existing branch $branch ..."
-		(cd "$FOLDER" && git fetch origin "$branch" && git checkout "$branch" && git pull)
+                (cd "$FOLDER" && git fetch origin "$branch" && git checkout "$branch" && git pull)
             fi
 
             # 取得最新 commit 資訊
@@ -106,14 +114,15 @@ function prepare_and_copy_files()
 # Make storage folder
 if [ -e $OUTPUT_DIR ] ; then
 	echo "[ADV] $OUTPUT_DIR had already been created"
-	echo "[ADV] remove $OUTPUT_DIR"
-	rm -rf $OUTPUT_DIR
+else
+	echo "[ADV] mkdir $OUTPUT_DIR"
+	mkdir -p $OUTPUT_DIR
 fi
 
 echo "[ADV] mkdir $OUTPUT_DIR"
 mkdir -p $OUTPUT_DIR
 
-get_source_code
+get_source_code_and_gen_csv_file
 prepare_and_copy_files
 
 cd $CURR_PATH

@@ -53,9 +53,7 @@ function process_repos() {
 
         echo "[INFO] Processing $NAME ($URL)"
 
-        # 找出所有 develop branch
         DEVELOP_BRANCHES=$(awk -F',' -v platform="$NAME" '$1==platform && $2 ~ /_develop/ {print $2","$3}' "$CSV_FILE")
-
         if [ -z "$DEVELOP_BRANCHES" ]; then
             echo "[WARN] No _develop branches found for $NAME in CSV."
             continue
@@ -65,34 +63,42 @@ function process_repos() {
         git clone "$URL" "$NAME"
         cd "$NAME"
 
+        # 這裡要確保所有 remote branch 都抓下來
+        git fetch --all --tags
+
         for line in $DEVELOP_BRANCHES; do
             BRANCH=$(echo "$line" | cut -d',' -f1)
             COMMIT_HASH=$(echo "$line" | cut -d',' -f2)
             OFFICIAL_BRANCH="${BRANCH%_develop}"
 
             echo "[INFO] Found develop branch: $BRANCH"
-            echo "[INFO] Commit hash to merge: $COMMIT_HASH"
+            echo "[INFO] Commit hash to rebase until: $COMMIT_HASH"
             echo "[INFO] Target official branch: $OFFICIAL_BRANCH"
 
-            # 1. merge 指定 commit 到 official branch
-            git fetch origin "$OFFICIAL_BRANCH" || git checkout -b "$OFFICIAL_BRANCH" "origin/$OFFICIAL_BRANCH"
-            git checkout "$OFFICIAL_BRANCH"
+            # === official branch rebase ===
+            git fetch origin "$OFFICIAL_BRANCH" || true
+            git checkout -B "$OFFICIAL_BRANCH" "origin/$OFFICIAL_BRANCH"
             git pull origin "$OFFICIAL_BRANCH"
 
-            echo "[INFO] Merging commit $COMMIT_HASH from $BRANCH into $OFFICIAL_BRANCH ..."
-            git fetch origin "$BRANCH"
-            git merge --no-ff "$COMMIT_HASH" -m "Merge commit $COMMIT_HASH from $BRANCH into $OFFICIAL_BRANCH"
+            MERGE_BASE=$(git merge-base "$OFFICIAL_BRANCH" "origin/$BRANCH")
+            echo "[INFO] Merge-base between $OFFICIAL_BRANCH and $BRANCH is $MERGE_BASE"
+
+            git checkout -B tmp_rebase_branch "$COMMIT_HASH"
+            echo "[INFO] Rebasing commits from $MERGE_BASE..$COMMIT_HASH onto $OFFICIAL_BRANCH ..."
+            git rebase --onto "$OFFICIAL_BRANCH" "$MERGE_BASE"
+
+            git checkout "$OFFICIAL_BRANCH"
+            git merge --ff-only tmp_rebase_branch || true
             git push origin "$OFFICIAL_BRANCH"
 
-            # 2. 打正式 tag
+            # === tag on official branch ===
             echo "[INFO] Tagging $OFFICIAL_BRANCH with v$OFFICIAL_VERSION ..."
             git tag -a "v$OFFICIAL_VERSION" -m "Official release v$OFFICIAL_VERSION"
             git push origin "v$OFFICIAL_VERSION"
 
-            # 3. 在 develop branch 打 develop tag
-            echo "[INFO] Tagging $BRANCH with v${OFFICIAL_VERSION}_develop (commit $COMMIT_HASH) ..."
-            git checkout "$BRANCH"
-            git pull origin "$BRANCH"
+            # === tag on develop branch ===
+            echo "[INFO] Tagging $BRANCH with v${OFFICIAL_VERSION}_develop at commit $COMMIT_HASH ..."
+            git checkout -B "$BRANCH" "origin/$BRANCH"
             git tag -a "v${OFFICIAL_VERSION}_develop" "$COMMIT_HASH" -m "Develop snapshot for v$OFFICIAL_VERSION"
             git push origin "v${OFFICIAL_VERSION}_develop"
         done

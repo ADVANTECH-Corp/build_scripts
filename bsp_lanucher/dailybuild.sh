@@ -119,9 +119,6 @@ else
 	mkdir -p $OUTPUT_DIR
 fi
 
-echo "[ADV] mkdir $OUTPUT_DIR"
-mkdir -p $OUTPUT_DIR
-
 get_source_code_and_gen_csv_file
 prepare_and_copy_files
 

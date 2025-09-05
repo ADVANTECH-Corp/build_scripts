@@ -8,11 +8,6 @@ echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
 echo "[ADV] BSP_XML = ${BSP_XML}"
 echo "[ADV] DAILY_RELEASE_VERSION = ${DAILY_RELEASE_VERSION}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
-echo "[ADV] MODEL_NAME = ${MODEL_NAME}"
-echo "[ADV] BOARD_VER = ${BOARD_VER}"
-echo "[ADV] ROOT_DIR = ${ROOT_DIR}"
-echo "[ADV] OUTPUT_DIR = ${OUTPUT_DIR}"
-echo "[ADV] VER_TAG = ${VER_TAG}"
 echo "[ADV] Release_Note = ${Release_Note}"
 
 CURR_PATH="$PWD"
@@ -31,6 +26,8 @@ OFFICAL_EMMC_IMAGE_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VER
 
 echo "$Release_Note" > Release_Note
 REALEASE_NOTE="Release_Note"
+
+EXISTED_VERSION=""
 
 # Make storage folder
 if [ -e $OUTPUT_DIR ]; then
@@ -404,6 +401,11 @@ if [ -z "$EXISTED_VERSION" ] ; then
     # Get the dailybuild commit info
     get_csv_info
 
+    # Prepare official files
+    prepend_official_version_to_csv
+    prepare_official_package
+    copy_official_files
+
     echo "[ADV] Add tag"
     commit_tag amss $BSP_BRANCH $HASH_AMSS
     commit_tag download $BSP_BRANCH $HASH_DOWNLOAD
@@ -437,9 +439,5 @@ if [ -z "$EXISTED_VERSION" ] ; then
 
     rm -rf $ROOT_DIR
 fi
-
-prepend_official_version_to_csv
-prepare_official_package
-copy_official_files
 
 echo "[ADV] build script done!"

@@ -6,6 +6,7 @@ echo "[ADV] STORED = ${STORED}"
 echo "[ADV] BSP_URL = ${BSP_URL}"
 echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
 echo "[ADV] BSP_XML = ${BSP_XML}"
+echo "[ADV] DAILY_RELEASE_VERSION = ${DAILY_RELEASE_VERSION}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] MODEL_NAME = ${MODEL_NAME}"
 echo "[ADV] BOARD_VER = ${BOARD_VER}"
@@ -14,46 +15,20 @@ echo "[ADV] OUTPUT_DIR = ${OUTPUT_DIR}"
 echo "[ADV] VER_TAG = ${VER_TAG}"
 echo "[ADV] Release_Note = ${Release_Note}"
 
-if [ ${#PROJECT} -ne 9 ]; then
-    echo "${PROJECT} project is not 9 characters"
-    exit 1
-fi
-
-if [ ${#OS_BSP} -ne 1 ]; then
-    echo "${OS_BSP} os bsp is not 1 character"
-    exit 1
-fi
-
-if [ ${#DISTRO} -ne 4 ]; then
-    echo "${DISTRO} distro is not 4 characters"
-    exit 1
-fi
-
-if [ ${#RELEASE_VERSION} -ne 2 ]; then
-    echo "${RELEASE_VERSION} version is not 2 characters"
-    exit 1
-fi
-
-if [ ${#KERNEL_VERSION} -ne 8 ]; then
-    echo "${KERNEL_VERSION} kernel version is not 8 characters"
-    exit 1
-fi
-
-if [ ${#CHIP_NAME} -ne 5 ]; then
-    echo "${CHIP_NAME} chip name is not 5 characters"
-    exit 1
-fi
-
-if [ ${#RAM_SIZE} -ne 3 ]; then
-    echo "${RAM_SIZE} ram size is not 3 characters"
-    exit 1
-fi
-
 CURR_PATH="$PWD"
-ROOT_DIR="${PLATFORM_PREFIX}_${TARGET_BOARD}_${RELEASE_VERSION}_${DATE}"
+ROOT_DIR="${PLATFORM_PREFIX}_${PROJECT}_v${RELEASE_VERSION}_${DATE}"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
-VER_TAG="${PROJECT}_${OS_BSP}${DISTRO}${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}"
-DEFAULT_VER_TAG="${PROJECT}_${OS_BSP}${DISTRO}00_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}"
+VER_TAG="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}"
+DEFAULT_VER_TAG="${PROJECT}_${OS_DISTRO}_v0.0.0_${KERNEL_VERSION}_${CHIP_NAME}"
+DAILY_CSV_VER="${PROJECT}_${OS_DISTRO}_v${DAILY_RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${DATE}"
+DAILY_LOG_VER="${PROJECT}_${OS_DISTRO}_v${DAILY_RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${DATE}_log"
+DAILY_UFS_IMAGE_VER="${PROJECT}_${OS_DISTRO}_v${DAILY_RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${STORAGE}_${DATE}"
+DAILY_EMMC_IMAGE_VER="${PROJECT}_${OS_DISTRO}_v${DAILY_RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_emmc_${DATE}"
+OFFICAL_CSV_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${DATE}"
+OFFICAL_LOG_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${DATE}_log"
+OFFICAL_UFS_IMAGE_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${STORAGE}_${DATE}"
+OFFICAL_EMMC_IMAGE_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_emmc_${DATE}"
+
 echo "$Release_Note" > Release_Note
 REALEASE_NOTE="Release_Note"
 
@@ -95,15 +70,15 @@ function get_source_code()
         echo "[ADV] This is a new VERSION"
         repo sync
     else
-        echo "[ADV] $RELEASE_VERSION already exists!"
-	exit 1
+        echo "[ADV] v$RELEASE_VERSION already exists!"
+        exit 1
     fi
 }
 
 function get_csv_info()
 {
     echo "[ADV] get csv info"
-    CSV_FILE=${CURR_PATH}/${PLATFORM_PREFIX}/${DATE}/${VER_TAG}_${DATE}.csv
+    CSV_FILE=${CURR_PATH}/${PLATFORM_PREFIX}/${DATE}/${DAILY_CSV_VER}.csv
 
     echo "[ADV] Show HASH in ${CSV_FILE}"
     if [ -e ${CSV_FILE} ] ; then
@@ -294,7 +269,7 @@ function create_aim_linux_release_xml()
     echo "[ADV] get AIM_Linux_Release source code"
     cd $CURR_PATH/$ROOT_DIR
 
-    git clone $AIM_LINUX_RELEASE_BSP_URL -b ${DISTRO}
+    git clone $AIM_LINUX_RELEASE_BSP_URL -b ${OS_DISTRO}
     pushd $AIM_LINUX_RELEASE_BSP_PLATFORM
 
     # check the default latest xml file
@@ -326,15 +301,95 @@ function create_aim_linux_release_xml()
         git commit -m "[Official Release] ${VER_TAG}"
         git push
     else
-        echo "[ADV] $RELEASE_VERSION already exists!"
+        echo "[ADV] v$RELEASE_VERSION already exists!"
         exit 1
     fi
 }
 
-function copy_dailybuild_files()
-{
-    echo "[ADV] copy dailybuild files to $OUTPUT_DIR"
+# === Funciton : prepend OfficialVersion to CSV ===
+function prepend_official_version_to_csv() {
+    local csv_file="${DAILY_CSV_VER}.csv"
+    local official_version="v${RELEASE_VERSION}"
 
+    pushd ${CURR_PATH}/${PLATFORM_PREFIX}/${DATE} >/dev/null
+
+    if [ ! -f "$csv_file" ]; then
+        echo "[ERROR] CSV file $csv_file not found!"
+        exit 1
+    fi
+
+    {
+        echo "OfficialVersion"
+        echo "$official_version"
+        echo ""
+        cat "$csv_file"
+    } > "${csv_file}.tmp"
+
+    mv "${csv_file}.tmp" "$csv_file"
+    echo "[INFO] OfficialVersion $official_version prepended to $csv_file"
+
+    popd >/dev/null
+}
+
+# === Funciton : Process daily -> official image ===
+function process_image() {
+    local daily_image="$1"
+    local official_image="$2"
+    local ini_file="rootfs/etc/OEMInfo.ini"
+
+    echo "[INFO] Extracting ${daily_image}.tgz..."
+    sudo tar -zxvf "${daily_image}.tgz"
+
+    pushd "${daily_image}" >/dev/null
+    mkdir -p rootfs
+    sudo mount -o loop,offset=0 system.img rootfs
+
+    # Update the Image_Version
+    sudo sed -i "s/^Image_Version:.*/Image_Version: V${RELEASE_VERSION}/" "$ini_file"
+
+    sleep 1
+    sudo umount rootfs
+    sudo rm -rf rootfs
+    popd >/dev/null
+
+    mv "${daily_image}" "${official_image}"
+
+    echo "[INFO] Creating ${official_image}.tgz..."
+    sudo tar -zcvf "${official_image}.tgz" "${official_image}"
+
+    echo "[INFO] Generating md5 for ${official_image}.tgz..."
+    md5sum "${official_image}.tgz" | awk '{print $1}' > "${official_image}.tgz.md5"
+    sudo rm -rf ${official_image}
+}
+
+# === Funciton : Prepare official package ===
+prepare_official_package() {
+    echo "[INFO] Prepare official package"
+    pushd "${CURR_PATH}/${PLATFORM_PREFIX}/${DATE}" >/dev/null
+
+    # UFS
+    process_image "${DAILY_UFS_IMAGE_VER}" "${OFFICAL_UFS_IMAGE_VER}"
+
+    # EMMC
+    process_image "${DAILY_EMMC_IMAGE_VER}" "${OFFICAL_EMMC_IMAGE_VER}"
+
+    # CSV
+    echo "[INFO] Renaming CSV file..."
+    mv "${DAILY_CSV_VER}.csv" "${OFFICAL_CSV_VER}.csv"
+    echo "[INFO] Generating md5 for ${OFFICAL_CSV_VER}.csv..."
+    md5sum "${OFFICAL_CSV_VER}.csv" | awk '{print $1}' > "${OFFICAL_CSV_VER}.csv.md5"
+
+    # Log
+    echo "[INFO] Renaming Log file..."
+    mv "${DAILY_LOG_VER}.tgz" "${OFFICAL_LOG_VER}.tgz"
+    echo "[INFO] Generating md5 for ${OFFICAL_LOG_VER}.tgz..."
+    md5sum "${OFFICAL_LOG_VER}.tgz" | awk '{print $1}' > "${OFFICAL_LOG_VER}.tgz.md5"
+
+    popd >/dev/null
+}
+
+function copy_official_files() {
+    echo "[INFO] Copy all official files to ${OUTPUT_DIR}/"
     mv -f ${CURR_PATH}/${PLATFORM_PREFIX}/${DATE}/${VER_TAG}* $OUTPUT_DIR
 }
 
@@ -356,7 +411,7 @@ if [ -z "$EXISTED_VERSION" ] ; then
     commit_tag layers/meta-qcom-robotics-extras $BSP_BRANCH $HASH_META_QCOM_ROBOTICS_EXTRAS
     commit_tag scripts $BSP_BRANCH $HASH_SCRIPTS
 
-    if [ "${DISTRO}" == "l011" ] ; then
+    if [ "${OS_DISTRO}" == "yocto4.0.18-le1.1" ] ; then
         commit_tag layers/meta-advantech $BSP_BRANCH $HASH_META_ADVANTECH
     else
         # Check meta-advantech tag exist or not, and checkout to tag version
@@ -383,7 +438,8 @@ if [ -z "$EXISTED_VERSION" ] ; then
     rm -rf $ROOT_DIR
 fi
 
-echo "[ADV] copy dailybuild files"
-copy_dailybuild_files
+prepend_official_version_to_csv
+prepare_official_package
+copy_official_files
 
 echo "[ADV] build script done!"

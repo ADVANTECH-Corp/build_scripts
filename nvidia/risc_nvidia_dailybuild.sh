@@ -20,7 +20,7 @@ ROOT_DIR="${PLATFORM_PREFIX}_${TARGET_BOARD}_${RELEASE_VERSION}_${DATE}"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
 LINUX_TEGRA="Linux_for_Tegra"
 #IMAGE_VER="${PROJECT}_${OS_VERSION}${RELEASE_VERSION}_${KERNEL_VERSION}_${SOC_MEM}_${STORAGE}_${DATE}"
-IMAGE_VER="${PROJECT}_${OS_VERSION}_${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}_${DATE}"
+IMAGE_VER="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}_${DATE}"
 
 
 # ===========
@@ -34,6 +34,42 @@ function get_source_code()
 	repo init -u $BSP_URL -m ${BSP_XML}
 	repo sync -j8
 	popd
+}
+
+function update_oeminfo()
+{
+    local ini_file="$ROOT_DIR/Linux_for_Tegra/rootfs/etc/OEMInfo.ini"
+
+    if [ ! -f "$ini_file" ]; then
+        echo "[ERROR] File $ini_file not found!"
+        return 1
+    fi
+
+    echo "[INFO] Updating OEMInfo.ini ..."
+    echo "[INFO] Build_Date: $DATE"
+    echo "[INFO] Image_Version: v${RELEASE_VERSION}"
+
+	# 更新 Chip_name
+    local board_value=$(echo "$TARGET_BOARD" | tr '+' ',')
+	sed -i "s/^Chip_Name:.*/Chip_Name: ${board_value}/" "$ini_file"
+ 	# 更新 Product_Name
+    sed -i "s/^Product_Name:.*/Product_Name: ${PROJECT}/" "$ini_file"
+	# 更新 Ram_Size
+    local socmem_value=$(echo "$SOC_MEM" | tr '+' ',')
+    sed -i "s/^Ram_Size:.*/Ram_Size: ${socmem_value}/" "$ini_file"
+	# 更新 OS_Distro
+    sed -i "s/^OS_Distro:.*/OS_Distro: ${OS_VERSION}/" "$ini_file"
+    # 更新 Image_Version
+    sed -i "s/^Image_Version:.*/Image_Version: V${RELEASE_VERSION}/" "$ini_file"
+	# 更新 Kernel_Version
+    sed -i "s/^Kernel_Version:.*/Kernel_Version: ${KERNEL_VERSION}/" "$ini_file"
+	# 更新 Storage_support
+	local storage_value=$(echo "$STORAGE" | tr '+' ',')
+    sed -i "s/^Storage_support:.*/Storage_support: ${storage_value}/" "$ini_file"
+	# 更新 Build_Date
+    sed -i "s/^Build_Date:.*/Build_Date: $DATE/" "$ini_file"
+	
+    echo "[INFO] Done updating $ini_file."
 }
 
 function build_image()
@@ -153,6 +189,7 @@ sudo apt-get update
 sudo apt-get install flex bison device-tree-compiler sshpass abootimg nfs-kernel-server uuid-runtime -y
 
 get_source_code
+update_oeminfo
 build_image
 prepare_images
 copy_image_to_storage

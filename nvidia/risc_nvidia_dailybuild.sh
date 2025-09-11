@@ -189,8 +189,8 @@ sudo apt-get update
 sudo apt-get install flex bison device-tree-compiler sshpass abootimg nfs-kernel-server uuid-runtime -y
 
 get_source_code
-update_oeminfo
 build_image
+update_oeminfo
 prepare_images
 copy_image_to_storage
 save_temp_log

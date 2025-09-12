@@ -51,23 +51,23 @@ function update_oeminfo()
 
 	# 更新 Chip_name
     local board_value=$(echo "$TARGET_BOARD" | tr '+' ',')
-	sed -i "s/^Chip_Name:.*/Chip_Name: ${board_value}/" "$ini_file"
+	sudo sed -i "s/^Chip_Name:.*/Chip_Name: ${board_value}/" "$ini_file"
  	# 更新 Product_Name
-    sed -i "s/^Product_Name:.*/Product_Name: ${PROJECT}/" "$ini_file"
+    sudo sed -i "s/^Product_Name:.*/Product_Name: ${PROJECT}/" "$ini_file"
 	# 更新 Ram_Size
     local socmem_value=$(echo "$SOC_MEM" | tr '+' ',')
-    sed -i "s/^Ram_Size:.*/Ram_Size: ${socmem_value}/" "$ini_file"
+    sudo sed -i "s/^Ram_Size:.*/Ram_Size: ${socmem_value}/" "$ini_file"
 	# 更新 OS_Distro
-    sed -i "s/^OS_Distro:.*/OS_Distro: ${OS_VERSION}/" "$ini_file"
+    sudo sed -i "s/^OS_Distro:.*/OS_Distro: ${OS_VERSION}/" "$ini_file"
     # 更新 Image_Version
-    sed -i "s/^Image_Version:.*/Image_Version: V${RELEASE_VERSION}/" "$ini_file"
+    sudo sed -i "s/^Image_Version:.*/Image_Version: V${RELEASE_VERSION}/" "$ini_file"
 	# 更新 Kernel_Version
-    sed -i "s/^Kernel_Version:.*/Kernel_Version: ${KERNEL_VERSION}/" "$ini_file"
+    sudo sed -i "s/^Kernel_Version:.*/Kernel_Version: ${KERNEL_VERSION}/" "$ini_file"
 	# 更新 Storage_support
 	local storage_value=$(echo "$STORAGE" | tr '+' ',')
-    sed -i "s/^Storage_support:.*/Storage_support: ${storage_value}/" "$ini_file"
+    sudo sed -i "s/^Storage_support:.*/Storage_support: ${storage_value}/" "$ini_file"
 	# 更新 Build_Date
-    sed -i "s/^Build_Date:.*/Build_Date: $DATE/" "$ini_file"
+    sudo sed -i "s/^Build_Date:.*/Build_Date: $DATE/" "$ini_file"
 	
     echo "[INFO] Done updating $ini_file."
 }

@@ -9,7 +9,7 @@ VER_TAG="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET
 DEFAULT_VER_TAG="${PROJECT}_${OS_VERSION}_v0.0.0_${KERNEL_VERSION}_${TARGET_BOARD}"
 DAILY_CSV_VER="${PROJECT}_${OS_VERSION}_v${DAILY_RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}_${DATE}"
 DAILY_LOG_VER="${PROJECT}_${OS_VERSION}_v${DAILY_RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}_${DATE}_log"
-DAILY_IMAGE_VER="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}_${DATE}"
+DAILY_IMAGE_VER="${PROJECT}_${OS_VERSION}_v${DAILY_RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}_${DATE}"
 OFFICAL_CSV_VER="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}_${DATE}"
 OFFICAL_LOG_VER="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}_${DATE}_log"
 OFFICAL_IMAGE_VER="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}_${DATE}"
@@ -237,31 +237,24 @@ function prepend_official_version_to_csv() {
 function process_image() {
     local daily_image="$1"
     local official_image="$2"
-    local ini_file="rootfs/etc/OEMInfo.ini"
+    local ini_file="Linux_for_Tegra/rootfs/etc/OEMInfo.ini"
 
     echo "[INFO] Extracting ${daily_image}.tgz..."
     sudo tar -zxvf "${daily_image}.tgz"
 
-    pushd "${daily_image}" >/dev/null
-    mkdir -p rootfs
-    sudo mount -o loop,offset=0 system.img rootfs
-
+    pushd Linux_for_Tegra >/dev/null
+    
     # Update the Image_Version
     sudo sed -i "s/^Image_Version:.*/Image_Version: V${RELEASE_VERSION}/" "$ini_file"
 
-    sleep 1
-    sudo umount rootfs
-    sudo rm -rf rootfs
     popd >/dev/null
 
-    mv "${daily_image}" "${official_image}"
-
     echo "[INFO] Creating ${official_image}.tgz..."
-    sudo tar -zcvf "${official_image}.tgz" "${official_image}"
+    sudo tar -zcvf "${official_image}.tgz" Linux_for_Tegra
 
     echo "[INFO] Generating md5 for ${official_image}.tgz..."
     md5sum "${official_image}.tgz" | awk '{print $1}' > "${official_image}.tgz.md5"
-    sudo rm -rf ${official_image}
+    sudo rm -rf Linux_for_Tegra
 }
 
 # === Funciton : Prepare official package ===

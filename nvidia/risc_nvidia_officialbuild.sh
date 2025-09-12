@@ -210,7 +210,7 @@ function create_aim_linux_release_xml()
 
 # === Funciton : prepend OfficialVersion to CSV ===
 function prepend_official_version_to_csv() {
-    local csv_file="${DAILY_CSV_VER}.tgz.csv
+    local csv_file="${DAILY_CSV_VER}.tgz.csv"
     local official_version="v${RELEASE_VERSION}"
 
     pushd ${CURR_PATH}/${PLATFORM_PREFIX}/${DATE} >/dev/null

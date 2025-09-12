@@ -2,10 +2,22 @@
 
 PRODUCT=$1
 CURR_PATH="$PWD"
-ROOT_DIR="${PLATFORM_PREFIX}_${TARGET_BOARD}_${RELEASE_VERSION}_${DATE}"
+ROOT_DIR="${PLATFORM_PREFIX}_${PROJECT}_v${RELEASE_VERSION}_${DATE}"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
-IMAGE_VER="${PROJECT}_${OS_VERSION}${RELEASE_VERSION}_${KERNEL_VERSION}_${SOC_MEM}_${STORAGE}_${DATE}"
-VER_TAG="${PROJECT}_${OS_VERSION}${RELEASE_VERSION}_${KERNEL_VERSION}_${SOC_MEM}"
+
+VER_TAG="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}"
+DEFAULT_VER_TAG="${PROJECT}_${OS_VERSION}_v0.0.0_${KERNEL_VERSION}_${TARGET_BOARD}"
+DAILY_CSV_VER="${PROJECT}_${OS_VERSION}_v${DAILY_RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${DATE}"
+DAILY_LOG_VER="${PROJECT}_${OS_VERSION}_v${DAILY_RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${DATE}_log"
+DAILY_IMAGE_VER="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}_${DATE}"
+OFFICAL_CSV_VER="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${DATE}"
+OFFICAL_LOG_VER="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${DATE}_log"
+OFFICAL_IMAGE_VER="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}_${DATE}"
+
+
+#IMAGE_VER="${PROJECT}_${OS_VERSION}${RELEASE_VERSION}_${KERNEL_VERSION}_${SOC_MEM}_${STORAGE}_${DATE}"
+#VER_TAG="${PROJECT}_${OS_VERSION}${RELEASE_VERSION}_${KERNEL_VERSION}_${SOC_MEM}"
+
 
 HASH_MANIFEST=""
 HASH_JETSON_DOWNLOAD=""
@@ -21,17 +33,14 @@ echo "[ADV] STORED = ${STORED}"
 echo "[ADV] BSP_URL = ${BSP_URL}"
 echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
 echo "[ADV] BSP_XML = ${BSP_XML}"
+echo "[ADV] DAILY_RELEASE_VERSION = ${DAILY_RELEASE_VERSION}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
-echo "[ADV] MODEL_NAME = ${MODEL_NAME}"
-echo "[ADV] BOARD_VER = ${BOARD_VER}"
-echo "[ADV] ROOT_DIR = ${ROOT_DIR}"
-echo "[ADV] OUTPUT_DIR = ${OUTPUT_DIR}"
-echo "[ADV] IMAGE_VER = ${IMAGE_VER}"
-echo "[ADV] VER_TAG = ${VER_TAG}"
 echo "[ADV] Release_Note = ${Release_Note}"
 
 echo "$Release_Note" > Release_Note
 REALEASE_NOTE="Release_Note"
+
+EXISTED_VERSION=""
 
 # Make storage folder
 if [ -e $OUTPUT_DIR ]; then
@@ -71,14 +80,14 @@ function get_source_code()
         echo "[ADV] This is a new VERSION"
         repo sync
     else
-        echo "[ADV] $RELEASE_VERSION already exists!"
+        echo "[ADV] v$RELEASE_VERSION already exists!"
     fi
 }
 
 function get_csv_info()
 {
     echo "[ADV] get csv info"
-    CSV_FILE=${CURR_PATH}/${PLATFORM_PREFIX}/${DATE}/${IMAGE_VER}.tgz.csv
+    CSV_FILE=${CURR_PATH}/${PLATFORM_PREFIX}/${DATE}/${DAILY_CSV_VER}.tgz.csv
 
     echo "[ADV] Show HASH in ${CSV_FILE}"
     if [ -e ${CSV_FILE} ] ; then
@@ -157,11 +166,131 @@ function create_xml_and_commit()
     cd $CURR_PATH
 }
 
-function copy_dailybuild_files()
+function create_aim_linux_release_xml()
 {
-    echo "[ADV] copy dailybuild files to $OUTPUT_DIR"
+    echo "[ADV] get AIM_Linux_Release source code"
+    cd $CURR_PATH/$ROOT_DIR
 
-    mv -f ${CURR_PATH}/${PLATFORM_PREFIX}/${DATE}/${IMAGE_VER}* $OUTPUT_DIR
+    git clone $AIM_LINUX_RELEASE_BSP_URL -b ${OS_VERSION}
+    pushd $AIM_LINUX_RELEASE_BSP_PLATFORM
+
+    # check the default latest xml file
+    EXISTED_VERSION=`find . -name ${DEFAULT_VER_TAG}.xml`
+    if [ -z "$EXISTED_VERSION" ] ; then
+        echo "[ADV] No the default latest xml file"
+        # push to github
+        cp $CURR_PATH/$ROOT_DIR/.repo/manifests/${BSP_XML} ./${DEFAULT_VER_TAG}.xml
+        git add ${DEFAULT_VER_TAG}.xml
+        git commit -m "[Official Release] ${DEFAULT_VER_TAG}"
+        git push
+    else
+        if [ "$(cat $BSP_XML)" != "$(cat ${DEFAULT_VER_TAG}.xml)" ]; then
+            echo "[ADV] Update the ${DEFAULT_VER_TAG}.xml"
+            cp $CURR_PATH/$ROOT_DIR/.repo/manifests/${BSP_XML} ./${DEFAULT_VER_TAG}.xml
+            git add ${DEFAULT_VER_TAG}.xml
+            git commit -m "[Official Release] Update the ${DEFAULT_VER_TAG}"
+            git push
+        fi
+    fi
+
+    # check the Official release xml file
+    EXISTED_VERSION=`find . -name ${VER_TAG}.xml`
+    if [ -z "$EXISTED_VERSION" ] ; then
+        echo "[ADV] This is a new VERSION"
+        # push to github
+        cp $CURR_PATH/$ROOT_DIR/.repo/manifests/$VER_TAG.xml .
+        git add $VER_TAG.xml
+        git commit -m "[Official Release] ${VER_TAG}"
+        git push
+    else
+        echo "[ADV] v$RELEASE_VERSION already exists!"
+        exit 1
+    fi
+}
+
+# === Funciton : prepend OfficialVersion to CSV ===
+function prepend_official_version_to_csv() {
+    local csv_file="${DAILY_CSV_VER}.csv"
+    local official_version="v${RELEASE_VERSION}"
+
+    pushd ${CURR_PATH}/${PLATFORM_PREFIX}/${DATE} >/dev/null
+
+    if [ ! -f "$csv_file" ]; then
+        echo "[ERROR] CSV file $csv_file not found!"
+        exit 1
+    fi
+
+    {
+        echo "OfficialVersion"
+        echo "$official_version"
+        echo ""
+        cat "$csv_file"
+    } > "${csv_file}.tmp"
+
+    mv "${csv_file}.tmp" "$csv_file"
+    echo "[INFO] OfficialVersion $official_version prepended to $csv_file"
+
+    popd >/dev/null
+}
+
+# === Funciton : Process daily -> official image ===
+function process_image() {
+    local daily_image="$1"
+    local official_image="$2"
+    local ini_file="rootfs/etc/OEMInfo.ini"
+
+    echo "[INFO] Extracting ${daily_image}.tgz..."
+    sudo tar -zxvf "${daily_image}.tgz"
+
+    pushd "${daily_image}" >/dev/null
+    mkdir -p rootfs
+    sudo mount -o loop,offset=0 system.img rootfs
+
+    # Update the Image_Version
+    sudo sed -i "s/^Image_Version:.*/Image_Version: V${RELEASE_VERSION}/" "$ini_file"
+
+    sleep 1
+    sudo umount rootfs
+    sudo rm -rf rootfs
+    popd >/dev/null
+
+    mv "${daily_image}" "${official_image}"
+
+    echo "[INFO] Creating ${official_image}.tgz..."
+    sudo tar -zcvf "${official_image}.tgz" "${official_image}"
+
+    echo "[INFO] Generating md5 for ${official_image}.tgz..."
+    md5sum "${official_image}.tgz" | awk '{print $1}' > "${official_image}.tgz.md5"
+    sudo rm -rf ${official_image}
+}
+
+# === Funciton : Prepare official package ===
+prepare_official_package() {
+    echo "[INFO] Prepare official package"
+    pushd "${CURR_PATH}/${PLATFORM_PREFIX}/${DATE}" >/dev/null
+
+    process_image "${DAILY_IMAGE_VER}" "${OFFICAL_IMAGE_VER}"
+
+    # CSV
+    echo "[INFO] Renaming CSV file..."
+    mv "${DAILY_CSV_VER}.csv" "${OFFICAL_CSV_VER}.csv"
+    echo "[INFO] Generating md5 for ${OFFICAL_CSV_VER}.csv..."
+    md5sum "${OFFICAL_CSV_VER}.csv" | awk '{print $1}' > "${OFFICAL_CSV_VER}.csv.md5"
+
+    # Log
+    echo "[INFO] Renaming Log file..."
+    mv "${DAILY_LOG_VER}.tgz" "${OFFICAL_LOG_VER}.tgz"
+    echo "[INFO] Generating md5 for ${OFFICAL_LOG_VER}.tgz..."
+    md5sum "${OFFICAL_LOG_VER}.tgz" | awk '{print $1}' > "${OFFICAL_LOG_VER}.tgz.md5"
+
+    popd >/dev/null
+}
+
+function copy_official_files()
+{
+    echo "[INFO] Copy all official files to ${OUTPUT_DIR}/"
+
+    mv -f ${CURR_PATH}/${PLATFORM_PREFIX}/${DATE}/${VER_TAG}* $OUTPUT_DIR
 }
 
 # ================
@@ -175,6 +304,11 @@ if [ -z "$EXISTED_VERSION" ] ; then
     # Get the dailybuild commit info
     get_csv_info
 
+    # Prepare official files
+    prepend_official_version_to_csv
+    prepare_official_package
+    copy_official_files
+
     echo "[ADV] Add tag"
     commit_tag download $BSP_BRANCH $HASH_JETSON_DOWNLOAD
     commit_tag kernel $PROJECT_BRANCH $HASH_JETSON_KERNEL
@@ -185,10 +319,10 @@ if [ -z "$EXISTED_VERSION" ] ; then
     # Create manifests xml and commit
     create_xml_and_commit $HASH_MANIFEST
 
+    # Create AIM_Linux_Release xml file
+    create_aim_linux_release_xml
+
     rm -rf $ROOT_DIR
 fi
-
-echo "[ADV] copy dailybuild files"
-copy_dailybuild_files
 
 echo "[ADV] build script done!"

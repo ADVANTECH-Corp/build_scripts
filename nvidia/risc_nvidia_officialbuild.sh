@@ -5,7 +5,7 @@ CURR_PATH="$PWD"
 ROOT_DIR="${PLATFORM_PREFIX}_${PROJECT}_v${RELEASE_VERSION}_${DATE}"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
 
-VER_TAG="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}"
+VER_TAG="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}"
 DEFAULT_VER_TAG="${PROJECT}_${OS_VERSION}_v0.0.0_${KERNEL_VERSION}_${TARGET_BOARD}"
 DAILY_CSV_VER="${PROJECT}_${OS_VERSION}_v${DAILY_RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}_${DATE}"
 DAILY_LOG_VER="${PROJECT}_${OS_VERSION}_v${DAILY_RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}_${DATE}_log"
@@ -210,7 +210,7 @@ function create_aim_linux_release_xml()
 
 # === Funciton : prepend OfficialVersion to CSV ===
 function prepend_official_version_to_csv() {
-    local csv_file="${DAILY_CSV_VER}.csv"
+    local csv_file="${DAILY_CSV_VER}.tgz.csv
     local official_version="v${RELEASE_VERSION}"
 
     pushd ${CURR_PATH}/${PLATFORM_PREFIX}/${DATE} >/dev/null
@@ -273,9 +273,9 @@ prepare_official_package() {
 
     # CSV
     echo "[INFO] Renaming CSV file..."
-    mv "${DAILY_CSV_VER}.csv" "${OFFICAL_CSV_VER}.csv"
-    echo "[INFO] Generating md5 for ${OFFICAL_CSV_VER}.csv..."
-    md5sum "${OFFICAL_CSV_VER}.csv" | awk '{print $1}' > "${OFFICAL_CSV_VER}.csv.md5"
+    mv "${DAILY_CSV_VER}.tgz.csv" "${OFFICAL_CSV_VER}.tgz.csv"
+    echo "[INFO] Generating md5 for ${OFFICAL_CSV_VER}.tgz.csv..."
+    md5sum "${OFFICAL_CSV_VER}.tgz.csv" | awk '{print $1}' > "${OFFICAL_CSV_VER}.tgz.csv.md5"
 
     # Log
     echo "[INFO] Renaming Log file..."

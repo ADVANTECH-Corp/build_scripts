@@ -87,7 +87,7 @@ function get_source_code()
 function get_csv_info()
 {
     echo "[ADV] get csv info"
-    CSV_FILE=${CURR_PATH}/${PLATFORM_PREFIX}/${DATE}/${DAILY_CSV_VER}.tgz.csv
+    CSV_FILE=${CURR_PATH}/${PLATFORM_PREFIX}/${DATE}/${DAILY_CSV_VER}.csv
 
     echo "[ADV] Show HASH in ${CSV_FILE}"
     if [ -e ${CSV_FILE} ] ; then

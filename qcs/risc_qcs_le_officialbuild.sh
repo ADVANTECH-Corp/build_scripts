@@ -332,7 +332,7 @@ function prepend_official_version_to_csv() {
 function process_image() {
     local daily_image="$1"
     local official_image="$2"
-    local ini_file="rootfs/etc/OEMInfo.ini"
+    local ini_files
 
     echo "[INFO] Extracting ${daily_image}.tgz..."
     sudo tar -zxvf "${daily_image}.tgz"
@@ -341,8 +341,21 @@ function process_image() {
     mkdir -p rootfs
     sudo mount -o loop,offset=0 system.img rootfs
 
-    # Update the Image_Version
-    sudo sed -i "s/^Image_Version:.*/Image_Version: V${RELEASE_VERSION}/" "$ini_file"
+    # Find all OEMInfo.ini files dynamically
+    pushd rootfs >/dev/null
+    mapfile -t ini_files < <(sudo find . -type f -name "OEMInfo.ini")
+
+    if [ ${#ini_files[@]} -eq 0 ]; then
+        echo "[ERROR] OEMInfo.ini not found"
+    fi
+
+    # Update Image_Version in all found files
+    for ini_file in "${ini_files[@]}"; do
+        echo "[INFO] Updating Image_Version in $ini_file..."
+        sudo sed -i "s/^Image_Version:.*/Image_Version: V${RELEASE_VERSION}/" "$ini_file"
+    done
+
+    popd >/dev/null
 
     sleep 1
     sudo umount rootfs

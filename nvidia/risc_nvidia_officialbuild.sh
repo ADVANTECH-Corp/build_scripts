@@ -237,7 +237,7 @@ function prepend_official_version_to_csv() {
 function process_image() {
     local daily_image="$1"
     local official_image="$2"
-    local ini_file="Linux_for_Tegra/rootfs/etc/OEMInfo.ini"
+    local ini_file="rootfs/etc/OEMInfo.ini"
 
     echo "[INFO] Extracting ${daily_image}.tgz..."
     sudo tar -zxvf "${daily_image}.tgz"

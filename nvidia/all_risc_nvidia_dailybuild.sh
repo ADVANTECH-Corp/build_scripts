@@ -1,4 +1,8 @@
 #!/bin/bash
+#AIR030A1_projects
+if [ "$air030a1" == "true" ]; then
+    ./risc_nvidia_dailybuild.sh
+fi
 
 #EPCR7300A1_projects
 if [ "$epcr7300a1" == "true" ]; then

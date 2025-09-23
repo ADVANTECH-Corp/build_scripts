@@ -70,7 +70,7 @@ function update_oeminfo()
 	cd $CURR_PATH
 
 	# Set the folder
-	BASE_DIR="sources/meta-advantech-nxp/recipes-fsl/images"
+	BASE_DIR="sources/meta-advantech/recipes-fsl/images"
 	FILES_DIR="${BASE_DIR}/files"
 	INI_FILE="${FILES_DIR}/OEMInfo.ini"
 	BB_FILE="${BASE_DIR}/${DEPLOY_IMAGE_NAME}.bbappend"
@@ -130,6 +130,7 @@ function generate_md5()
 
 	if [ -e $FILENAME ]; then
 		MD5_SUM=`md5sum -b $FILENAME | cut -d ' ' -f 1`
+		echo $MD5_SUM > $FILENAME.md5
 	fi
 }
 
@@ -152,8 +153,8 @@ function save_temp_log()
 	mv -f $LOG_DIR.tgz.md5 $STORAGE_PATH
 
 	# Remove all temp logs
-	rm -rf $LOG_DIR
-	find . -name "temp" | xargs rm -rf
+	sudo rm -rf $LOG_DIR
+	find . -name "temp" | xargs sudo rm -rf
 }
 
 # ===============================
@@ -172,10 +173,10 @@ function generate_csv()
         set - `ls -lh ${FILENAME}`; FILE_SIZE=$5
     fi
 
-    HASH_BSP=$(cd $CURR_PATH/$ROOT_DIR/.repo/manifests && git rev-parse HEAD)
-    HASH_ADV=$(cd $CURR_PATH/$ROOT_DIR/$META_ADVANTECH_PATH && git rev-parse HEAD)
-    HASH_KERNEL=$(cd $CURR_PATH/$ROOT_DIR/$BUILD_DIR/$TMP_DIR/work/${CHIP_NAME}${PROJECT}-poky-linux/linux-imx/$KERNEL_VERSION*/git && git rev-parse HEAD)
-    HASH_UBOOT=$(cd $CURR_PATH/$ROOT_DIR/$BUILD_DIR/$TMP_DIR/work/${CHIP_NAME}${PROJECT}-poky-linux/u-boot-imx/*$U_BOOT_VERSION*/git && git rev-parse HEAD)
+    HASH_BSP=$(cd ${CURR_PATH}/${ROOT_DIR}/.repo/manifests && git rev-parse HEAD)
+    HASH_ADV=$(cd ${CURR_PATH}/${ROOT_DIR}/${META_ADVANTECH_PATH} && git rev-parse HEAD)
+    HASH_KERNEL=$(cd ${CURR_PATH}/${ROOT_DIR}/${BUILD_DIR}/${TMP_DIR}/work/${CHIP_NAME}${PROJECT}-poky-linux/linux-imx/${KERNEL_VERSION}*/git && git rev-parse HEAD)
+    HASH_UBOOT=$(cd ${CURR_PATH}/${ROOT_DIR}/${BUILD_DIR}/${TMP_DIR}/work/${CHIP_NAME}${PROJECT}-poky-linux/u-boot-imx/*${U_BOOT_VERSION}*/git && git rev-parse HEAD)
     cd $CURR_PATH
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV
@@ -333,7 +334,7 @@ function prepare_images() {
 			cp $DEPLOY_IMAGE_PATH/$FILE_NAME $OUTPUT_DIR/image
 			chmod 755 $CURR_PATH/mksd-linux.sh
 			sudo cp $CURR_PATH/mksd-linux.sh $OUTPUT_DIR/mk_inand/
-			rm $DEPLOY_IMAGE_PATH/$FILE_NAME && sync
+			sudo rm $DEPLOY_IMAGE_PATH/$FILE_NAME && sync
 			;;
 		"cve")
 			mkdir $OUTPUT_DIR/image
@@ -360,21 +361,21 @@ function prepare_images() {
 	case $IMAGE_TYPE in
 		"flash" | "modules" | "imx-boot" | "cve" | "spdx")
 			echo "[ADV] creating ${OUTPUT_DIR}.tgz ..."
-			tar czf ${OUTPUT_DIR}.tgz $OUTPUT_DIR
+			tar czf ${OUTPUT_DIR}.tgz ${OUTPUT_DIR}
 			generate_md5 ${OUTPUT_DIR}.tgz
 			;;
 		"bsp")			
-			tar czf ${OUTPUT_DIR}.tgz --exclude-vcs --exclude .repo $ROOT_DIR
+			tar czf ${OUTPUT_DIR}.tgz --exclude-vcs --exclude .repo ${ROOT_DIR}
 			generate_md5 ${OUTPUT_DIR}.tgz
 			;;
 		*) # Normal images
 			echo "[ADV] creating ${OUTPUT_DIR}.img.tgz ..."
-			tar czf $OUTPUT_DIR/$FILE_NAME > $OUTPUT_DIR.img.tgz
-			generate_md5 $OUTPUT_DIR.img.tgz
+			tar czf ${OUTPUT_DIR}/${FILE_NAME} > ${OUTPUT_DIR}.img.tgz
+			generate_md5 ${OUTPUT_DIR}.img.tgz
 			;;
 	esac
 
-	rm -rf $OUTPUT_DIR
+	sudo rm -rf ${OUTPUT_DIR}
 }
 
 function copy_image_to_storage()
@@ -395,9 +396,9 @@ function copy_image_to_storage()
 			mv -f ${MODULES_DIR}.tgz $STORAGE_PATH/others
 		;;
 		"normal")
-			generate_csv $IMAGE_DIR.img.gz
+			generate_csv ${IMAGE_DIR}.img.tgz
 			mv ${IMAGE_DIR}.img.csv $STORAGE_PATH
-			mv -f $IMAGE_DIR.img.gz $STORAGE_PATH/image
+			mv -f ${IMAGE_DIR}.img.tgz $STORAGE_PATH/image
 		;;
 		"cve")
 			mv -f ${CVE_DIR}.tgz $STORAGE_PATH/others

@@ -41,6 +41,7 @@ STORAGE_PATH="$CURR_PATH/$STORED/$DATE"
 LOG_PATH="$CURR_PATH/$ROOT_DIR/$BUILD_DIR"
 PRE_MEMORY=""
 MEMORY=""
+BUILD_FOLDER="${$BUILD_DIR}"
 
 # ===========
 #  Functions
@@ -109,7 +110,7 @@ EOF
 
 		# Create bbappend
 		cat > "${BB_FILE}" <<EOF
-ADDON_FILES_DIR:="\${THISDIR}/files"
+ADDON_FILES_DIR = "\${THISDIR}/files"
 
 install_utils() {
 	install -m 0644 \${ADDON_FILES_DIR}/OEMInfo.ini \${IMAGE_ROOTFS}/etc
@@ -173,10 +174,13 @@ function generate_csv()
         set - `ls -lh ${FILENAME}`; FILE_SIZE=$5
     fi
 
+    echo "BUILD_DIR = ${BUILD_DIR}"
+    echo "BUILD_FOLDER = ${BUILD_FOLDER}"
+
     HASH_BSP=$(cd ${CURR_PATH}/${ROOT_DIR}/.repo/manifests && git rev-parse HEAD)
     HASH_ADV=$(cd ${CURR_PATH}/${ROOT_DIR}/${META_ADVANTECH_PATH} && git rev-parse HEAD)
-    HASH_KERNEL=$(cd ${CURR_PATH}/${ROOT_DIR}/${BUILD_DIR}/${TMP_DIR}/work/${CHIP_NAME}${PROJECT}-poky-linux/linux-imx/${KERNEL_VERSION}*/git && git rev-parse HEAD)
-    HASH_UBOOT=$(cd ${CURR_PATH}/${ROOT_DIR}/${BUILD_DIR}/${TMP_DIR}/work/${CHIP_NAME}${PROJECT}-poky-linux/u-boot-imx/*${U_BOOT_VERSION}*/git && git rev-parse HEAD)
+    HASH_KERNEL=$(cd ${CURR_PATH}/${ROOT_DIR}/${BUILD_FOLDER}/${TMP_DIR}/work/${CHIP_NAME}${PROJECT}-poky-linux/linux-imx/${KERNEL_VERSION}*/git && git rev-parse HEAD)
+    HASH_UBOOT=$(cd ${CURR_PATH}/${ROOT_DIR}/${BUILD_FOLDER}/${TMP_DIR}/work/${CHIP_NAME}${PROJECT}-poky-linux/u-boot-imx/*${U_BOOT_VERSION}*/git && git rev-parse HEAD)
     cd $CURR_PATH
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV
@@ -370,7 +374,7 @@ function prepare_images() {
 			;;
 		*) # Normal images
 			echo "[ADV] creating ${OUTPUT_DIR}.img.tgz ..."
-			tar czf ${OUTPUT_DIR}/${FILE_NAME} > ${OUTPUT_DIR}.img.tgz
+			tar czf ${OUTPUT_DIR}.img.tgz ${OUTPUT_DIR}/${FILE_NAME}
 			generate_md5 ${OUTPUT_DIR}.img.tgz
 			;;
 	esac

@@ -71,7 +71,7 @@ function update_oeminfo()
 	cd $CURR_PATH
 
 	# Set the folder
-	BASE_DIR="sources/meta-advantech/recipes-fsl/images"
+	BASE_DIR="${CURR_PATH}/${ROOT_DIR}/sources/meta-advantech/recipes-fsl/images"
 	FILES_DIR="${BASE_DIR}/files"
 	INI_FILE="${FILES_DIR}/OEMInfo.ini"
 	BB_FILE="${BASE_DIR}/${DEPLOY_IMAGE_NAME}.bbappend"

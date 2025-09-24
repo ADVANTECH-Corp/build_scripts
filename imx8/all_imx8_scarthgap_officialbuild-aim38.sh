@@ -13,7 +13,7 @@ $BUILD_SH imx8 imx8LBV"$VERSION_NUM" 1G
 
 #imx8_projects
 if [ $RSB3720A2 == true ]; then
-        $BUILD_SH rsb3720a2-8MP 3720A2"$AIM_VERSION"LIV"$VERSION_NUM" "6G 2G" "FSPI"
+        $BUILD_SH rsb3720a2-8MP 3720A2"$AIM_VERSION"LIV"$VERSION_NUM" "6G 4G 2G" "FSPI"
         [ "$?" -ne 0 ] && exit 1
 fi
 if [ $ROM5722A2 == true ]; then

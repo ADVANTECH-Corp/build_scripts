@@ -16,6 +16,7 @@ echo "[ADV] DEPLOY_IMAGE_NAME = ${DEPLOY_IMAGE_NAME}"
 echo "[ADV] BACKEND_TYPE = ${BACKEND_TYPE}"
 echo "[ADV] U_BOOT_VERSION = ${U_BOOT_VERSION}"
 echo "[ADV] META_ADVANTECH_PATH = ${META_ADVANTECH_PATH}"
+echo "[ADV] YOCTO_BUILD_DIR = ${YOCTO_BUILD_DIR}"
 
 CURR_PATH="$PWD"
 AIM_LINUX_TAG_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_kernel-${KERNEL_VERSION}_${CHIP_NAME}"
@@ -31,17 +32,16 @@ IMAGE_DIR=""
 FLASH_DIR=""
 IMX_BOOT_DIR=""
 
-DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$BUILD_DIR/$TMP_DIR/deploy/images/${CHIP_NAME}${PROJECT}"
-DEPLOY_IMX_BOOT_PATH="$CURR_PATH/$ROOT_DIR/$BUILD_DIR/$TMP_DIR/work/${CHIP_NAME}${PROJECT}-poky-linux/imx-boot/*/git"
-DEPLOY_CVE_PATH="$CURR_PATH/$ROOT_DIR/$BUILD_DIR/$TMP_DIR/deploy/cve"
-DEPLOY_MODULES_PATH="$CURR_PATH/$ROOT_DIR/$BUILD_DIR/$TMP_DIR/deploy/images/${CHIP_NAME}${PROJECT}"
-DEPLOY_SPDX_PATH="$CURR_PATH/$ROOT_DIR/$BUILD_DIR/$TMP_DIR/deploy/spdx"
+DEPLOY_IMAGE_PATH="$CURR_PATH/$ROOT_DIR/$YOCTO_BUILD_DIR/$TMP_DIR/deploy/images/${CHIP_NAME}${PROJECT}"
+DEPLOY_IMX_BOOT_PATH="$CURR_PATH/$ROOT_DIR/$YOCTO_BUILD_DIR/$TMP_DIR/work/${CHIP_NAME}${PROJECT}-poky-linux/imx-boot/*/git"
+DEPLOY_CVE_PATH="$CURR_PATH/$ROOT_DIR/$YOCTO_BUILD_DIR/$TMP_DIR/deploy/cve"
+DEPLOY_MODULES_PATH="$CURR_PATH/$ROOT_DIR/$YOCTO_BUILD_DIR/$TMP_DIR/deploy/images/${CHIP_NAME}${PROJECT}"
+DEPLOY_SPDX_PATH="$CURR_PATH/$ROOT_DIR/$YOCTO_BUILD_DIR/$TMP_DIR/deploy/spdx"
 
 STORAGE_PATH="$CURR_PATH/$STORED/$DATE"
-LOG_PATH="$CURR_PATH/$ROOT_DIR/$BUILD_DIR"
+LOG_PATH="$CURR_PATH/$ROOT_DIR/$YOCTO_BUILD_DIR"
 PRE_MEMORY=""
 MEMORY=""
-BUILD_FOLDER="${$BUILD_DIR}"
 
 # ===========
 #  Functions
@@ -174,13 +174,10 @@ function generate_csv()
         set - `ls -lh ${FILENAME}`; FILE_SIZE=$5
     fi
 
-    echo "BUILD_DIR = ${BUILD_DIR}"
-    echo "BUILD_FOLDER = ${BUILD_FOLDER}"
-
     HASH_BSP=$(cd ${CURR_PATH}/${ROOT_DIR}/.repo/manifests && git rev-parse HEAD)
     HASH_ADV=$(cd ${CURR_PATH}/${ROOT_DIR}/${META_ADVANTECH_PATH} && git rev-parse HEAD)
-    HASH_KERNEL=$(cd ${CURR_PATH}/${ROOT_DIR}/${BUILD_FOLDER}/${TMP_DIR}/work/${CHIP_NAME}${PROJECT}-poky-linux/linux-imx/${KERNEL_VERSION}*/git && git rev-parse HEAD)
-    HASH_UBOOT=$(cd ${CURR_PATH}/${ROOT_DIR}/${BUILD_FOLDER}/${TMP_DIR}/work/${CHIP_NAME}${PROJECT}-poky-linux/u-boot-imx/*${U_BOOT_VERSION}*/git && git rev-parse HEAD)
+    HASH_KERNEL=$(cd ${CURR_PATH}/${ROOT_DIR}/${YOCTO_BUILD_DIR}/${TMP_DIR}/work/${CHIP_NAME}${PROJECT}-poky-linux/linux-imx/${KERNEL_VERSION}*/git && git rev-parse HEAD)
+    HASH_UBOOT=$(cd ${CURR_PATH}/${ROOT_DIR}/${YOCTO_BUILD_DIR}/${TMP_DIR}/work/${CHIP_NAME}${PROJECT}-poky-linux/u-boot-imx/*${U_BOOT_VERSION}*/git && git rev-parse HEAD)
     cd $CURR_PATH
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV
@@ -226,7 +223,7 @@ function set_environment()
 	cd $CURR_PATH/$ROOT_DIR
 	echo "[ADV] set environment"
 
-	EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${CHIP_NAME}${PROJECT} UBOOT_CONFIG=${PRE_MEMORY} source imx-setup-release.sh -b $BUILD_DIR
+	EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${CHIP_NAME}${PROJECT} UBOOT_CONFIG=${PRE_MEMORY} source imx-setup-release.sh -b $YOCTO_BUILD_DIR
 	echo 'BB_NUMBER_THREADS = "16"' >> conf/local.conf
 	echo 'PARALLEL_MAKE = "-j 4"' >> conf/local.conf
 }
@@ -268,13 +265,13 @@ function rebuild_bootloader()
 	BOOTLOADER_TYPE=$1
 
 	echo "[ADV] Rebuild image for $BOOTLOADER_TYPE"
-	echo "UBOOT_CONFIG = \"$BOOTLOADER_TYPE\"" >> $CURR_PATH/$ROOT_DIR/$BUILD_DIR/conf/local.conf
+	echo "UBOOT_CONFIG = \"$BOOTLOADER_TYPE\"" >> $CURR_PATH/$ROOT_DIR/$YOCTO_BUILD_DIR/conf/local.conf
 	building imx-atf cleansstate
 	building optee-os cleansstate
 	building $DEPLOY_IMAGE_NAME clean
 	building $DEPLOY_IMAGE_NAME 
 
-	sed -i "/UBOOT_CONFIG/d" $CURR_PATH/$ROOT_DIR/$BUILD_DIR/conf/local.conf
+	sed -i "/UBOOT_CONFIG/d" $CURR_PATH/$ROOT_DIR/$YOCTO_BUILD_DIR/conf/local.conf
 	cd  $CURR_PATH
 }
 

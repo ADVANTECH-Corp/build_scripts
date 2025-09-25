@@ -16,6 +16,8 @@ echo "[ADV] DEPLOY_IMAGE_NAME = ${DEPLOY_IMAGE_NAME}"
 echo "[ADV] BACKEND_TYPE = ${BACKEND_TYPE}"
 echo "[ADV] U_BOOT_VERSION = ${U_BOOT_VERSION}"
 echo "[ADV] META_ADVANTECH_PATH = ${META_ADVANTECH_PATH}"
+echo "[ADV] IMX_IMAGE_CORE_BB_PATH = ${IMX_IMAGE_CORE_BB_PATH}"
+echo "[ADV] IMX_IMAGE_FULL_BB_PATH = ${IMX_IMAGE_FULL_BB_PATH}"
 echo "[ADV] YOCTO_BUILD_DIR = ${YOCTO_BUILD_DIR}"
 
 CURR_PATH="$PWD"
@@ -71,7 +73,19 @@ function update_oeminfo()
 	cd $CURR_PATH
 
 	# Set the folder
-	BASE_DIR="${CURR_PATH}/${ROOT_DIR}/sources/meta-advantech/recipes-fsl/images"
+	case "${DEPLOY_IMAGE_NAME}" in
+		imx-image-core)
+			BASE_DIR="${CURR_PATH}/${ROOT_DIR}/${IMX_IMAGE_CORE_BB_PATH}"
+			;;
+		imx-image-full)
+			BASE_DIR="${CURR_PATH}/${ROOT_DIR}/${IMX_IMAGE_FULL_BB_PATH}"
+			;;
+		*)
+			echo "DEPLOY_IMAGE_NAME is neither imx-image-core nor imx-image-full, exit function."
+			return 0
+			;;
+	esac
+
 	FILES_DIR="${BASE_DIR}/files"
 	INI_FILE="${FILES_DIR}/OEMInfo.ini"
 	BB_FILE="${BASE_DIR}/${DEPLOY_IMAGE_NAME}.bbappend"

@@ -349,10 +349,10 @@ function process_image() {
         echo "[ERROR] OEMInfo.ini not found"
     fi
 
-    # Update Image_Version in all found files
+    # Add the Officialbuild_Image_Version
     for ini_file in "${ini_files[@]}"; do
-        echo "[INFO] Updating Image_Version in $ini_file..."
-        sudo sed -i "s/^Image_Version:.*/Image_Version: V${RELEASE_VERSION}/" "$ini_file"
+        echo "[INFO] Add the Officialbuild_Image_Version in $ini_file..."
+        sudo sed -i "/^\(Dailybuild_Image_Version\|Image_Version\):[[:space:]]*/a Officialbuild_Image_Version: V${RELEASE_VERSION}" "$ini_file"
     done
 
     popd >/dev/null

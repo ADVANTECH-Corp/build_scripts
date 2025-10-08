@@ -67,7 +67,7 @@ function update_oeminfo()
     sudo sed -i "s/^OS_Distro:.*/OS_Distro: ${OS_VERSION^^}/" "$ini_file"
 
     # Update Image_Version
-    sudo sed -i "s/^Image_Version:.*/Image_Version: V${RELEASE_VERSION^^}/" "$ini_file"
+    sudo sed -i "s/^Image_Version:.*/Dailybuild_Image_Version: V${RELEASE_VERSION^^}/" "$ini_file"
 
     # Update Kernel_Version
     sudo sed -i "s/^Kernel_Version:.*/Kernel_Version: ${KERNEL_VERSION^^}/" "$ini_file"

@@ -49,25 +49,34 @@ function update_oeminfo()
     echo "[INFO] Build_Date: $DATE"
     echo "[INFO] Image_Version: v${RELEASE_VERSION}"
 
-	# 更新 Chip_name
-    local board_value=$(echo "$TARGET_BOARD" | tr '+' ',')
-	sudo sed -i "s/^Chip_Name:.*/Chip_Name: ${board_value}/" "$ini_file"
- 	# 更新 Product_Name
-    sudo sed -i "s/^Product_Name:.*/Product_Name: ${PROJECT}/" "$ini_file"
-	# 更新 Ram_Size
-    local socmem_value=$(echo "$SOC_MEM" | tr '+' ',')
+    # Convert values: replace + with ", " and uppercase
+    local board_value=$(echo "$TARGET_BOARD" | sed 's/+/, /g' | tr '[:lower:]' '[:upper:]')
+    local socmem_value=$(echo "$SOC_MEM" | sed 's/+/, /g' | tr '[:lower:]' '[:upper:]')
+    local storage_value=$(echo "$STORAGE" | sed 's/+/, /g' | tr '[:lower:]' '[:upper:]')
+
+    # Update Chip_Name
+    sudo sed -i "s/^Chip_Name:.*/Chip_Name: ${board_value}/" "$ini_file"
+
+    # Update Product_Name
+    sudo sed -i "s/^Product_Name:.*/Product_Name: ${PROJECT^^}/" "$ini_file"
+
+    # Update Ram_Size
     sudo sed -i "s/^Ram_Size:.*/Ram_Size: ${socmem_value}/" "$ini_file"
-	# 更新 OS_Distro
-    sudo sed -i "s/^OS_Distro:.*/OS_Distro: ${OS_VERSION}/" "$ini_file"
-    # 更新 Image_Version
-    sudo sed -i "s/^Image_Version:.*/Image_Version: V${RELEASE_VERSION}/" "$ini_file"
-	# 更新 Kernel_Version
-    sudo sed -i "s/^Kernel_Version:.*/Kernel_Version: ${KERNEL_VERSION}/" "$ini_file"
-	# 更新 Storage_support
-	local storage_value=$(echo "$STORAGE" | tr '+' ',')
-    sudo sed -i "s/^Storage_support:.*/Storage_support: ${storage_value}/" "$ini_file"
-	# 更新 Build_Date
-    sudo sed -i "s/^Build_Date:.*/Build_Date: $DATE/" "$ini_file"
+
+    # Update OS_Distro
+    sudo sed -i "s/^OS_Distro:.*/OS_Distro: ${OS_VERSION^^}/" "$ini_file"
+
+    # Update Image_Version
+    sudo sed -i "s/^Image_Version:.*/Image_Version: V${RELEASE_VERSION^^}/" "$ini_file"
+
+    # Update Kernel_Version
+    sudo sed -i "s/^Kernel_Version:.*/Kernel_Version: ${KERNEL_VERSION^^}/" "$ini_file"
+
+    # Update Storage or Storage_support
+    sudo sed -i "s/^Storage\(_support\)\?:.*/Storage: ${storage_value}/" "$ini_file"
+
+    # Update Build_Date
+    sudo sed -i "s/^Build_Date:.*/Build_Date: ${DATE^^}/" "$ini_file"
 	
     echo "[INFO] Done updating $ini_file."
 }

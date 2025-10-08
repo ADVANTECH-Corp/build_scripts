@@ -117,7 +117,7 @@ Product_Name: ${PROJECT^^}
 Ram_Size: ${MEMORY^^}
 Storage: ${STORAGE_FORMATTED}
 OS_Distro: ${OS_DISTRO^^}
-Image_Version: V${RELEASE_VERSION^^}
+Dailybuild_Image_Version: V${RELEASE_VERSION^^}
 Kernel_Version: ${KERNEL_VERSION^^}
 Build_Date: ${DATE^^}
 EOF

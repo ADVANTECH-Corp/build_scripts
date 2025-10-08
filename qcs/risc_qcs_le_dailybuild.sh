@@ -61,7 +61,7 @@ function update_oeminfo()
     # 更新 Build_Date
     sed -i "s/^Build_Date:.*/Build_Date: $DATE/" "$ini_file"
     # 更新 Image_Version
-    sed -i "s/^Image_Version:.*/Image_Version: V${RELEASE_VERSION}/" "$ini_file"
+    sed -i "s/^Image_Version:.*/Dailybuild_Image_Version: V${RELEASE_VERSION}/" "$ini_file"
 
     echo "[INFO] Done updating $ini_file."
 }

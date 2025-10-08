@@ -244,8 +244,8 @@ function process_image() {
 
     pushd Linux_for_Tegra >/dev/null
     
-    # Update the Image_Version
-    sudo sed -i "s/^Image_Version:.*/Image_Version: V${RELEASE_VERSION}/" "$ini_file"
+    # Add the Officialbuild_Image_Version
+    sudo sed -i "/^\(Dailybuild_Image_Version\|Image_Version\):[[:space:]]*/a Officialbuild_Image_Version: V${RELEASE_VERSION}" "$ini_file"
 
     popd >/dev/null
 

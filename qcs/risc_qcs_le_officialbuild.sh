@@ -448,7 +448,11 @@ if [ -z "$EXISTED_VERSION" ] ; then
     create_xml_and_commit
 
     # Create AIM_Linux_Release xml file
-    create_aim_linux_release_xml
+    if [ "$RELEASE_TO_BSP_LAUNCHER" = "y" ]; then
+        create_aim_linux_release_xml
+    else
+        echo "Skip releasing .xml to AIM Linux Release"
+    fi
 
     rm -rf $ROOT_DIR
 fi

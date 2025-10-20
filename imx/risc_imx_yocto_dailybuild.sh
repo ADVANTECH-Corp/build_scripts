@@ -434,7 +434,7 @@ function copy_image_to_storage()
 #  Main procedure
 # ================
 
-mkdir $ROOT_DIR
+mkdir -p $ROOT_DIR
 
 # Make storage folder
 if [ -e $STORAGE_PATH ] ; then
@@ -452,6 +452,12 @@ get_source_code
 echo "[ADV] tar $BSP_DIR.tgz file"
 prepare_images bsp $BSP_DIR
 copy_image_to_storage bsp
+
+if [ -e $CURR_PATH/sstate-cache ]; then
+	echo "[ADV] link sstate-cache directory from backup"
+	mkdir -p $CURR_PATH/$ROOT_DIR/$YOCTO_BUILD_DIR
+	ln -s $CURR_PATH/sstate-cache $CURR_PATH/$ROOT_DIR/$YOCTO_BUILD_DIR/sstate-cache
+fi
 
 if [ -e $CURR_PATH/downloads ]; then
 	echo "[ADV] link downloads directory from backup"
@@ -493,7 +499,7 @@ copy_image_to_storage cve
 echo "[ADV] create sbom SPDX files"
 prepare_images spdx $SPDX_DIR
 copy_image_to_storage spdx
-	
+
 echo "[ADV] create module"
 prepare_images modules $MODULES_DIR
 copy_image_to_storage modules

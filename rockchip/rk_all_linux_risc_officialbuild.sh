@@ -467,6 +467,9 @@ function install_build_dependencies() {
     sudo apt-get install binfmt-support qemu-user-static --reinstall
     sudo update-binfmts --enable qemu-aarch64
 
+    # install gettext
+    sudo apt-get install gettext -y
+
 	log_success "All build dependencies installed successfully"
     return 0
 }

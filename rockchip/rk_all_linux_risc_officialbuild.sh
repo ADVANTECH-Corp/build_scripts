@@ -462,6 +462,11 @@ function install_build_dependencies() {
     fi
 	log_success "live-build installed successfully"
 
+    # install qemu
+    sudo apt-get update
+    sudo apt-get install binfmt-support qemu-user-static --reinstall
+    sudo update-binfmts --enable qemu-aarch64
+
 	log_success "All build dependencies installed successfully"
     return 0
 }

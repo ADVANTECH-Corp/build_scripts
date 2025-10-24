@@ -6,11 +6,13 @@
 # AUTHOR: Yunjin Jiang <yunjin.jiang@advantech.com.cn>
 # VERSION HISTORY:
 #   1.0.0 2025-10-17 Initial release
+#   1.0.1 2025-10-22 Update build dependencies
 #
 
 ## MODIFICATION DETAILS:
 # Date       Version Author          Changes
-# 2024-01-10 1.0.0   Yunjin Jiang    Initial implementation
+# 2025-10-17 1.0.0   Yunjin Jiang    Initial implementation
+# 2025-10-17 1.0.1   Bo Xiao         Install "binfmt/qemu/gettext" for build dependencies
 # 
 
 
@@ -23,7 +25,7 @@ set -euo pipefail
 # ===========
 #  Global Variables
 # ===========
-declare -g SCRIPT_VERSION="1.0.0"
+declare -g SCRIPT_VERSION="1.0.1"
 
 declare -g REPO="repo"
 declare -g VERSION_K="" VERSION_M="" VERSION_P=""
@@ -463,12 +465,16 @@ function install_build_dependencies() {
 	log_success "live-build installed successfully"
 
     # install qemu
+    log_info "Installing qemu-user-static & binfmt-support ..."
     sudo apt-get update
     sudo apt-get install binfmt-support qemu-user-static --reinstall
     sudo update-binfmts --enable qemu-aarch64
+    log_success "qemu-user-static & binfmt-support installed successfully"
 
     # install gettext
+    log_info "Installing gettext..."
     sudo apt-get install gettext -y
+    log_success "gettext installed successfully"
 
 	log_success "All build dependencies installed successfully"
     return 0

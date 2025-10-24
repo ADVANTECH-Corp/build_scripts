@@ -48,7 +48,7 @@ fi
 if [ "$AOM3841A1" == "true" ]; then
 	PROJECT_LIST="$PROJECT_LIST AOM3841"
 	PROJECT="aom3841a1"
-	BOARD_CONFIG="adv_rk3576_aom3841a1_defconfig"
+	BOARD_CONFIG="rk3576_aom3841a1_defconfig"
 	RT_PATCH="false"
 
 	export PROJECT_LIST

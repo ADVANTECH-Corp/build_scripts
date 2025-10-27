@@ -38,7 +38,7 @@ declare -g ROOT_DIR="${OS_DISTRO}_${DATE}"
 declare -g ROOTFS="${ROOTFS:-debian}"  # Default value is debian
 
 # Read-only arrays
-readonly SPECIAL_GIT_REPOSITORY=(".repo/manifests" "u-boot_priv")
+readonly SPECIAL_GIT_REPOSITORY=(".repo/manifests")
 readonly BUILD_COMPONENTS=("uboot" "kernel" "rootfs" "recovery" "misc" "firmware")
 readonly REQUIRED_VARS=(
     "BSP_URL" "BSP_BRANCH" "BSP_XML"

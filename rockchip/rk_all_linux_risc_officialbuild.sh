@@ -4,15 +4,13 @@
 # FILE: rk_all_linux_risc_officialbuild.sh
 # PURPOSE: Auto build on azure pipeline
 # AUTHOR: Yunjin Jiang <yunjin.jiang@advantech.com.cn>
-# VERSION HISTORY:
-#   1.0.0 2025-10-17 Initial release
-#   1.0.1 2025-10-22 Update build dependencies
 #
 
 ## MODIFICATION DETAILS:
 # Date       Version Author          Changes
 # 2025-10-17 1.0.0   Yunjin Jiang    Initial implementation
-# 2025-10-17 1.0.1   Bo Xiao         Install "binfmt/qemu/gettext" for build dependencies
+# 2025-10-22 1.0.1   Bo Xiao         Install "binfmt/qemu/gettext" for build dependencies
+# 2025-10-27 1.0.2   Yunjin Jiang    Handle unbound variable:remote_server in function commit_tag
 # 
 
 
@@ -25,7 +23,7 @@ set -euo pipefail
 # ===========
 #  Global Variables
 # ===========
-declare -g SCRIPT_VERSION="1.0.1"
+declare -g SCRIPT_VERSION="1.0.2"
 
 declare -g REPO="repo"
 declare -g VERSION_K="" VERSION_M="" VERSION_P=""
@@ -1014,6 +1012,10 @@ function commit_tag() {
     log_success "Existing tags checked successfully"
     
     # Create new tags
+    safe_cd "$CURR_PATH/$ROOT_DIR/kernel" || return 1
+    local remote_server=$(git remote -v | grep push | awk '{print $1}')
+    safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
+
     log_info "Creating tag: $VER_TAG"
     if ! $REPO forall -c "git tag -a '$VER_TAG' -m '[Official Release] $VER_TAG'"; then
         log_error "Failed to create tags"
@@ -1024,7 +1026,7 @@ function commit_tag() {
         log_error "Failed to push tags"
         return 1
     fi
-    
+
     # Special repository tag pushing
     for dir in "${SPECIAL_GIT_REPOSITORY[@]}"; do
         local dir_full_path="$CURR_PATH/$ROOT_DIR/$dir"

@@ -91,16 +91,19 @@ function process_repos() {
             git merge --ff-only tmp_rebase_branch || true
             git push origin "$OFFICIAL_BRANCH"
 
+            TAG_NAME="v${OFFICIAL_VERSION}_${OFFICIAL_BRANCH}"
+            DEV_TAG_NAME="v${OFFICIAL_VERSION}_${BRANCH}"
+
             # === tag on official branch ===
-            echo "[INFO] Tagging $OFFICIAL_BRANCH with v$OFFICIAL_VERSION ..."
-            git tag -a "v$OFFICIAL_VERSION" -m "Official release v$OFFICIAL_VERSION"
-            git push origin "v$OFFICIAL_VERSION"
+            echo "[INFO] Tagging $OFFICIAL_BRANCH with $TAG_NAME ..."
+            git tag -a "$TAG_NAME" -m "Official release $TAG_NAME"
+            git push origin "$TAG_NAME"
 
             # === tag on develop branch ===
-            echo "[INFO] Tagging $BRANCH with v${OFFICIAL_VERSION}_develop at commit $COMMIT_HASH ..."
+            echo "[INFO] Tagging $BRANCH with $DEV_TAG_NAME at commit $COMMIT_HASH ..."
             git checkout -B "$BRANCH" "origin/$BRANCH"
-            git tag -a "v${OFFICIAL_VERSION}_develop" "$COMMIT_HASH" -m "Develop snapshot for v$OFFICIAL_VERSION"
-            git push origin "v${OFFICIAL_VERSION}_develop"
+            git tag -a "$DEV_TAG_NAME" "$COMMIT_HASH" -m "Develop snapshot for $TAG_NAME"
+            git push origin "$DEV_TAG_NAME"
         done
 
         cd ..

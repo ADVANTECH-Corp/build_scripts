@@ -297,6 +297,14 @@ prepare_official_package() {
     sudo apt-get update
     sudo apt-get install -y util-linux fdisk
 
+    # Remove files for other machines, since only one machine is currently supported.
+    echo "[INFO] Remove files whose filenames do not contain '$DAILY_VER'."
+    for F in `find . -type f -name "*"`; do 
+        [[ $F =~ $DAILY_VER ]] && continue
+	echo " - $F"
+    done
+    echo "[INFO] done"
+
     # image
     for MEMORY in $MEMORY_LIST; do
 	    DAILY_IMAGE_VER="${DAILY_VER}_${MEMORY}_${STORAGE}_${DATE}"

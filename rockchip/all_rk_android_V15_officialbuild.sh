@@ -7,7 +7,7 @@ if [ "$AOM3841A1" == "true" ]; then
         UBOOT_DEFCONFIG=rk3576_aom3841a1
         KERNEL_DEFCONFIG=rk3576_adv_defconfig
         KERNEL_DTB=rk3576-aom3841-a1.img
-        ANDROID_PRODUCT=aom3841_u-userdebug
+        ANDROID_PRODUCT=aom3841_u-ap4a-userdebug
         PROJECT_NAME=aom3841a1
         MACHINE_LIST="$MACHINE_LIST aom3841"
 

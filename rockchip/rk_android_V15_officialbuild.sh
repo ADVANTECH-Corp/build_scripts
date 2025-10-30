@@ -61,6 +61,7 @@ echo "[ADV] BSP_URL = ${BSP_URL}"
 echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
 echo "[ADV] BSP_XML = ${BSP_XML}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
+echo "[ADV] KERNEL_VERSION = ${KERNEL_VERSION}"
 echo "[ADV] MACHINE_LIST= ${MACHINE_LIST}"
 echo "[ADV] BUILD_NUMBER = ${BUILD_NUMBER}"
 
@@ -68,13 +69,13 @@ echo "[ADV] UBOOT_DEFCONFIG = ${UBOOT_DEFCONFIG}"
 echo "[ADV] KERNEL_DEFCONFIG = ${KERNEL_DEFCONFIG}"
 echo "[ADV] KERNEL_DTB = ${KERNEL_DTB}"
 echo "[ADV] ANDROID_PRODUCT = ${ANDROID_PRODUCT}"
-VER_TAG="${VER_PREFIX}AIV"$(echo $RELEASE_VERSION | sed 's/[.]//')
+VER_TAG=${PROJECT_NAME}"_"${OS_DISTRO}"_"$(echo $RELEASE_VERSION | sed 's/[.]//')"_"${KERNEL_VERSION}"_"${CHIP_NAME}
 echo "[ADV] VER_TAG = $VER_TAG"
 echo "[ADV] isFirstMachine = $isFirstMachine"
 CURR_PATH="$PWD"
 ROOT_DIR="${VER_TAG}"_"$DATE"
 SUB_DIR="android"
-OUTPUT_DIR="$CURR_PATH/$STORED/$DATE/V"$(echo $RELEASE_VERSION | sed 's/[.]//')
+OUTPUT_DIR="$CURR_PATH/$STORED/$DATE/"$(echo $RELEASE_VERSION | sed 's/[.]//')
 
 #-- Advantech/RK azure android source code repository
 echo "[ADV-ROOT]  $ROOT_DIR"
@@ -335,7 +336,7 @@ function building()
         source build/envsetup.sh
         lunch $ANDROID_PRODUCT
         make clean
-        echo " V$RELEASE_VERSION" > u-boot/.scmversion
+        echo " $RELEASE_VERSION" > u-boot/.scmversion
         ./build.sh -AUCKuop 2>> $CURR_PATH/$ROOT_DIR/$LOG_FILE_ANDROID
     else
         echo "[ADV] pass building..."

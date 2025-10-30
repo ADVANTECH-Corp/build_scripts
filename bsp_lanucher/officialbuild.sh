@@ -63,7 +63,6 @@ function process_repos() {
         git clone "$URL" "$NAME"
         cd "$NAME"
 
-        # 這裡要確保所有 remote branch 都抓下來
         git fetch --all --tags
 
         for line in $DEVELOP_BRANCHES; do
@@ -75,17 +74,28 @@ function process_repos() {
             echo "[INFO] Commit hash to rebase until: $COMMIT_HASH"
             echo "[INFO] Target official branch: $OFFICIAL_BRANCH"
 
+            # === check if official branch exists on remote ===
+            if git ls-remote --heads origin "$OFFICIAL_BRANCH" | grep -q "$OFFICIAL_BRANCH"; then
+                echo "[INFO] Remote branch '$OFFICIAL_BRANCH' exists."
+            else
+                echo "[WARN] Remote branch '$OFFICIAL_BRANCH' does NOT exist. Creating from '$BRANCH' ..."
+                git checkout -B "$BRANCH" "origin/$BRANCH"
+                git checkout -B "$OFFICIAL_BRANCH"
+                git push origin "$OFFICIAL_BRANCH"
+                echo "[INFO] Remote branch '$OFFICIAL_BRANCH' created from '$BRANCH'."
+            fi
+
             # === official branch rebase ===
-            git fetch origin "$OFFICIAL_BRANCH" || true
+            git fetch origin "$OFFICIAL_BRANCH"
             git checkout -B "$OFFICIAL_BRANCH" "origin/$OFFICIAL_BRANCH"
             git pull origin "$OFFICIAL_BRANCH"
 
-            MERGE_BASE=$(git merge-base "$OFFICIAL_BRANCH" "origin/$BRANCH")
+            MERGE_BASE=$(git merge-base "$OFFICIAL_BRANCH" "origin/$BRANCH" || true)
             echo "[INFO] Merge-base between $OFFICIAL_BRANCH and $BRANCH is $MERGE_BASE"
 
             git checkout -B tmp_rebase_branch "$COMMIT_HASH"
             echo "[INFO] Rebasing commits from $MERGE_BASE..$COMMIT_HASH onto $OFFICIAL_BRANCH ..."
-            git rebase --onto "$OFFICIAL_BRANCH" "$MERGE_BASE"
+            git rebase --onto "$OFFICIAL_BRANCH" "$MERGE_BASE" || true
 
             git checkout "$OFFICIAL_BRANCH"
             git merge --ff-only tmp_rebase_branch || true

@@ -69,13 +69,13 @@ echo "[ADV] UBOOT_DEFCONFIG = ${UBOOT_DEFCONFIG}"
 echo "[ADV] KERNEL_DEFCONFIG = ${KERNEL_DEFCONFIG}"
 echo "[ADV] KERNEL_DTB = ${KERNEL_DTB}"
 echo "[ADV] ANDROID_PRODUCT = ${ANDROID_PRODUCT}"
-VER_TAG=${PROJECT_NAME}"_"${OS_DISTRO}"_"$(echo $RELEASE_VERSION | sed 's/[.]//')"_"${KERNEL_VERSION}"_"${CHIP_NAME}
+VER_TAG=${PROJECT_NAME}"_"${OS_DISTRO}"_"${RELEASE_VERSION}"_"${KERNEL_VERSION}"_"${CHIP_NAME}
 echo "[ADV] VER_TAG = $VER_TAG"
 echo "[ADV] isFirstMachine = $isFirstMachine"
 CURR_PATH="$PWD"
 ROOT_DIR="${VER_TAG}"_"$DATE"
 SUB_DIR="android"
-OUTPUT_DIR="$CURR_PATH/$STORED/$DATE/"$(echo $RELEASE_VERSION | sed 's/[.]//')
+OUTPUT_DIR="$CURR_PATH/$STORED/$DATE/"${RELEASE_VERSION}
 
 #-- Advantech/RK azure android source code repository
 echo "[ADV-ROOT]  $ROOT_DIR"

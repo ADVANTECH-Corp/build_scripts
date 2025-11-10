@@ -58,3 +58,16 @@ if [ "$AOM3841A1" == "true" ]; then
 	./rk_all_linux_risc_officialbuild.sh
 fi
 
+if [ "$AOM5841A1" == "true" ]; then
+	PROJECT_LIST="$PROJECT_LIST AOM5841"
+	PROJECT="aom5841a1"
+	BOARD_CONFIG="rk3576_aom5841a1_defconfig"
+	RT_PATCH="false"
+
+	export PROJECT_LIST
+	export PROJECT
+	export BOARD_CONFIG
+	export RT_PATCH
+	./rk_all_linux_risc_officialbuild.sh
+fi
+

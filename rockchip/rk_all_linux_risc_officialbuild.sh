@@ -221,7 +221,11 @@ function get_first_project() {
 }
 
 function get_adv_version() {
-    local version_file="$CURR_PATH/$ROOT_DIR/.repo/manifests/version/${PROJECT}"
+    if [[ "$ROOTFS" == "ubuntu" ]]; then
+        local version_file="$CURR_PATH/$ROOT_DIR/.repo/manifests/version/${PROJECT}_ubuntu"
+    else
+        local version_file="$CURR_PATH/$ROOT_DIR/.repo/manifests/version/${PROJECT}"
+    fi
     
     if [[ ! -f "$version_file" ]]; then
         VERSION_K_LAST="0"
@@ -239,7 +243,11 @@ function get_adv_version() {
     # Validate version numbers are numeric
     if ! [[ "$VERSION_K_LAST" =~ ^[0-9]+$ ]] || ! [[ "$VERSION_M_LAST" =~ ^[0-9]+$ ]] || ! [[ "$VERSION_P_LAST" =~ ^[0-9]+$ ]]; then
         log_error "Invalid version format detected: VERSION_K_LAST='$VERSION_K_LAST', VERSION_M_LAST='$VERSION_M_LAST', VERSION_P_LAST='$VERSION_P_LAST'"
-        log_error "Please check the version file: '.repo/manifests/version/${PROJECT}'"
+        if [[ "$ROOTFS" == "ubuntu" ]]; then
+            log_error "Please check the version file: '.repo/manifests/version/${PROJECT}_ubuntu'"
+        else
+            log_error "Please check the version file: '.repo/manifests/version/${PROJECT}'"
+        fi
         return 1
     fi
 
@@ -314,8 +322,12 @@ function get_kernel_version() {
 }
 
 function init_global_variable() {
-    OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}/v${SDK_VERSION}.${ADV_VERSION}"
-    
+    if [[ "$ROOTFS" == "ubuntu" ]]; then
+        OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}/uiv${SDK_VERSION}.${ADV_VERSION}"
+    else
+        OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}/v${SDK_VERSION}.${ADV_VERSION}"
+    fi
+
     VER_TAG="${PROJECT}_${OS_DISTRO}_v${ADV_VERSION}_kernel-${KERNEL_VERSION}_${CHIP_NAME}"
     VER_MANIFEST="${VER_TAG}"
     VER_LOG="${VER_TAG}_${RAM_SIZE}_${STORAGE}_${DATE}.log"
@@ -848,13 +860,23 @@ function commit_manifest_and_version() {
     if [[ "${VERSION_FIXED}" == "false" ]]; then
         # Create version file
         mkdir -p version
-        cat > "version/${PROJECT}" << EOF
+        if [[ "$ROOTFS" == "ubuntu" ]]; then
+            cat > "version/${PROJECT}_ubuntu" << EOF
 VERSION_K = ${VERSION_K}
 VERSION_M = ${VERSION_M}
 VERSION_P = ${VERSION_P}
 EOF
 
-        git add "version/${PROJECT}"
+            git add "version/${PROJECT}_ubuntu"
+        else
+            cat > "version/${PROJECT}" << EOF
+VERSION_K = ${VERSION_K}
+VERSION_M = ${VERSION_M}
+VERSION_P = ${VERSION_P}
+EOF
+
+            git add "version/${PROJECT}"
+        fi
     else
         log_info "Skip creating version file because VERSION_FIXED is true"
     fi

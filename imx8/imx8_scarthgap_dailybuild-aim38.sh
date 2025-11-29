@@ -265,7 +265,7 @@ function set_environment()
 	else
 		# First build
 		EULA=1 DISTRO=$BACKEND_TYPE MACHINE=${KERNEL_CPU_TYPE}${PRODUCT} UBOOT_CONFIG=${PRE_MEMORY} source imx-setup-release.sh -b $BUILDALL_DIR
-        echo 'BB_NUMBER_THREADS = "16"' >> conf/local.conf
+        echo 'BB_NUMBER_THREADS = "$(nproc)"' >> conf/local.conf
         echo 'PARALLEL_MAKE = "-j 4"' >> conf/local.conf
 	fi
 }

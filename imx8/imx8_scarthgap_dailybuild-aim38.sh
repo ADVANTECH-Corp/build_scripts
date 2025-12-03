@@ -505,8 +505,8 @@ else #"$PRODUCT" != "$VER_PREFIX"
 
 	if [ -e $CURR_PATH/sstate-cache ]; then
 		echo "[ADV] link sstate-cache directory from backup"
-		mkdir -p $CURR_PATH/$ROOT_DIR/$YOCTO_BUILD_DIR
-		ln -s $CURR_PATH/sstate-cache $CURR_PATH/$ROOT_DIR/$YOCTO_BUILD_DIR/sstate-cache
+		mkdir -p $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR
+		ln -s $CURR_PATH/sstate-cache $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/sstate-cache
 	fi
 
         if [ -e $CURR_PATH/downloads ] ; then

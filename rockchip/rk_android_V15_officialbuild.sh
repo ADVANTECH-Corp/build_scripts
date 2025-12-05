@@ -365,7 +365,7 @@ function build_android_images()
 function prepare_images()
 {
     cd $CURR_PATH
-    IMAGE_DIR="${VER_TAG}"_"$NEW_MACHINE"_"$DATE"
+    IMAGE_DIR="${VER_TAG}"_all_emmc_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
 
@@ -382,8 +382,8 @@ function prepare_images()
 
 
     echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
-    tar czf ${IMAGE_DIR}.tgz $IMAGE_DIR
-    generate_md5 ${IMAGE_DIR}.tgz
+    tar czf ${IMAGE_DIR}.img.tgz -C $IMAGE_DIR .
+    generate_md5 ${IMAGE_DIR}.img.tgz
 }
 
 function copy_image_to_storage()

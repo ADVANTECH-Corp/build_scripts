@@ -29,6 +29,25 @@ if [ "$RSB4810A2" == "true" ]; then
 	./rk3568_debian10_v110_risc_officialbuild.sh $VERSION_NUM
 fi
 
+if [ "$ROCK101A2" == "true" ]; then
+	UBOOT_DEFCONFIG=rk3568_rock101a2
+	KERNEL_DEFCONFIG=rk3568_adv_defconfig
+	KERNEL_DTB=rk3568-rock101-a2.img
+	MACHINE_LIST="$MACHINE_LIST ROCK101"
+	MODEL_NAME="ROCK101"
+	HW_VER="A2"
+	BOARD_CONFIG="BoardConfig-rk3568-rock101a2.mk"
+
+	export UBOOT_DEFCONFIG
+	export KERNEL_DEFCONFIG
+	export KERNEL_DTB
+	export MACHINE_LIST
+	export MODEL_NAME
+	export HW_VER
+	export BOARD_CONFIG
+	./rk3568_debian10_v110_risc_officialbuild.sh $VERSION_NUM
+fi
+
 if [ "$ROM5880A1" == "true" ]; then
 	UBOOT_DEFCONFIG=rk3568_rom5880a1
 	KERNEL_DEFCONFIG=rk3568_adv_defconfig

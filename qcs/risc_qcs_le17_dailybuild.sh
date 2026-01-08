@@ -102,6 +102,11 @@ function build_image()
 	#cd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
 	echo "[ADV] Check cuurent path"
 	pwd
+	
+	echo "[ADV] Remove fail for le17"
+	rm -rf ../layers/meta-advantech-qualcomm/recipes-firmware/firmware/firmware-qcom-dspso_1.0.bbappend
+	rm -rf ../layers/meta-advantech-qualcomm/recipes-firmware/firmware/firmware-qcom-hlosfw_1.0.bbappend
+	
 	echo "[ADV] building ..."
 	bitbake-layers add-layer ../layers/meta-advantech-qualcomm
 

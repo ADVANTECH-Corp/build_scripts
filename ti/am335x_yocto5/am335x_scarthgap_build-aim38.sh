@@ -158,7 +158,7 @@ function prepare_images()
     echo "[ADV] DEPLOY_IMAGE_PATH=$DEPLOY_IMAGE_PATH"
 
     # tisdk-core-bundle-am335xepcr3220a1-yyyyMMddhhmmss.tar.xz   ,  tisdk-default-image-am335xepcr3220a1-yyyyMMddhhmmss.rootfs.tar.xz
-    FILE_NAME=${OS_IMAGE_NAME}"-"${MACHINE_PROJECT}".rootfs.*"
+    FILE_NAME=${OS_IMAGE_NAME}"-"${MACHINE_PROJECT}".rootfs-*.*"
 
     echo "[ADV] OS images:$FILE_NAME"
     echo "[ADV] creating ${IMAGE_DIR}_OS_img.tgz for all OS images..."

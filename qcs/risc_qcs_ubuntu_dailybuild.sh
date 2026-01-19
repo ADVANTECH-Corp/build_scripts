@@ -1,35 +1,31 @@
 #!/bin/bash
 PRODUCT=$1
-set -x
+
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
 echo "[ADV] BSP_URL = ${BSP_URL}"
 echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
 echo "[ADV] BSP_XML = ${BSP_XML}"
 echo "[ADV] PLATFORM_PREFIX = ${PLATFORM_PREFIX}"
-echo "[ADV] PROJECT=$PROJECT"
 echo "[ADV] OS_DISTRO=$OS_DISTRO"
 echo "[ADV] KERNEL_VERSION=$KERNEL_VERSION"
 echo "[ADV] CHIP_NAME=$CHIP_NAME"
 echo "[ADV] RAM_SIZE=$RAM_SIZE"
 echo "[ADV] STORAGE=$STORAGE"
 echo "[ADV] RELEASE_VERSION=$RELEASE_VERSION"
-echo "[ADV] YOCTO_MACHINE_NAME=$YOCTO_MACHINE_NAME"
+echo "[ADV] UBUNTU_MACHINE=$UBUNTU_MACHINE"
 echo "[ADV] DISTRO_IMAGE = ${DISTRO_IMAGE}"
+echo "[ADV] BUILD_RELEASE_TYPE=$BUILD_RELEASE_TYPE"
 
 CURR_PATH="$PWD"
-ROOT_DIR="${PLATFORM_PREFIX}_${PROJECT}_v${RELEASE_VERSION}_${DATE}"
+ROOT_DIR="${PLATFORM_PREFIX}_${UBUNTU_MACHINE}_v${RELEASE_VERSION}_${DATE}"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
-IMAGE_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${DATE}"
-UFS_IMAGE_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${STORAGE}_${DATE}"
-EMMC_IMAGE_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_emmc_${DATE}"
+IMAGE_VER="${UBUNTU_MACHINE}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${DATE}"
+UFS_IMAGE_VER="${UBUNTU_MACHINE}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${STORAGE}_${DATE}"
+EMMC_IMAGE_VER="${UBUNTU_MACHINE}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_emmc_${DATE}"
 
-# QIMP
-#YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-wayland/tmp-glibc/deploy/images/${YOCTO_MACHINE_NAME}"
-# QIRP
-#YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-robotics-ros2-humble/tmp-glibc/deploy/images/${YOCTO_MACHINE_NAME}"
 # Ubuntu
-YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/images/${YOCTO_MACHINE_NAME}"
+UBUNTU_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/images/${UBUNTU_MACHINE}"
 
 # ===========
 #  Functions
@@ -48,7 +44,7 @@ function get_source_code()
 
 function update_oeminfo()
 {
-    local ini_file="$ROOT_DIR/layers/meta-advantech/recipes-products/images/files/rootfs/etc/OEMInfo.ini"
+    local ini_file="$ROOT_DIR/tools/oeminfo/OEMInfo.ini"
 
     if [ ! -f "$ini_file" ]; then
         echo "[ERROR] File $ini_file not found!"
@@ -56,9 +52,24 @@ function update_oeminfo()
     fi
 
     echo "[INFO] Updating OEMInfo.ini ..."
+    echo "[INFO] Chip_Name: ${CHIP_NAME}"
+    echo "[INFO] Product_Name: ${UBUNTU_MACHINE}"
+    echo "[INFO] Ram_Size: ${RAM_SIZE}"
+    echo "[INFO] OS_Distro: ${OS_DISTRO}"
+    echo "[INFO] Kernel_Version: ${KERNEL_VERSION}"
     echo "[INFO] Build_Date: $DATE"
     echo "[INFO] Image_Version: v${RELEASE_VERSION}"
 
+    # 更新 Chip_Name
+    sed -i "s/^Chip_Name:.*/Chip_Name: ${CHIP_NAME^^}/" "$ini_file"
+    # 更新 Product_Name
+    sed -i "s/^Product_Name:.*/Product_Name: ${UBUNTU_MACHINE^^}/" "$ini_file"
+    # 更新 Ram_Size
+    sed -i "s/^Ram_Size:.*/Ram_Size: ${RAM_SIZE^^}/" "$ini_file"
+    # 更新 OS_Distro
+    sed -i "s/^OS_Distro:.*/OS_Distro: ${OS_DISTRO^^}/" "$ini_file"
+    # 更新 Kernel_Version
+    sed -i "s/^Kernel_Version:.*/Kernel_Version: ${KERNEL_VERSION#kernel-}/" "$ini_file"
     # 更新 Build_Date
     sed -i "s/^Build_Date:.*/Build_Date: $DATE/" "$ini_file"
     # 更新 Image_Version
@@ -67,24 +78,11 @@ function update_oeminfo()
     echo "[INFO] Done updating $ini_file."
 }
 
-function get_downloads()
-{
-	echo "[ADV] get yocto downloads"
-	sudo mv $CURR_PATH/downloads $CURR_PATH/$ROOT_DIR/downloads
-}
-
-function set_environment()
-{
-	cd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
-	echo "[ADV] set environment"
-	source scripts/env.sh
-}
-
 function build_image()
 {
 	cd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
 	echo "[ADV] building ..."
-	script/build_release.sh -${1} -${YOCTO_MACHINE_NAME} -${DISTRO_IMAGE}
+	scripts/build_release.sh -${BUILD_RELEASE_TYPE} -${UBUNTU_MACHINE} -${DISTRO_IMAGE}
 }
 
 function generate_md5()
@@ -101,7 +99,7 @@ function prepare_and_copy_images()
 {
 	echo "[ADV] creating ${UFS_IMAGE_VER}.tgz."
 
-	pushd $YOCTO_IMAGE_DIR 2>&1 > /dev/null
+	pushd $UBUNTU_IMAGE_DIR 2>&1 > /dev/null
 	# QIMP
 	# mv qcom-multimedia-image ${UFS_IMAGE_VER}
 	# mv qcom-multimedia-image-emmc ${EMMC_IMAGE_VER}
@@ -140,11 +138,12 @@ function generate_csv()
 	
 	pushd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
 
-	HASH_AMSS=$(cd amss && git rev-parse HEAD)
+	HASH_BOOT_FW=$(cd boot-firmware && git rev-parse HEAD)
 	HASH_BSP=$(cd .repo/manifests && git rev-parse HEAD)
 	HASH_DOWNLOAD=$(cd download && git rev-parse HEAD)
-	HASH_KERNEL=$(cd kernel && git rev-parse HEAD)
-	HASH_SCRIPTS=$(cd script && git rev-parse HEAD)
+	HASH_KERNEL=$(cd noble && git rev-parse HEAD)
+	HASH_SCRIPTS=$(cd scripts && git rev-parse HEAD)
+	HASH_TOOLS=$(cd tools && git rev-parse HEAD)
 
 	cat > ${FILENAME}.csv << END_OF_CSV
 ESSD Software/OS Update News
@@ -161,10 +160,11 @@ Issue description, N/A
 Function Addition,
 Manifest, ${HASH_BSP}
 
-QCS_AMSS, ${HASH_AMSS}
+QCS_BOOT_FW, ${HASH_BOOT_FW}
 QCS_DOWNLOAD, ${HASH_DOWNLOAD}
 QCS_UBUNTU, ${HASH_KERNEL}
 QCS_SCRIPTS, ${HASH_SCRIPTS}
+QCS_TOOLS, ${HASH_TOOLS}
 
 END_OF_CSV
 
@@ -207,36 +207,13 @@ else
 fi
 
 
-if [ $# -gt 0 ]; then
-	case ${1} in
-		"amss")
-			#prepare source code and build environment
-			get_source_code
-			# update_oeminfo
-			# get_downloads
-			# set_environment
-			build_image "$@"
-			;;
-		"ubuntu")
-			build_image "$@"
-			prepare_and_copy_images
-			prepare_and_copy_csv
-			prepare_and_copy_log
-			;;
-		*)
-			echo "[ADV] Build: invalid parameter!"
-			echo "Usage: ${0} [OPTIONS]"
-			echo "This script build qualcomm bsp in this directory."
-			echo "It supports following options."
-			echo "OPTIONS:"
-			echo "        -amss				| Build amss images"
-			echo "        -ubuntu			| Build ubuntu images"
-			echo ""
-			echo "Example: ./${0} -amss"
-			exit 1;
-			;;
-	esac
-fi
+#prepare source code and build environment
+get_source_code
+update_oeminfo
+build_image
+prepare_and_copy_images
+prepare_and_copy_csv
+prepare_and_copy_log
 
 cd $CURR_PATH
 echo "[ADV] build script done!"

@@ -9,7 +9,8 @@ echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
 echo "[ADV] BSP_URL = ${BSP_URL}"
 echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
-echo "[ADV] DEPLOY_IMAGE_NAME = ${DEPLOY_IMAGE_NAME}"
+echo "[ADV] DEPLOY_IMAGE_NAME_ONE = ${DEPLOY_IMAGE_NAME_ONE}"
+echo "[ADV] DEPLOY_IMAGE_NAME_TWO = ${DEPLOY_IMAGE_NAME_TWO}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] BUILDALL_DIR = ${BUILDALL_DIR}"
 echo "[ADV] OS_IMAGE_NAME = ${OS_IMAGE_NAME}"
@@ -138,8 +139,10 @@ function build_yocto_images()
     building linux-ti-staging
 
     # Build full image
-    echo "building $DEPLOY_IMAGE_NAME"
-    building $DEPLOY_IMAGE_NAME
+    echo "building $DEPLOY_IMAGE_NAME_ONE"
+    building $DEPLOY_IMAGE_NAME_ONE
+    echo "building $DEPLOY_IMAGE_NAME_TWO"
+    building $DEPLOY_IMAGE_NAME_TWO
     echo -e "\n =====================\n [ADV] END ${FUNCNAME[0]} \n"
 }
 
@@ -173,6 +176,7 @@ function prepare_images()
     echo "[ADV] creating ${IMAGE_DIR}_spl.tgz for u-boot & SPL & MLO images ..."
     mv $DEPLOY_IMAGE_PATH/u-boot* $IMAGE_DIR
     mv $DEPLOY_IMAGE_PATH/MLO* $IMAGE_DIR
+    mv $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/arago-tmp-default-glibc/work/${MACHINE_PROJECT}-oe-linux-gnueabi/u-boot-ti-staging/2025.01+git/build/MLO.* $IMAGE_DIR
 
     echo "List all U-Boot & SPL & MLO files in $IMAGE_DIR:"
     for entry in "$IMAGE_DIR"/* ; do

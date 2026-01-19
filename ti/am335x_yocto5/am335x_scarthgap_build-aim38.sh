@@ -9,8 +9,6 @@ echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
 echo "[ADV] BSP_URL = ${BSP_URL}"
 echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
-echo "[ADV] DEPLOY_IMAGE_NAME_ONE = ${DEPLOY_IMAGE_NAME_ONE}"
-echo "[ADV] DEPLOY_IMAGE_NAME_TWO = ${DEPLOY_IMAGE_NAME_TWO}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] BUILDALL_DIR = ${BUILDALL_DIR}"
 echo "[ADV] OS_IMAGE_NAME = ${OS_IMAGE_NAME}"
@@ -139,10 +137,10 @@ function build_yocto_images()
     building linux-ti-staging
 
     # Build full image
-    echo "building $DEPLOY_IMAGE_NAME_ONE"
-    building $DEPLOY_IMAGE_NAME_ONE
-    echo "building $DEPLOY_IMAGE_NAME_TWO"
-    building $DEPLOY_IMAGE_NAME_TWO
+    echo "building tisdk-default-image"
+    building tisdk-default-image
+    echo "building tisdk-thinlinux-image"
+    building tisdk-thinlinux-image
     echo -e "\n =====================\n [ADV] END ${FUNCNAME[0]} \n"
 }
 
@@ -151,7 +149,7 @@ function prepare_images()
     echo -e "\n =====================\n [ADV] Start Running ${FUNCNAME[0]} \n"
     cd $CURR_PATH
 
-    IMAGE_DIR="LI${RELEASE_VERSION}"_"$MACHINE_PROJECT"_"$DATE"
+    IMAGE_DIR="LIV${RELEASE_VERSION}"_"$MACHINE_PROJECT"_"$DATE"
     echo "[ADV] mkdir $IMAGE_DIR"
     mkdir $IMAGE_DIR
 
@@ -218,7 +216,7 @@ function prepare_images()
     [  -d "$SDK_PATH" ] && echo "$SDK_PATH"
     if [  -d "$SDK_PATH" ]
     then
-        echo "[ADV] creating ${IMAGE_DIR}_sdk.tgz for arago-2023.04-armv7a-linux-gnueabi-tisdk.sh"
+        echo "[ADV] creating ${IMAGE_DIR}_sdk.tgz"
         cp -a $SDK_PATH $IMAGE_DIR
     sync
         tar czf ${IMAGE_DIR}_sdk.tgz $IMAGE_DIR

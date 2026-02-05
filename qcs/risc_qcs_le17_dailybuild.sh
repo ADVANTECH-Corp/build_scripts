@@ -88,8 +88,8 @@ function set_environment()
 	elif [ "$SDK_TYPE" = "QIRP" ]; then
 	pip3 install PyYAML
 	pip3 install requests
-    pip3 install tqdm gitpython
-    sudo apt-get install -y libgtest-dev
+	pip3 install tqdm gitpython
+	sudo apt-get install -y libgtest-dev
 	MACHINE=${YOCTO_MACHINE_NAME} DISTRO=qcom-robotics-ros2-humble QCOM_SELECTED_BSP=custom source setup-robotics-environment
 	else
     echo "Error: Unknown SDK_TYPE ($SDK_TYPE)"
@@ -113,6 +113,11 @@ function build_image()
 	if [ "$SDK_TYPE" = "QIMP" ]; then
 	bitbake $BUILD_TYPE
 	elif [ "$SDK_TYPE" = "QIRP" ]; then
+	# Fixed the robotics issue and solution from Qcomm Ken.Lai
+	sed -i 's/ROS_BRANCH ?= "master"/ROS_BRANCH ?= "humble"/g' ../layers/meta-qcom-robotics/recipes/ranger-mini/ranger-mini-base_0.0.1.bb
+	sed -i 's/ROS_BRANCH ?= "master"/ROS_BRANCH ?= "humble"/g' ../layers/meta-qcom-robotics/recipes/ranger-mini/ranger-mini-bringup_0.0.1.bb
+	sed -i 's/ROS_BRANCH ?= "master"/ROS_BRANCH ?= "humble"/g' ../layers/meta-qcom-robotics/recipes/ranger-mini/ranger-mini-msg_0.0.1.bb	
+	#-------
 	../qirp-build qcom-robotics-full-image
 	else
     echo "Error: Unknown SDK_TYPE ($SDK_TYPE)"

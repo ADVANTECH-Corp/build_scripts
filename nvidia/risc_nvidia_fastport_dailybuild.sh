@@ -88,7 +88,7 @@ function build_image()
 	./generate_profile.py --project ${PROJECT}
 	./apply_profile.py --project ${PROJECT}
 	cd ..
-	sudo ./adv-scripts/build_release.sh -v ${RELEASE_VERSION}
+	sudo ./scripts/build_release.sh -v ${RELEASE_VERSION}
 }
 
 function generate_md5()

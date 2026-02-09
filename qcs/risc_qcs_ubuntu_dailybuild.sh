@@ -59,13 +59,19 @@ function update_oeminfo()
     echo "[INFO] Kernel_Version: ${KERNEL_VERSION}"
     echo "[INFO] Build_Date: $DATE"
     echo "[INFO] Image_Version: v${RELEASE_VERSION}"
+    echo "[INFO] STORAGE: $STORAGE"
+
+    # Convert values: replace + with ", " and uppercase
+    local chip_name_value=$(echo "$CHIP_NAME" | sed 's/+/, /g' | tr '[:lower:]' '[:upper:]')
+    local ram_size_value=$(echo "$RAM_SIZE" | sed 's/+/, /g' | tr '[:lower:]' '[:upper:]')
+    local storage_value=$(echo "$STORAGE" | sed 's/+/, /g' | tr '[:lower:]' '[:upper:]')
 
     # 更新 Chip_Name
-    sed -i "s/^Chip_Name:.*/Chip_Name: ${CHIP_NAME^^}/" "$ini_file"
+    sed -i "s/^Chip_Name:.*/Chip_Name: ${chip_name_value}/" "$ini_file"
     # 更新 Product_Name
     sed -i "s/^Product_Name:.*/Product_Name: ${UBUNTU_MACHINE^^}/" "$ini_file"
     # 更新 Ram_Size
-    sed -i "s/^Ram_Size:.*/Ram_Size: ${RAM_SIZE^^}/" "$ini_file"
+    sed -i "s/^Ram_Size:.*/Ram_Size: ${ram_size_value}/" "$ini_file"
     # 更新 OS_Distro
     sed -i "s/^OS_Distro:.*/OS_Distro: ${OS_DISTRO^^}/" "$ini_file"
     # 更新 Kernel_Version
@@ -74,6 +80,8 @@ function update_oeminfo()
     sed -i "s/^Build_Date:.*/Build_Date: $DATE/" "$ini_file"
     # 更新 Image_Version
     sed -i "s/^Image_Version:.*/Dailybuild_Image_Version: V${RELEASE_VERSION}/" "$ini_file"
+    # Update Storage
+    sed -i "s/^Storage:.*/Storage: ${storage_value}/" "$ini_file"
 
     echo "[INFO] Done updating $ini_file."
 }

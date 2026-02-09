@@ -130,8 +130,7 @@ function generate_csv()
 	HASH_DOWNLOAD=$(cd download && git rev-parse --short HEAD)
 	HASH_KERNEL=$(cd kernel && git rev-parse --short HEAD)
 	HASH_LINUX_FOR_TEGRA=$(cd Linux_for_Tegra && git rev-parse --short HEAD)
-	HASH_SCRIPTS=$(cd scripts && git rev-parse --short HEAD)
-	HASH_TOOLS=$(cd tools && git rev-parse --short HEAD)
+	HASH_ADV_CUST=$(cd adv-jetson-custom && git rev-parse --short HEAD)
 
 	cat > ${FILENAME}.csv << END_OF_CSV
 ESSD Software/OS Update News
@@ -151,8 +150,7 @@ Manifest, ${HASH_BSP}
 JETSON_DOWNLOAD, ${HASH_DOWNLOAD}
 JETSON_KERNEL, ${HASH_KERNEL}
 JETSON_L4T, ${HASH_LINUX_FOR_TEGRA}
-JETSON_SCRIPTS, ${HASH_SCRIPTS}
-JETSON_TOOLS, ${HASH_TOOLS}
+JETSON_ADV, ${HASH_ADV_CUST}
 
 END_OF_CSV
 

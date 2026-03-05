@@ -1,6 +1,20 @@
 #!/usr/bin/env bash
 
 echo "Start CVE generate process"
+source azure_env.sh
+echo "[ADV] DATE = ${DATE}"
+echo "[ADV] STORED = ${STORED}"
+echo "[ADV] BSP_URL = ${BSP_URL}"
+echo "[ADV] BSP_BRANCH = ${BSP_BRANCH}"
+echo "[ADV] BSP_XML = ${BSP_XML}"
+echo "[ADV] PLATFORM_PREFIX = ${PLATFORM_PREFIX}"
+echo "[ADV] TARGET_BOARD=$TARGET_BOARD"
+echo "[ADV] PROJECT=$PROJECT"
+echo "[ADV] OS_VERSION=$OS_VERSION"
+echo "[ADV] KERNEL_VERSION=$KERNEL_VERSION"
+echo "[ADV] SOC_MEM=$SOC_MEM"
+echo "[ADV] STORAGE=$STORAGE"
+echo "[ADV] RELEASE_VERSION=$RELEASE_VERSION"
 
 CURR_PATH="$PWD"
 ROOT_DIR="${PLATFORM_PREFIX}_${TARGET_BOARD}_${RELEASE_VERSION}_${DATE}"

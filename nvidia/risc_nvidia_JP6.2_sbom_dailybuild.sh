@@ -42,12 +42,14 @@ need_cmd sudo
 need_cmd apt
 need_cmd docker
 
-if [ ! -f "${CURR_PATH}/${IMAGE_VER}.tgz" ]; then
-    log "[ERROR] Image not found: ${CURR_PATH}/${IMAGE_VER}.tgz"
+pushd ${OUTPUT_DIR}/ 2>&1 > /dev/null
+
+if [ ! -f "${IMAGE_VER}.tgz" ]; then
+    log "[ERROR] Image not found: ${OUTPUT_DIR}/${IMAGE_VER}.tgz"
     exit 1
 fi
 
-sudo tar -zxvf ${CURR_PATH}/${IMAGE_VER}.tgz
+sudo tar -zxvf ${IMAGE_VER}.tgz
 
 
 if [[ ! -d "${ROOTFS_DIR}" ]]; then

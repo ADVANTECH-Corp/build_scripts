@@ -432,7 +432,7 @@ sudo docker run --rm -it --platform="${PLATFORM}" \
   "${IMAGE}" \
   bash -lc "${CONTAINER_CMD}"
 
-if [ ! -f "${WORKDIR}/${IMAGE_VER}.html" ]; then
+if [ ! -f "${WORKDIR}/${IMAGE_VER}_sbom.html" ]; then
     if [  -f "Linux_for_Tegra" ]; then
       sudo rm -rf Linux_for_Tegra
       sudo rm CVE.* SBOM.json  Dockerfile  trivy_to_dashboard_html.py

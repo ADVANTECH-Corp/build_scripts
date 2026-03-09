@@ -113,11 +113,17 @@ function build_image()
 	if [ "$SDK_TYPE" = "QIMP" ]; then
 	bitbake $BUILD_TYPE
 	elif [ "$SDK_TYPE" = "QIRP" ]; then
+	echo "[ADV] building QIRP ..."
+
 	# Fixed the robotics issue and solution from Qcomm Ken.Lai
 	sed -i 's/ROS_BRANCH ?= "master"/ROS_BRANCH ?= "humble"/g' ../layers/meta-qcom-robotics/recipes/ranger-mini/ranger-mini-base_0.0.1.bb
 	sed -i 's/ROS_BRANCH ?= "master"/ROS_BRANCH ?= "humble"/g' ../layers/meta-qcom-robotics/recipes/ranger-mini/ranger-mini-bringup_0.0.1.bb
 	sed -i 's/ROS_BRANCH ?= "master"/ROS_BRANCH ?= "humble"/g' ../layers/meta-qcom-robotics/recipes/ranger-mini/ranger-mini-msg_0.0.1.bb	
 	#-------
+	# check
+	grep -inr "ROS_BRANCH" ../layers/meta-qcom-robotics/recipes/ranger-mini/ranger-mini-base_0.0.1.bb
+	grep -inr "ROS_BRANCH" ../layers/meta-qcom-robotics/recipes/ranger-mini/ranger-mini-bringup_0.0.1.bb
+	grep -inr "ROS_BRANCH" ../layers/meta-qcom-robotics/recipes/ranger-mini/ranger-mini-msg_0.0.1.bb
 	../qirp-build qcom-robotics-full-image
 	else
     echo "Error: Unknown SDK_TYPE ($SDK_TYPE)"

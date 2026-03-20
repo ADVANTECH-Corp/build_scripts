@@ -2,6 +2,20 @@
 
 PROJECT_LIST=""
 
+#rk3568_projects
+if [ "$AFEE630A1" == "true" ]; then
+	PROJECT_LIST="$PROJECT_LIST AFEE630"
+	PROJECT="afee630a1"
+	BOARD_CONFIG="rk3588_aom3821a1_defconfig"
+	RT_PATCH="false"
+
+	export PROJECT_LIST
+	export PROJECT
+	export BOARD_CONFIG
+	export RT_PATCH
+	./rk_all_linux_risc_officialbuild.sh
+fi
+
 #rk3588_projects
 if [ "$AOM3821A1" == "true" ]; then
 	PROJECT_LIST="$PROJECT_LIST AOM3821"

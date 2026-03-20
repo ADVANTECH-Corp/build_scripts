@@ -6,7 +6,7 @@ PROJECT_LIST=""
 if [ "$AFEE630A1" == "true" ]; then
 	PROJECT_LIST="$PROJECT_LIST AFEE630"
 	PROJECT="afee630a1"
-	BOARD_CONFIG="rk3588_aom3821a1_defconfig"
+	BOARD_CONFIG="rk3568_afee630a1_defconfig"
 	RT_PATCH="false"
 
 	export PROJECT_LIST

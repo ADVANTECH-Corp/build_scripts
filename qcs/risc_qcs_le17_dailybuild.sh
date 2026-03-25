@@ -134,6 +134,7 @@ function build_image()
 	bitbake-layers add-layer ../layers/meta-advantech-qualcomm
 
 	if [ "$SDK_TYPE" = "QIMP" ]; then
+		bitbake-layers add-layer ../layers/meta-qcom-robotics-distro
 		bitbake qcom-multimedia-image
 	elif [ "$SDK_TYPE" = "QIRP" ]; then
 		echo "[ADV] building QIRP ..."

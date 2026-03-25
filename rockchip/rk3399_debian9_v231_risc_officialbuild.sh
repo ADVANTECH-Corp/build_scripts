@@ -315,7 +315,7 @@ function building()
 
 		cd $CURR_PATH/$ROOT_DIR/debian
 		sudo dpkg -i ubuntu-build-service/packages/*
-		sudo apt-get install -f 
+		sudo apt-get install -f -y
 		cd $CURR_PATH/$ROOT_DIR/
 		sudo BUILD_IN_DOCKER=TRUE ./mk-debian.sh new >&1 | tee $CURR_PATH/$ROOT_DIR/$LOG_FILE_ROOTFS
 

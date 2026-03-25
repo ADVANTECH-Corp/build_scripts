@@ -21,9 +21,7 @@ echo "[ADV] SDK_TYPE = $SDK_TYPE"
 CURR_PATH="$PWD"
 ROOT_DIR="${PLATFORM_PREFIX}_${PROJECT}_v${RELEASE_VERSION}_${DATE}"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
-IMAGE_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${DATE}"
-UFS_IMAGE_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${STORAGE}_${DATE}"
-EMMC_IMAGE_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_emmc_${DATE}"
+IMAGE_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${STORAGE}_${DATE}"
 
 if [[ "$CHIP_NAME" == *"qcs6490"* ]]; then
     YOCTO_MACHINE_NAME="qcs6490${PROJECT}"
@@ -167,31 +165,24 @@ function generate_md5()
 
 function prepare_and_copy_images()
 {
-	echo "[ADV] creating ${UFS_IMAGE_VER}.tgz and ${EMMC_IMAGE_VER}.tgz..."
+	echo "[ADV] creating ${IMAGE_VER}.tgz..."
 
 	pushd $YOCTO_IMAGE_DIR 2>&1 > /dev/null
 	if [ "$SDK_TYPE" = "QIMP" ]; then
-		mv qcom-multimedia-image ${UFS_IMAGE_VER}
-		mv qcom-multimedia-image-emmc ${EMMC_IMAGE_VER}
-
+		mv qcom-multimedia-image ${IMAGE_VER}
 	elif [ "$SDK_TYPE" = "QIRP" ]; then
-		mv qcom-robotics-full-image ${UFS_IMAGE_VER}
-		mv qcom-robotics-full-image-emmc ${EMMC_IMAGE_VER}
-
+		mv qcom-robotics-full-image ${IMAGE_VER}
 	else
 		echo "Error: Unknown SDK_TYPE ($SDK_TYPE)"
 		popd
 		exit 1
 	fi
 
-	sudo tar czf ${UFS_IMAGE_VER}.tgz ${UFS_IMAGE_VER}
-	sudo tar czf ${EMMC_IMAGE_VER}.tgz ${EMMC_IMAGE_VER}
+	sudo tar czf ${IMAGE_VER}.tgz ${IMAGE_VER}
 
-	generate_md5 ${UFS_IMAGE_VER}.tgz
-	generate_md5 ${EMMC_IMAGE_VER}.tgz
+	generate_md5 ${IMAGE_VER}.tgz
 
-	mv -f ${UFS_IMAGE_VER}.tgz* $OUTPUT_DIR
-	mv -f ${EMMC_IMAGE_VER}.tgz* $OUTPUT_DIR
+	mv -f ${IMAGE_VER}.tgz* $OUTPUT_DIR
 
 	popd
 }

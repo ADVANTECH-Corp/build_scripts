@@ -203,7 +203,16 @@ function generate_csv()
 	pushd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
 
 	HASH_BSP=$(cd .repo/manifests && git rev-parse HEAD)
-	HASH_KERNEL=$(cd build-qcom-robotics-ros2-humble/tmp-glibc/work-shared/${YOCTO_MACHINE_NAME}/kernel-source && git rev-parse HEAD)
+
+	if [ "$SDK_TYPE" = "QIMP" ]; then
+		HASH_KERNEL=$(cd build-qcom-wayland/tmp-glibc/work-shared/${YOCTO_MACHINE_NAME}/kernel-source && git rev-parse HEAD)
+	elif [ "$SDK_TYPE" = "QIRP" ]; then
+		HASH_KERNEL=$(cd build-qcom-robotics-ros2-humble/tmp-glibc/work-shared/${YOCTO_MACHINE_NAME}/kernel-source && git rev-parse HEAD)
+	else
+		echo "Error: Unknown SDK_TYPE ($SDK_TYPE)"
+		exit 1
+	fi
+
 	HASH_META_ADVANTECH=$(cd layers/meta-advantech-qualcomm && git rev-parse HEAD)
 
 	cat > ${FILENAME}.csv << END_OF_CSV

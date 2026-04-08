@@ -16,6 +16,32 @@ if [ "$AFEE630A1" == "true" ]; then
 	./rk_all_linux_risc_officialbuild.sh
 fi
 
+if [ "$RSB4810A2" == "true" ]; then
+	PROJECT_LIST="$PROJECT_LIST RSB4810"
+	PROJECT="rsb4810a2"
+	BOARD_CONFIG="rk3568_rsb4810a2_defconfig"
+	RT_PATCH="false"
+
+	export PROJECT_LIST
+	export PROJECT
+	export BOARD_CONFIG
+	export RT_PATCH
+	./rk_all_linux_risc_officialbuild.sh
+fi
+
+if [ "$ROM5880A1" == "true" ]; then
+	PROJECT_LIST="$PROJECT_LIST ROM5880"
+	PROJECT="rom5880a1"
+	BOARD_CONFIG="rk3568_rom5880a1_defconfig"
+	RT_PATCH="false"
+
+	export PROJECT_LIST
+	export PROJECT
+	export BOARD_CONFIG
+	export RT_PATCH
+	./rk_all_linux_risc_officialbuild.sh
+fi
+
 #rk3588_projects
 if [ "$AOM3821A1" == "true" ]; then
 	PROJECT_LIST="$PROJECT_LIST AOM3821"

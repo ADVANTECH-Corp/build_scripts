@@ -52,7 +52,7 @@ function get_source_code()
 
 function update_oeminfo()
 {
-    local ini_file="$ROOT_DIR/layers/meta-advantech-qualcomm/recipes-products/images/files/rootfs/etc/OEMInfo.ini"
+    local ini_file="$ROOT_DIR/layers/meta-advantech-qualcomm/recipes-products/images/files/common/rootfs/etc/OEMInfo.ini"
 
     if [ ! -f "$ini_file" ]; then
         echo "[ERROR] File $ini_file not found!"

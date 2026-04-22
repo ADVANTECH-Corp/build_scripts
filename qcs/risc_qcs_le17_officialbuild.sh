@@ -10,6 +10,7 @@ echo "[ADV] BSP_XML = ${BSP_XML}"
 echo "[ADV] DAILY_RELEASE_VERSION = ${DAILY_RELEASE_VERSION}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] Release_Note = ${Release_Note}"
+echo "[ADV] KERNEL_GIT_URL_BRANCH = ${KERNEL_GIT_URL_BRANCH}"
 
 CURR_PATH="$PWD"
 ROOT_DIR="${PLATFORM_PREFIX}_${PROJECT}_v${RELEASE_VERSION}_${DATE}"
@@ -287,8 +288,10 @@ if [ -z "$EXISTED_VERSION" ] ; then
 
     commit_tag_and_rollback layers/meta-advantech-qualcomm
 
-    echo "[ADV] Add kernel tag and Package kernel"
-    commit_tag_and_package $KERNEL_URL $PROJECT_BRANCH $HASH_KERNEL
+#    echo "[ADV] Add kernel tag and Package kernel"
+#    commit_tag_and_package $KERNEL_URL $PROJECT_BRANCH $HASH_KERNEL
+    echo "[ADV] Add kernel tag and Package kernel to branch $KERNEL_GIT_URL_BRANCH"
+    commit_tag_and_package "$KERNEL_URL" "$KERNEL_GIT_URL_BRANCH" "$HASH_KERNEL"
 
     create_xml_and_commit
 

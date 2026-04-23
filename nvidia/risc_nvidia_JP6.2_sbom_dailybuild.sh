@@ -426,7 +426,7 @@ echo "[INFO] Done."
 EOF
 
 echo "[INFO] Starting container..."
-sudo docker run --rm -it --platform="${PLATFORM}" \
+sudo docker run --rm -i --platform="${PLATFORM}" \
   -v "${WORKDIR}":/work \
   -w /work \
   "${IMAGE}" \

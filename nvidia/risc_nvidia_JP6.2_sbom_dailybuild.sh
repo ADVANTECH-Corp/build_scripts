@@ -128,6 +128,9 @@ sudo docker buildx inspect --bootstrap >/dev/null
 # 6) Build image for linux/arm64 and --load into local docker
 # =========================
 log "Build image: ${TAG_NAME} (platform=${PLATFORM})"
+
+sudo docker image rm ${TAG_NAME}
+
 sudo docker buildx build \
   --platform "${PLATFORM}" \
   -t "${TAG_NAME}" \
@@ -137,7 +140,7 @@ sudo docker buildx build \
 log "Done."
 log "Result image: ${TAG_NAME}"
 
-IMAGE="nv_cve_docker_image"
+IMAGE="${TAG_NAME}"
 PLATFORM="linux/arm64"
 
 WORKDIR="$(pwd)"
@@ -450,6 +453,7 @@ echo
 echo "[INFO] Back on host. Verify outputs:"
 ls -al "${WORKDIR}" | egrep 'trivy_to_dashboard_html\.py|SBOM\.json|CVE\.json|${IMAGE_VER}\.html|${IMAGE_VER}.html.md5' || true
 sudo rm -rf CVE.* SBOM.json  Dockerfile  trivy_to_dashboard_html.py Linux_for_Tegra/
+sudo docker image rm ${IMAGE}
 if [  -f "Linux_for_Tegra" ]; then
     sudo rm -rf Linux_for_Tegra
 fi

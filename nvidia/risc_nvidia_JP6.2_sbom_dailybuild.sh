@@ -129,7 +129,8 @@ sudo docker buildx inspect --bootstrap >/dev/null
 # =========================
 log "Build image: ${TAG_NAME} (platform=${PLATFORM})"
 
-sudo docker image rm ${TAG_NAME}
+
+sudo docker image rm ${TAG_NAME} >/dev/null 2>&1 || true
 
 sudo docker buildx build \
   --platform "${PLATFORM}" \
@@ -453,11 +454,10 @@ echo
 echo "[INFO] Back on host. Verify outputs:"
 ls -al "${WORKDIR}" | egrep 'trivy_to_dashboard_html\.py|SBOM\.json|CVE\.json|${IMAGE_VER}\.html|${IMAGE_VER}.html.md5' || true
 sudo rm -rf CVE.* SBOM.json  Dockerfile  trivy_to_dashboard_html.py Linux_for_Tegra/
-sudo docker image rm ${IMAGE}
 if [  -f "Linux_for_Tegra" ]; then
     sudo rm -rf Linux_for_Tegra
 fi
-
+sudo docker image rm ${IMAGE}
 
 echo
 echo "[INFO] Finished. ${IMAGE_VER}.html is in: ${WORKDIR}"

@@ -367,7 +367,7 @@ echo "[INFO] Image   : ${IMAGE}"
 echo "[INFO] Platform: ${PLATFORM}"
 echo
 
-read -r -d '' CONTAINER_CMD <<'EOF' || true
+read -r -d '' CONTAINER_CMD <<EOF || true
 set -euo pipefail
 
 echo "[INFO] Container OS:"

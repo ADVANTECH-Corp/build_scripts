@@ -281,7 +281,7 @@ prepare_official_package() {
     echo "[INFO] Renaming sbom file..."
     mv "${DAILY_SBOM_VER}.html" "${OFFICAL_SBOM_VER}.html"
     echo "[INFO] Generating md5 for ${OFFICAL_SBOM_VER}.html..."
-    md5sum "${OFFICAL_SBOM_VER}.html" | awk '{print $1}' > "${OFFICAL_SOM_VER}.html.md5"
+    md5sum "${OFFICAL_SBOM_VER}.html" | awk '{print $1}' > "${OFFICAL_SBOM_VER}.html.md5"
 
     popd >/dev/null
 }

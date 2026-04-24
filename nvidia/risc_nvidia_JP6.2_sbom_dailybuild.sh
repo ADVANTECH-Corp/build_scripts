@@ -449,7 +449,7 @@ echo "[INFO] Generated ${IMAGE_VER}_sbom.html.md5 "
 echo
 echo "[INFO] Back on host. Verify outputs:"
 ls -al "${WORKDIR}" | egrep 'trivy_to_dashboard_html\.py|SBOM\.json|CVE\.json|${IMAGE_VER}\.html|${IMAGE_VER}.html.md5' || true
-sudo rm CVE.* SBOM.json  Dockerfile  trivy_to_dashboard_html.py
+sudo rm -rf CVE.* SBOM.json  Dockerfile  trivy_to_dashboard_html.py Linux_for_Tegra/
 if [  -f "Linux_for_Tegra" ]; then
     sudo rm -rf Linux_for_Tegra
 fi

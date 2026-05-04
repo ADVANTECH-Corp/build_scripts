@@ -136,8 +136,14 @@ function check_tag_and_replace()
 function commit_tag_and_rollback()
 {
     FILE_PATH=$1
+    BRANCH=$2
+    HASH_CSV=$3
+    
     if [ -d "$CURR_PATH/$ROOT_DIR/$FILE_PATH" ]; then
         cd $CURR_PATH/$ROOT_DIR/$FILE_PATH
+        git checkout $BRANCH
+        git reset --hard $HASH_CSV
+        
         META_TAG=`git tag | grep $VER_TAG`
         if [ "x$META_TAG" != "x" ]; then
             echo "[ADV] $FILE_PATH has been tagged ($VER_TAG). Nothing to do."

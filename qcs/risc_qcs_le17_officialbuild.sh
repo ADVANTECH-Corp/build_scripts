@@ -147,11 +147,6 @@ function commit_tag_and_rollback()
             git commit -m "[Official Release] $VER_TAG"
             git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
             git push --follow-tags
-            # Rollback to avoid local diffs
-            HEAD_HASH_ID=`git rev-parse HEAD`
-            git revert $HEAD_HASH_ID --no-edit
-            git push
-            git reset --hard $HEAD_HASH_ID
         fi
         cd $CURR_PATH
     fi

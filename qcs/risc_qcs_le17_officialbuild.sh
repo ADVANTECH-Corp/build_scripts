@@ -279,7 +279,7 @@ if [ -z "$EXISTED_VERSION" ] ; then
     echo "[ADV] Add tags to repositories"
 
     # 注意：LE 1.7 使用 layers/meta-advantech-qualcomm
-    check_tag_and_checkout layers/meta-advantech-qualcomm $PROJECT_BRANCH $HASH_META_ADVANTECH
+    check_tag_and_checkout layers/meta-advantech-qualcomm "scarthgap-qli.1.7" $HASH_META_ADVANTECH
 
     # 更新 Kernel bbappend (路徑比照 le17_dailybuild)
     check_tag_and_replace $KERNEL_PATH/linux-kernel-headers-install_%.bbappend $KERNEL_URL $HASH_KERNEL

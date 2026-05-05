@@ -101,8 +101,8 @@ function commit_tag()
 
     if [ -d "$CURR_PATH/$ROOT_DIR/$FILE_PATH" ]; then
         cd $CURR_PATH/$ROOT_DIR/$FILE_PATH
-        git checkout $BRANCH
-        git reset --hard $HASH_CSV
+##        git checkout $BRANCH
+##        git reset --hard $HASH_CSV
 
         # Add tag
         HASH_ID=`git tag -v $VER_TAG | grep object | cut -d ' ' -f 2`

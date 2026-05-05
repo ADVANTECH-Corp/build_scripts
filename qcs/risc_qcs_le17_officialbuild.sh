@@ -101,8 +101,8 @@ function commit_tag()
 
     if [ -d "$CURR_PATH/$ROOT_DIR/$FILE_PATH" ]; then
         cd $CURR_PATH/$ROOT_DIR/$FILE_PATH
-##        git checkout $BRANCH
-##        git reset --hard $HASH_CSV
+        git checkout $BRANCH
+        git reset --hard $HASH_CSV
 
         # Add tag
         HASH_ID=`git tag -v $VER_TAG | grep object | cut -d ' ' -f 2`
@@ -140,7 +140,7 @@ function check_tag_and_checkout()
 			BRANCH_ORI="${META_BRANCH/_$BRANCH_SUFFIX}"
 			git checkout $BRANCH_ORI
 			git pull
-			git reset --hard $HASH_CSV
+#			git reset --hard $HASH_CSV
 			echo "[ADV] Checkout to '$META_BRANCH' and merge from '$BRANCH_ORI'"
 			git checkout $META_BRANCH
 			git pull

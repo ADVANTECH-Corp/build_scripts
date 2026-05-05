@@ -136,8 +136,13 @@ function check_tag_and_replace()
 function commit_tag_and_rollback()
 {
     FILE_PATH=$1
-    BRANCH=$2
+    META_BRANCH=$2
     HASH_CSV=$3
+
+    echo "[ADV] $FILE_PATH ############"
+    echo "[ADV] $META_BRANCH ############."
+    echo "[ADV] $HASH_CSV ############"
+
     
     if [ -d "$CURR_PATH/$ROOT_DIR/$FILE_PATH" ]; then
         cd $CURR_PATH/$ROOT_DIR/$FILE_PATH

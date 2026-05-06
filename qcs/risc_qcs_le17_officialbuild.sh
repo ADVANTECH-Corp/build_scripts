@@ -108,9 +108,13 @@ function commit_tag()
         echo "[ADV] HASH_CSV : ${HASH_CSV}"
 		ls -al
 		pwd
+		cd layers
+		ls
+		pwd
 		echo "+++commit_tag+++"
+		echo "[ADV] PATH_1 : ${CURR_PATH}/${ROOT_DIR}/${FILE_PATH}"
 		
-    if [ -d "$CURR_PATH/$ROOT_DIR/$FILE_PATH" ]; then
+    if [ -d "$CURR_PATH/layers/$ROOT_DIR/$FILE_PATH" ]; then
 
 		echo "[ADV] PATH_1 : ${CURR_PATH}/${ROOT_DIR}/${FILE_PATH}"
 		

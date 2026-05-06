@@ -101,7 +101,7 @@ function commit_tag()
     FILE_PATH=$1
     BRANCH=$2
     HASH_CSV=$3
-	LAYERS=layers
+	LAYERS="layers"
 
 		echo "+++commit_tag+++"
         echo "[ADV] FILE_PATH : ${FILE_PATH}"

@@ -411,7 +411,10 @@ if [ -z "$EXISTED_VERSION" ] ; then
     copy_official_files
 
     echo "[ADV] Add tag"
+    if [ "${OS_DISTRO}" == "yocto5.0.14-le1.7" ] ; then
+    commit_tag meta-advantech-qualcomm $PROJECT_BRANCH $HASH_META_ADVANTECH
 
+    else
     # Check meta-advantech-qualcomm tag exist or not, and checkout to tag version
     check_tag_and_checkout layers/meta-advantech-qualcomm $PROJECT_BRANCH $HASH_META_ADVANTECH
 
@@ -425,6 +428,7 @@ if [ -z "$EXISTED_VERSION" ] ; then
     # Add git tag and Package kernel
     echo "[ADV] Add kernel tag and Package kernel"
     commit_tag_and_package $KERNEL_URL $PROJECT_BRANCH $HASH_KERNEL
+    fi
 
     # Create manifests xml and commit
     create_xml_and_commit

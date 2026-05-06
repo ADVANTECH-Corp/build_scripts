@@ -380,11 +380,11 @@ prepare_official_package() {
     echo "[INFO] Generating md5 for ${OFFICAL_CSV_VER}.csv..."
     md5sum "${OFFICAL_CSV_VER}.csv" | awk '{print $1}' > "${OFFICAL_CSV_VER}.csv.md5"
 
-    # Log
-    echo "[INFO] Renaming Log file..."
-    mv "${DAILY_LOG_VER}.tgz" "${OFFICAL_LOG_VER}.tgz"
-    echo "[INFO] Generating md5 for ${OFFICAL_LOG_VER}.tgz..."
-    md5sum "${OFFICAL_LOG_VER}.tgz" | awk '{print $1}' > "${OFFICAL_LOG_VER}.tgz.md5"
+#    # Log
+#    echo "[INFO] Renaming Log file..."
+#    mv "${DAILY_LOG_VER}.tgz" "${OFFICAL_LOG_VER}.tgz"
+#    echo "[INFO] Generating md5 for ${OFFICAL_LOG_VER}.tgz..."
+#    md5sum "${OFFICAL_LOG_VER}.tgz" | awk '{print $1}' > "${OFFICAL_LOG_VER}.tgz.md5"
 
     popd >/dev/null
 }

@@ -103,26 +103,7 @@ function commit_tag()
     HASH_CSV=$3
 	LAYERS="layers"
 
-		echo "+++commit_tag+++"
-        echo "[ADV] FILE_PATH : ${FILE_PATH}"
-        echo "[ADV] BRANCH : ${BRANCH}"
-        echo "[ADV] HASH_CSV : ${HASH_CSV}"
-		echo "[ADV] CURR_PATH : ${CURR_PATH}"
-		echo "[ADV] ROOT_DIR : ${ROOT_DIR}"
-		echo "[ADV] LAYERS : ${LAYERS}"
-		echo "[ADV] FILE_PATH : ${FILE_PATH}"
-		ls -al
-		pwd
-		cd layers
-		ls
-		pwd
-		echo "+++commit_tag+++"
-		echo "[ADV] PATH_1 : ${CURR_PATH}/${ROOT_DIR}/${LAYERS}/${FILE_PATH}"
-		
-    if [ -d "$CURR_PATH/$ROOT_DIR/$LAYERS/$FILE_PATH" ]; then
-
-		echo "[ADV] PATH_2 : ${CURR_PATH}/${ROOT_DIR}/${LAYERS}/${FILE_PATH}"
-		
+    if [ -d "$CURR_PATH/$ROOT_DIR/$LAYERS/$FILE_PATH" ]; then		
         cd $CURR_PATH/$ROOT_DIR/$LAYERS/$FILE_PATH
         git checkout $BRANCH
         git reset --hard $HASH_CSV
@@ -151,9 +132,10 @@ function check_tag_and_checkout()
 	FILE_PATH=$1
 	META_BRANCH=$2
 	HASH_CSV=$3
+	LAYERS="layers"
 
-        if [ -d "$CURR_PATH/$ROOT_DIR/$FILE_PATH" ]; then
-                cd $CURR_PATH/$ROOT_DIR/$FILE_PATH
+        if [ -d "$CURR_PATH/$ROOT_DIR/$LAYERS/$FILE_PATH" ]; then
+                cd $CURR_PATH/$ROOT_DIR/$LAYERS/$FILE_PATH
                 META_TAG=`git tag | grep $VER_TAG`
                 if [ "$META_TAG" != "" ]; then
                         echo "[ADV] meta-advantech-qualcomm has been tagged ($VER_TAG). Nothing to do."
@@ -171,7 +153,7 @@ function check_tag_and_checkout()
                 fi
                 cd $CURR_PATH
         else
-                echo "[ADV] Directory $ROOT_DIR/$FILE_PATH doesn't exist"
+                echo "[ADV] Directory $ROOT_DIR/$LAYERS/$FILE_PATH doesn't exist"
                 exit 1
         fi
 }
@@ -181,7 +163,8 @@ function check_tag_and_replace()
         FILE_PATH=$1
         REMOTE_URL=$2
         HASH_CSV=$3
-
+		LAYERS="layers"
+		
         HASH_ID=`git ls-remote $REMOTE_URL $VER_TAG | awk '{print $1}'`
         if [ "x$HASH_ID" != "x" ]; then
                 echo "[ADV] $REMOTE_URL has been tagged ,ID is $HASH_ID"
@@ -189,15 +172,16 @@ function check_tag_and_replace()
 		HASH_ID=$HASH_CSV
                 echo "[ADV] $REMOTE_URL isn't tagged , set HASH_ID to $HASH_ID"
         fi
-        sed -i "s/"\$\{AUTOREV\}"/$HASH_ID/g" $ROOT_DIR/$FILE_PATH
+        sed -i "s/"\$\{AUTOREV\}"/$HASH_ID/g" $ROOT_DIR/$LAYERS/$FILE_PATH
 }
 
 function commit_tag_and_rollback()
 {
         FILE_PATH=$1
+		LAYERS="layers"
 
-        if [ -d "$CURR_PATH/$ROOT_DIR/$FILE_PATH" ]; then
-                cd $CURR_PATH/$ROOT_DIR/$FILE_PATH
+        if [ -d "$CURR_PATH/$ROOT_DIR/$LAYERS/$FILE_PATH" ]; then
+                cd $CURR_PATH/$ROOT_DIR/$LAYERS/$FILE_PATH
                 META_TAG=`git tag | grep $VER_TAG`
                 if [ "x$META_TAG" != "x" ]; then
                         echo "[ADV] meta-advantech-qualcomm has been tagged ($VER_TAG). Nothing to do."
@@ -216,7 +200,7 @@ function commit_tag_and_rollback()
                 fi
                 cd $CURR_PATH
         else
-                echo "[ADV] Directory $ROOT_DIR/$FILE_PATH doesn't exist"
+                echo "[ADV] Directory $ROOT_DIR/$LAYERS/$FILE_PATH doesn't exist"
                 exit 1
         fi
 }

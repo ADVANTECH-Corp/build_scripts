@@ -10,6 +10,7 @@ echo "[ADV] BSP_XML = ${BSP_XML}"
 echo "[ADV] DAILY_RELEASE_VERSION = ${DAILY_RELEASE_VERSION}"
 echo "[ADV] RELEASE_VERSION = ${RELEASE_VERSION}"
 echo "[ADV] Release_Note = ${Release_Note}"
+echo "[ADV] LAYERS = ${LAYERS}"
 
 CURR_PATH="$PWD"
 ROOT_DIR="${PLATFORM_PREFIX}_${PROJECT}_v${RELEASE_VERSION}_${DATE}"
@@ -112,13 +113,13 @@ function commit_tag()
 		ls
 		pwd
 		echo "+++commit_tag+++"
-		echo "[ADV] PATH_1 : ${CURR_PATH}/${ROOT_DIR}/${FILE_PATH}"
+		echo "[ADV] PATH_1 : ${CURR_PATH}/${LAYERS}/${ROOT_DIR}/${FILE_PATH}"
 		
-    if [ -d "$CURR_PATH/layers/$ROOT_DIR/$FILE_PATH" ]; then
+    if [ -d "$CURR_PATH/$LAYERS/$ROOT_DIR/$FILE_PATH" ]; then
 
-		echo "[ADV] PATH_1 : ${CURR_PATH}/${ROOT_DIR}/${FILE_PATH}"
+		echo "[ADV] PATH_2 : ${CURR_PATH}/${LAYERS}/${ROOT_DIR}/${FILE_PATH}"
 		
-        cd $CURR_PATH/$ROOT_DIR/$FILE_PATH
+        cd $CURR_PATH/$LAYERS/$ROOT_DIR/$FILE_PATH
         git checkout $BRANCH
         git reset --hard $HASH_CSV
 
@@ -133,7 +134,7 @@ function commit_tag()
             git push $REMOTE_SERVER $VER_TAG
         fi
     else
-        echo "[ADV] Directory $CURR_PATH/$ROOT_DIR/$FILE_PATH doesn't exist"
+        echo "[ADV] Directory $CURR_PATH/$LAYERS/$ROOT_DIR/$FILE_PATH doesn't exist"
 	exit 1
     fi
 

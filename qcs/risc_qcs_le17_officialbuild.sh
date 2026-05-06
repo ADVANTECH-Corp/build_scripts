@@ -102,7 +102,15 @@ function commit_tag()
     BRANCH=$2
     HASH_CSV=$3
 
+		echo "+++commit_tag+++"
+        echo "[ADV] FILE_PATH : ${FILE_PATH}"
+        echo "[ADV] BRANCH : ${BRANCH}"
+        echo "[ADV] HASH_CSV : ${HASH_CSV}"
+		
     if [ -d "$CURR_PATH/$ROOT_DIR/$FILE_PATH" ]; then
+
+		echo "[ADV] PATH_1 : ${CURR_PATH}/${ROOT_DIR}/${FILE_PATH}"
+		
         cd $CURR_PATH/$ROOT_DIR/$FILE_PATH
         git checkout $BRANCH
         git reset --hard $HASH_CSV

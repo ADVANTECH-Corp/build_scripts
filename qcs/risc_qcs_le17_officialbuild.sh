@@ -106,6 +106,9 @@ function commit_tag()
         echo "[ADV] FILE_PATH : ${FILE_PATH}"
         echo "[ADV] BRANCH : ${BRANCH}"
         echo "[ADV] HASH_CSV : ${HASH_CSV}"
+		ls -al
+		pwd
+		echo "+++commit_tag+++"
 		
     if [ -d "$CURR_PATH/$ROOT_DIR/$FILE_PATH" ]; then
 

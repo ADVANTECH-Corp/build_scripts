@@ -107,20 +107,23 @@ function commit_tag()
         echo "[ADV] FILE_PATH : ${FILE_PATH}"
         echo "[ADV] BRANCH : ${BRANCH}"
         echo "[ADV] HASH_CSV : ${HASH_CSV}"
+		echo "[ADV] CURR_PATH : ${CURR_PATH}"
+		echo "[ADV] ROOT_DIR : ${ROOT_DIR}"
 		echo "[ADV] LAYERS : ${LAYERS}"
+		echo "[ADV] FILE_PATH : ${FILE_PATH}"
 		ls -al
 		pwd
 		cd layers
 		ls
 		pwd
 		echo "+++commit_tag+++"
-		echo "[ADV] PATH_1 : ${CURR_PATH}/${ROOT_DIR}/${FILE_PATH}/${LAYERS}"
+		echo "[ADV] PATH_1 : ${CURR_PATH}/${ROOT_DIR}/${LAYERS}/${FILE_PATH}"
 		
-    if [ -d "$CURR_PATH/$ROOT_DIR/$FILE_PATH/$LAYERS" ]; then
+    if [ -d "$CURR_PATH/$ROOT_DIR/$LAYERS/$FILE_PATH" ]; then
 
-		echo "[ADV] PATH_2 : ${CURR_PATH}/${ROOT_DIR}/${FILE_PATH}/${LAYERS}"
+		echo "[ADV] PATH_2 : ${CURR_PATH}/${ROOT_DIR}/${LAYERS}/${FILE_PATH}"
 		
-        cd $CURR_PATH/$ROOT_DIR/$FILE_PATH/$LAYERS
+        cd $CURR_PATH/$ROOT_DIR/$LAYERS/$FILE_PATH
         git checkout $BRANCH
         git reset --hard $HASH_CSV
 
@@ -135,7 +138,7 @@ function commit_tag()
             git push $REMOTE_SERVER $VER_TAG
         fi
     else
-        echo "[ADV] Directory $CURR_PATH/$ROOT_DIR/$FILE_PATH/$LAYERS doesn't exist"
+        echo "[ADV] Directory $CURR_PATH/$ROOT_DIR/$LAYERS/$FILE_PATH doesn't exist"
 	exit 1
     fi
 

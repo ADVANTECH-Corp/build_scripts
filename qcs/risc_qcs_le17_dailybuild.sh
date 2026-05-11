@@ -27,14 +27,7 @@ if [[ "$CHIP_NAME" == *"qcs6490"* ]]; then
     YOCTO_MACHINE_NAME="qcs6490${PROJECT}"
 fi
 
-if [ "$SDK_TYPE" = "QIMP" ]; then
-    YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-wayland/tmp-glibc/deploy/images/${YOCTO_MACHINE_NAME}"
-elif [ "$SDK_TYPE" = "QIRP" ]; then
-    YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-robotics-ros2-humble/tmp-glibc/deploy/images/${YOCTO_MACHINE_NAME}"
-else
-    echo "Error: Unknown SDK_TYPE ($SDK_TYPE)"
-    exit 1
-fi
+YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-robotics-ros2-humble/tmp-glibc/deploy/images/${YOCTO_MACHINE_NAME}"
 
 # ===========
 #  Functions
@@ -109,18 +102,7 @@ function set_environment()
 		export DEBUG_BUILD=1
 	fi
 
-	if [ "$SDK_TYPE" = "QIMP" ]; then
-		MACHINE=${YOCTO_MACHINE_NAME} DISTRO=qcom-wayland source setup-environment
-	elif [ "$SDK_TYPE" = "QIRP" ]; then
-		pip3 install PyYAML
-		pip3 install requests
-		pip3 install tqdm gitpython
-		sudo apt-get install -y libgtest-dev
-		MACHINE=${YOCTO_MACHINE_NAME} DISTRO=qcom-robotics-ros2-humble QCOM_SELECTED_BSP=custom source setup-robotics-environment
-	else
-		echo "Error: Unknown SDK_TYPE ($SDK_TYPE)"
-		exit 1
-	fi
+	MACHINE=${YOCTO_MACHINE_NAME} DISTRO=qcom-robotics-ros2-humble QCOM_SELECTED_BSP=custom source setup-robotics-environment
 }
 
 function build_image()
@@ -132,20 +114,9 @@ function build_image()
 	bitbake-layers add-layer ../layers/meta-advantech-qualcomm
 
 	if [ "$SDK_TYPE" = "QIMP" ]; then
-		bitbake-layers add-layer ../layers/meta-qcom-robotics-distro
 		bitbake qcom-multimedia-image
 	elif [ "$SDK_TYPE" = "QIRP" ]; then
 		echo "[ADV] building QIRP ..."
-
-		# Fixed the robotics issue and solution from Qcomm Ken.Lai
-		sed -i 's/ROS_BRANCH ?= "master"/ROS_BRANCH ?= "humble"/g' ../layers/meta-qcom-robotics/recipes/ranger-mini/ranger-mini-base_0.0.1.bb
-		sed -i 's/ROS_BRANCH ?= "master"/ROS_BRANCH ?= "humble"/g' ../layers/meta-qcom-robotics/recipes/ranger-mini/ranger-mini-bringup_0.0.1.bb
-		sed -i 's/ROS_BRANCH ?= "master"/ROS_BRANCH ?= "humble"/g' ../layers/meta-qcom-robotics/recipes/ranger-mini/ranger-mini-msg_0.0.1.bb	
-		#-------
-		# check
-		grep -inr "ROS_BRANCH" ../layers/meta-qcom-robotics/recipes/ranger-mini/ranger-mini-base_0.0.1.bb
-		grep -inr "ROS_BRANCH" ../layers/meta-qcom-robotics/recipes/ranger-mini/ranger-mini-bringup_0.0.1.bb
-		grep -inr "ROS_BRANCH" ../layers/meta-qcom-robotics/recipes/ranger-mini/ranger-mini-msg_0.0.1.bb
 		../qirp-build qcom-robotics-full-image
 	else
 		echo "Error: Unknown SDK_TYPE ($SDK_TYPE)"
@@ -203,16 +174,7 @@ function generate_csv()
 	pushd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
 
 	HASH_BSP=$(cd .repo/manifests && git rev-parse HEAD)
-
-	if [ "$SDK_TYPE" = "QIMP" ]; then
-		HASH_KERNEL=$(cd build-qcom-wayland/tmp-glibc/work-shared/${YOCTO_MACHINE_NAME}/kernel-source && git rev-parse HEAD)
-	elif [ "$SDK_TYPE" = "QIRP" ]; then
-		HASH_KERNEL=$(cd build-qcom-robotics-ros2-humble/tmp-glibc/work-shared/${YOCTO_MACHINE_NAME}/kernel-source && git rev-parse HEAD)
-	else
-		echo "Error: Unknown SDK_TYPE ($SDK_TYPE)"
-		exit 1
-	fi
-
+	HASH_KERNEL=$(cd build-qcom-robotics-ros2-humble/tmp-glibc/work-shared/${YOCTO_MACHINE_NAME}/kernel-source && git rev-parse HEAD)
 	HASH_META_ADVANTECH=$(cd layers/meta-advantech-qualcomm && git rev-parse HEAD)
 
 	cat > ${FILENAME}.csv << END_OF_CSV

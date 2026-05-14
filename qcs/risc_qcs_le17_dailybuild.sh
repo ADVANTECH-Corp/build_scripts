@@ -22,6 +22,7 @@ CURR_PATH="$PWD"
 ROOT_DIR="${PLATFORM_PREFIX}_${PROJECT}_v${RELEASE_VERSION}_${DATE}"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
 IMAGE_VER="${PROJECT}_${OS_DISTRO}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${CHIP_NAME}_${RAM_SIZE}_${STORAGE}_${DATE}"
+SPDX_DIR="${IMAGE_VER}_spdx"
 
 if [[ "$CHIP_NAME" == *"qcs6490"* ]]; then
     YOCTO_MACHINE_NAME="qcs6490${PROJECT}"
@@ -210,6 +211,20 @@ function prepare_and_copy_csv()
 	popd
 }
 
+function prepare_and_copy_spdx()
+{
+	echo "[ADV] create sbom SPDX files"
+
+	if compgen -G "${YOCTO_IMAGE_DIR}/*.spdx.tar.zst" > /dev/null; then
+		cp -fpv "$YOCTO_IMAGE_DIR"/*.spdx.tar.zst "$SPDX_DIR/"
+	fi
+
+	echo "[ADV] creating ${SPDX_DIR}.tgz ..."
+	tar czf "${SPDX_DIR}.tgz" "$SPDX_DIR"
+	generate_md5 "${SPDX_DIR}.tgz"
+	mv -f "${SPDX_DIR}.tgz"* "$OUTPUT_DIR"
+}
+
 # ================
 #  Main procedure
 # ================
@@ -230,6 +245,7 @@ set_environment
 build_image
 prepare_and_copy_images
 prepare_and_copy_csv
+prepare_and_copy_spdx
 
 cd $CURR_PATH
 echo "[ADV] build script done!"

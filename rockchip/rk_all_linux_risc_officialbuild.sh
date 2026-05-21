@@ -11,7 +11,7 @@
 # 2025-10-17 1.0.0   Yunjin Jiang    Initial implementation
 # 2025-10-22 1.0.1   Bo Xiao         Install "binfmt/qemu/gettext" for build dependencies
 # 2025-10-27 1.0.2   Yunjin Jiang    Handle unbound variable:remote_server in function commit_tag
-# 
+# 2026-05-20 1.0.3   Yunjin Jiang    Fix tag renaming bug in commit_tag function
 
 
 
@@ -23,7 +23,7 @@ set -euo pipefail
 # ===========
 #  Global Variables
 # ===========
-declare -g SCRIPT_VERSION="1.0.2"
+declare -g SCRIPT_VERSION="1.0.3"
 
 declare -g REPO="repo"
 declare -g VERSION_K="" VERSION_M="" VERSION_P=""
@@ -36,7 +36,7 @@ declare -g ROOT_DIR="${OS_DISTRO}_${DATE}"
 declare -g ROOTFS="${ROOTFS:-debian}"  # Default value is debian
 
 # Read-only arrays
-readonly SPECIAL_GIT_REPOSITORY=(".repo/manifests")
+readonly SPECIAL_GIT_REPOSITORIES=(".repo/manifests")
 readonly BUILD_COMPONENTS=("uboot" "kernel" "rootfs" "recovery" "misc" "firmware")
 readonly REQUIRED_VARS=(
     "BSP_URL" "BSP_BRANCH" "BSP_XML"
@@ -472,7 +472,7 @@ function install_build_dependencies() {
     if [[ -d "live-build" ]]; then
         rm -rf live-build
     fi
-	log_success "live-build installed successfully"
+    log_success "live-build installed successfully"
 
     # install qemu
     log_info "Installing qemu-user-static & binfmt-support ..."
@@ -486,7 +486,7 @@ function install_build_dependencies() {
     sudo apt-get install gettext -y
     log_success "gettext installed successfully"
 
-	log_success "All build dependencies installed successfully"
+    log_success "All build dependencies installed successfully"
     return 0
 }
 
@@ -928,7 +928,7 @@ function find_max_suffix_of_exist_tag() {
     done
     
     # Special repository tag handling
-    for dir in "${SPECIAL_GIT_REPOSITORY[@]}"; do
+    for dir in "${SPECIAL_GIT_REPOSITORIES[@]}"; do
         local full_path="$CURR_PATH/$ROOT_DIR/$dir"
         if [[ -d "$full_path" ]]; then
             safe_cd "$full_path" || continue
@@ -948,15 +948,21 @@ function find_max_suffix_of_exist_tag() {
     echo $((max_suffix + 1))
 }
 
+# Rename existing tag to a new name without changing its commit target
+# This preserves the old tag's reference to its original commit
 function rename_exist_tag() {
     local new_tag="$1"
     local remote_server=$(git remote -v | grep push | awk '{print $1}')
     log_info "Renaming tag in repository: $(basename "$PWD")"
 
-    # Create new tag pointing to the actual commit (avoid nested tag warning)
-    local commit_id
-    commit_id=$(git rev-parse "$VER_TAG^{}")
-    git tag -a "$new_tag" "$commit_id" -m "[Renamed] Original tag: $VER_TAG"
+    # Get the commit that the existing tag points to
+    # This preserves the old tag's reference to its original commit
+    local existing_commit_id
+    existing_commit_id=$(git rev-parse "$VER_TAG^{}")
+    log_info "Existing tag $VER_TAG points to commit: $existing_commit_id"
+
+    # Create new tag pointing to the same commit (preserve the old reference)
+    git tag -a "$new_tag" "$existing_commit_id" -m "[Renamed] Original tag: $VER_TAG"
 
     # Push new tag to remote
     git push "$remote_server" "$new_tag"
@@ -968,10 +974,10 @@ function rename_exist_tag() {
     if git ls-remote --tags "$remote_server" | grep -q "refs/tags/$VER_TAG"; then
         git push "$remote_server" --delete "$VER_TAG" || log_warning "Failed to delete remote tag $VER_TAG, may already be deleted"
     else
-        log_info "Remote tag $VER_TAG already deleted"
+        log_info "Remote tag $VER_TAG not found, may have been deleted already"
     fi
     
-    log_success "Renamed tag: $VER_TAG -> $new_tag"
+    log_success "Renamed tag: $VER_TAG -> $new_tag (both pointing to commit: $existing_commit_id)"
 }
 
 function commit_tag() {
@@ -990,6 +996,7 @@ function commit_tag() {
     local new_tag="${VER_TAG}_old_$(printf "%03d" "$suffix")"
 
     # Handle existing tags by renaming them with incrementing suffix
+    # This preserves the old tags pointing to their original commits
     log_info "Checking for existing tags..."
     safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
     local repos_with_tag=()
@@ -1007,7 +1014,7 @@ function commit_tag() {
         if [[ -d "$full_path" ]]; then
             safe_cd "$full_path" || continue
             if git rev-parse "$VER_TAG" >/dev/null 2>&1; then
-                rename_exist_tag $new_tag
+                rename_exist_tag "$new_tag"
             fi
             safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
         else
@@ -1016,14 +1023,14 @@ function commit_tag() {
     done
     
     # Special repository tag handling
-    for dir in "${SPECIAL_GIT_REPOSITORY[@]}"; do
+    for dir in "${SPECIAL_GIT_REPOSITORIES[@]}"; do
         log_info "Processing repository: $dir"
 
         local full_path="$CURR_PATH/$ROOT_DIR/$dir"
         if [[ -d "$full_path" ]]; then
             safe_cd "$full_path" || continue
             if git rev-parse "$VER_TAG" >/dev/null 2>&1; then
-                rename_exist_tag $new_tag
+                rename_exist_tag "$new_tag"
             fi
             safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
         else
@@ -1031,14 +1038,15 @@ function commit_tag() {
         fi
     done
     
-    log_success "Existing tags checked successfully"
+    log_success "Existing tags checked and renamed successfully"
     
-    # Create new tags
+    # Create new tags pointing to the current HEAD (the new build)
     safe_cd "$CURR_PATH/$ROOT_DIR/kernel" || return 1
-    local remote_server=$(git remote -v | grep push | awk '{print $1}')
+    local remote_server
+    remote_server=$(git remote -v | grep push | awk '{print $1}')
     safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
 
-    log_info "Creating tag: $VER_TAG"
+    log_info "Creating new tag: $VER_TAG on current HEAD"
     if ! $REPO forall -c "git tag -a '$VER_TAG' -m '[Official Release] $VER_TAG'"; then
         log_error "Failed to create tags"
         return 1
@@ -1050,14 +1058,14 @@ function commit_tag() {
     fi
 
     # Special repository tag pushing
-    for dir in "${SPECIAL_GIT_REPOSITORY[@]}"; do
+    for dir in "${SPECIAL_GIT_REPOSITORIES[@]}"; do
         local dir_full_path="$CURR_PATH/$ROOT_DIR/$dir"
         if [[ -d "$dir_full_path" ]]; then
             safe_cd "$dir_full_path" || continue
             log_info "Creating tag for special repository: $dir"
-            remote_server_special=$(git remote -v | grep push | awk '{print $1}')
+            remote_server=$(git remote -v | grep push | awk '{print $1}')
             git tag -a "$VER_TAG" -m "[Official Release] $VER_TAG"
-            git push "$remote_server_special" "$VER_TAG" || log_warning "Failed to push tag for $dir"
+            git push "$remote_server" "$VER_TAG" || log_warning "Failed to push tag for $dir"
             safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
         else
             log_warning "Special repository directory not found: $dir_full_path"

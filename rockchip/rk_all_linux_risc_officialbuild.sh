@@ -948,21 +948,15 @@ function find_max_suffix_of_exist_tag() {
     echo $((max_suffix + 1))
 }
 
-# Rename existing tag to a new name without changing its commit target
-# This preserves the old tag's reference to its original commit
 function rename_exist_tag() {
     local new_tag="$1"
     local remote_server=$(git remote -v | grep push | awk '{print $1}')
     log_info "Renaming tag in repository: $(basename "$PWD")"
 
-    # Get the commit that the existing tag points to
-    # This preserves the old tag's reference to its original commit
-    local existing_commit_id
-    existing_commit_id=$(git rev-parse "$VER_TAG^{}")
-    log_info "Existing tag $VER_TAG points to commit: $existing_commit_id"
-
-    # Create new tag pointing to the same commit (preserve the old reference)
-    git tag -a "$new_tag" "$existing_commit_id" -m "[Renamed] Original tag: $VER_TAG"
+    # Create new tag pointing to the actual commit (avoid nested tag warning)
+    local commit_id
+    commit_id=$(git rev-parse "$VER_TAG^{}")
+    git tag -a "$new_tag" "$commit_id" -m "[Renamed] Original tag: $VER_TAG"
 
     # Push new tag to remote
     git push "$remote_server" "$new_tag"
@@ -977,7 +971,7 @@ function rename_exist_tag() {
         log_info "Remote tag $VER_TAG not found, may have been deleted already"
     fi
     
-    log_success "Renamed tag: $VER_TAG -> $new_tag (both pointing to commit: $existing_commit_id)"
+    log_success "Renamed tag: $VER_TAG -> $new_tag"
 }
 
 function commit_tag() {
@@ -996,7 +990,6 @@ function commit_tag() {
     local new_tag="${VER_TAG}_old_$(printf "%03d" "$suffix")"
 
     # Handle existing tags by renaming them with incrementing suffix
-    # This preserves the old tags pointing to their original commits
     log_info "Checking for existing tags..."
     safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
     local repos_with_tag=()
@@ -1040,13 +1033,12 @@ function commit_tag() {
     
     log_success "Existing tags checked and renamed successfully"
     
-    # Create new tags pointing to the current HEAD (the new build)
+    # Create new tags
     safe_cd "$CURR_PATH/$ROOT_DIR/kernel" || return 1
-    local remote_server
-    remote_server=$(git remote -v | grep push | awk '{print $1}')
+    local remote_server=$(git remote -v | grep push | awk '{print $1}')
     safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
 
-    log_info "Creating new tag: $VER_TAG on current HEAD"
+    log_info "Creating tag: $VER_TAG"
     if ! $REPO forall -c "git tag -a '$VER_TAG' -m '[Official Release] $VER_TAG'"; then
         log_error "Failed to create tags"
         return 1
@@ -1063,9 +1055,9 @@ function commit_tag() {
         if [[ -d "$dir_full_path" ]]; then
             safe_cd "$dir_full_path" || continue
             log_info "Creating tag for special repository: $dir"
-            remote_server=$(git remote -v | grep push | awk '{print $1}')
+            remote_server_special=$(git remote -v | grep push | awk '{print $1}')
             git tag -a "$VER_TAG" -m "[Official Release] $VER_TAG"
-            git push "$remote_server" "$VER_TAG" || log_warning "Failed to push tag for $dir"
+            git push "$remote_server_special" "$VER_TAG" || log_warning "Failed to push tag for $dir"
             safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
         else
             log_warning "Special repository directory not found: $dir_full_path"

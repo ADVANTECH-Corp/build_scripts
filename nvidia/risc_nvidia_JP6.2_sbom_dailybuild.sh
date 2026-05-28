@@ -145,226 +145,112 @@ IMAGE="${TAG_NAME}"
 PLATFORM="linux/arm64"
 
 WORKDIR="$(pwd)"
-PY_SCRIPT="${WORKDIR}/trivy_to_dashboard_html.py"
+CVE_BIN_TOOL_VENV="${WORKDIR}/.venv-cve-bin-tool"
+SUMMARY_PATCH_SCRIPT="${WORKDIR}/patch_cve_html_summary.py"
 
-# =========================
-# Create Dockerfile in current folder
-# =========================
-log "Generate Dockerfile: ${PY_SCRIPT}"
-cat > "${PY_SCRIPT}" <<'EOF'
+ensure_cve_bin_tool() {
+  log "Check cve-bin-tool on host"
+
+  if ! command -v cve-bin-tool >/dev/null 2>&1; then
+    log "Install cve-bin-tool into host Python venv: ${CVE_BIN_TOOL_VENV}"
+    sudo apt update
+    sudo apt install -y \
+      python3 python3-venv python3-pip \
+      file binutils tar unzip rpm2cpio cpio cabextract
+
+    python3 -m venv "${CVE_BIN_TOOL_VENV}"
+    "${CVE_BIN_TOOL_VENV}/bin/python" -m pip install --upgrade pip
+    "${CVE_BIN_TOOL_VENV}/bin/pip" install --upgrade cve-bin-tool
+
+    export PATH="${CVE_BIN_TOOL_VENV}/bin:${PATH}"
+  fi
+
+  cve-bin-tool --version
+
+  log "Prepare cve-bin-tool CVE database cache"
+  cve-bin-tool --update daily -n json-mirror --disable-data-source OSV 
+}
+
+patch_cve_html_summary() {
+  log "Generate HTML summary patch script: ${SUMMARY_PATCH_SCRIPT}"
+  cat > "${SUMMARY_PATCH_SCRIPT}" <<'PY'
 #!/usr/bin/env python3
 import json
+import re
 import sys
-from collections import Counter
-from datetime import datetime
+from pathlib import Path
 
-SEV_ORDER = ["CRITICAL", "HIGH", "MEDIUM", "LOW", "UNKNOWN"]
+if len(sys.argv) != 5:
+    print("Usage: patch_cve_html_summary.py SBOM.json cve_report.json input.html output.html")
+    sys.exit(1)
 
+sbom_file, cve_json_file, html_in, html_out = sys.argv[1:5]
 
-def load_trivy_vulns(path: str):
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+sbom = json.loads(Path(sbom_file).read_text(encoding="utf-8"))
+cve_rows = json.loads(Path(cve_json_file).read_text(encoding="utf-8"))
+html = Path(html_in).read_text(encoding="utf-8")
 
-    vulns = []
-    for result in data.get("Results", []):
-        for v in result.get("Vulnerabilities", []) or []:
-            vulns.append(
-                {
-                    "CVEID": v.get("VulnerabilityID", ""),
-                    "Severity": (v.get("Severity") or "UNKNOWN").upper(),
-                    "Package": v.get("PkgName", ""),
-                    "Installed": v.get("InstalledVersion", ""),
-                    "Fixed": v.get("FixedVersion") or "N/A",
-                    "Ref": v.get("PrimaryURL") or "",
-                }
-            )
-    return vulns
+package_count = len(sbom.get("packages", []))
 
+vulnerable_products = {
+    (
+        row.get("vendor", "UNKNOWN"),
+        row.get("product", ""),
+        row.get("version", ""),
+    )
+    for row in cve_rows
+}
 
-def esc(s: str) -> str:
-    return (
-        (s or "")
-        .replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-        .replace('"', "&quot;")
+vuln_count = len(vulnerable_products)
+no_known = max(package_count - vuln_count, 0)
+
+def replace_first_number_after(label, value, text):
+    label_pos = text.lower().find(label.lower())
+    if label_pos == -1:
+        return text
+
+    window_start = label_pos
+    window_end = min(len(text), label_pos + 800)
+    window = text[window_start:window_end]
+
+    patched, count = re.subn(
+        r'(<span[^>]*class="[^"]*badge[^"]*"[^>]*>)\d+(</span>)',
+        rf'\g<1>{value}\2',
+        window,
+        count=1,
+        flags=re.I | re.S,
     )
 
+    if count == 0:
+        patched, count = re.subn(r'(\b)\d+(\b)', rf'\g<1>{value}\2', window, count=1)
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python3 trivy_to_dashboard_html.py <trivy_json> [output_html]")
-        sys.exit(2)
+    if count == 0:
+        return text
 
-    in_json = sys.argv[1]
-    out_html = sys.argv[2] if len(sys.argv) >= 3 else "cve_report.html"
+    return text[:window_start] + patched + text[window_end:]
 
-    vulns = load_trivy_vulns(in_json)
+html = replace_first_number_after("Scanned Files:", package_count, html)
+html = replace_first_number_after("Total Scanned Files", package_count, html)
+html = replace_first_number_after("Vulnerable Files:", vuln_count, html)
+html = replace_first_number_after("Vulnerable Files", vuln_count, html)
+html = replace_first_number_after("No Known Vulnerability", no_known, html)
 
-    sev_counts = Counter(v["Severity"] for v in vulns)
+Path(html_out).write_text(html, encoding="utf-8")
 
-    sev_rank = {s: i for i, s in enumerate(SEV_ORDER)}
-    vulns = sorted(
-        vulns,
-        key=lambda v: (sev_rank.get(v["Severity"], 99), v["Package"], v["CVEID"]),
-    )
+audit = {
+    "source_flow": "syft SBOM -> cve-bin-tool HTML/JSON -> patched HTML summary",
+    "sbom_file": sbom_file,
+    "cve_json_file": cve_json_file,
+    "sbom_package_count": package_count,
+    "cve_bin_tool_vulnerable_product_count": vuln_count,
+    "no_known_vulnerability_count": no_known,
+    "vulnerable_products": sorted(list(vulnerable_products)),
+}
 
-    rows = []
-    for v in vulns:
-        rows.append(
-            f"<tr>"
-            f"<td>{esc(v['CVEID'])}</td>"
-            f"<td><span class='sev sev-{v['Severity']}'>{v['Severity']}</span></td>"
-            f"<td class='mono'>{esc(v['Package'])}</td>"
-            f"<td class='mono'>{esc(v['Installed'])}</td>"
-            f"<td class='mono'>{esc(v['Fixed'])}</td>"
-            f"<td>"
-            + (f"<a href='{esc(v['Ref'])}' target='_blank'>link</a>" if v["Ref"] else "")
-            + "</td></tr>"
-        )
-
-    now = datetime.now().strftime("%Y-%m-%d %H:%M")
-
-    html = f"""<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CVE Report</title>
-
-<style>
-body {{
-  font-family: system-ui, Arial;
-  background: #f3f5f7;
-  margin: 0;
-}}
-
-header {{
-  background: #2f343a;
-  color: white;
-  padding: 10px 16px;
-  display: flex;
-  justify-content: space-between;
-}}
-
-.container {{
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 16px;
-}}
-
-.card {{
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 16px;
-}}
-
-table {{
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}}
-
-th, td {{
-  padding: 8px;
-  border-top: 1px solid #e5e7eb;
-}}
-
-th {{
-  text-align: left;
-  color: #6b7280;
-}}
-
-.sev {{
-  padding: 2px 8px;
-  border-radius: 999px;
-  color: white;
-  font-weight: 700;
-  font-size: 11px;
-}}
-
-.sev-CRITICAL {{ background:#ef4444; }}
-.sev-HIGH {{ background:#f59e0b; color:#111827; }}
-.sev-MEDIUM {{ background:#3b82f6; }}
-.sev-LOW {{ background:#10b981; }}
-.sev-UNKNOWN {{ background:#9ca3af; color:#111827; }}
-
-.mono {{
-  font-family: ui-monospace, Menlo, Consolas, monospace;
-  font-size: 11px;
-}}
-
-.table-wrap {{
-  max-height: 600px;
-  overflow: auto;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-}}
-</style>
-</head>
-
-<body>
-<header>
-  <strong>CVE Report</strong>
-  <span>Generated: {now}</span>
-</header>
-
-<div class="container">
-
-  <div class="card">
-    <h3>CVE Summary</h3>
-    <table>
-      <thead><tr><th>Severity</th><th>Count</th></tr></thead>
-      <tbody>
-        {"".join(f"<tr><td><span class='sev sev-{s}'>{s}</span></td><td>{sev_counts.get(s,0)}</td></tr>" for s in SEV_ORDER)}
-      </tbody>
-    </table>
-  </div>
-
-  <div class="card">
-    <h3>Vulnerabilities</h3>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>CVE</th>
-            <th>Severity</th>
-            <th>Package</th>
-            <th>Installed</th>
-            <th>Fixed</th>
-            <th>Ref</th>
-          </tr>
-        </thead>
-        <tbody>
-          {"".join(rows)}
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-</div>
-</body>
-</html>
-"""
-
-    with open(out_html, "w", encoding="utf-8") as f:
-        f.write(html)
-
-    print(f"[OK] Generated {out_html}")
-
-
-if __name__ == "__main__":
-    main()
-
-EOF
-
-if [[ ! -f "${PY_SCRIPT}" ]]; then
-  echo "[ERROR] Not found: ${PY_SCRIPT}"
-  echo "        Please put trivy_to_dashboard_html.py in the same directory as this script."
-  exit 1
-fi
+Path(html_out + ".audit.json").write_text(json.dumps(audit, indent=2), encoding="utf-8")
+print(json.dumps(audit, indent=2))
+PY
+}
 
 echo "[INFO] Workdir : ${WORKDIR}"
 echo "[INFO] Image   : ${IMAGE}"
@@ -396,37 +282,11 @@ echo "[INFO] Generate SBOM.json"
 sudo syft / --output spdx-json > /work/SBOM.json
 echo
 
-echo "[INFO] Install trivy repo key + list (best effort)"
-wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
-  | gpg --dearmor \
-  | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null || echo "[WARN] add trivy key failed"
-
-echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" \
-  | sudo tee /etc/apt/sources.list.d/trivy.list > /dev/null || true
-
-echo
-echo "[INFO] apt-get update (allow failure)"
-sudo apt-get update || echo "[WARN] apt-get update failed, continue anyway"
-
-echo "[INFO] install trivy (best effort)"
-sudo apt-get install -y trivy || echo "[WARN] trivy install failed, try existing trivy if any"
-trivy --version || true
-echo
-
-echo "[INFO] Generate CVE.json from SBOM.json"
-trivy sbom --format json /work/SBOM.json > /work/CVE.json
-echo
-
-echo "[INFO] Convert CVE.json -> CVE.html using /work/trivy_to_dashboard_html.py"
-python3 /work/trivy_to_dashboard_html.py /work/CVE.json /work/${IMAGE_VER}_sbom.html
-echo
-
-
 echo "[INFO] Output files:"
-ls -al /work | egrep 'trivy_to_dashboard_html\.py|SBOM\.json|CVE\.json|${IMAGE_VER}_sbom\.html' || true
+ls -al /work | egrep 'SBOM\.json' || true
 echo
 
-echo "[INFO] Done."
+echo "[INFO] Done generating SBOM.json in container."
 EOF
 
 echo "[INFO] Starting container..."
@@ -436,10 +296,27 @@ sudo docker run --rm -i --platform="${PLATFORM}" \
   "${IMAGE}" \
   bash -lc "${CONTAINER_CMD}"
 
+ensure_cve_bin_tool
+patch_cve_html_summary
+
+log "Generate CVE report HTML/JSON by cve-bin-tool on host"
+cve-bin-tool --sbom spdx \
+  --sbom-file "${WORKDIR}/SBOM.json" \
+  --format html,json \
+  --output-file "${WORKDIR}/${IMAGE_VER}_sbom" \
+  --update never
+
+log "Patch cve-bin-tool HTML summary with SBOM package count"
+python3 "${SUMMARY_PATCH_SCRIPT}" \
+  "${WORKDIR}/SBOM.json" \
+  "${WORKDIR}/${IMAGE_VER}_sbom.json" \
+  "${WORKDIR}/${IMAGE_VER}_sbom.html" \
+  "${WORKDIR}/${IMAGE_VER}_sbom.html"
+
 if [ ! -f "${WORKDIR}/${IMAGE_VER}_sbom.html" ]; then
     if [  -f "Linux_for_Tegra" ]; then
       sudo rm -rf Linux_for_Tegra
-      sudo rm CVE.* SBOM.json  Dockerfile  trivy_to_dashboard_html.py
+      sudo rm -f SBOM.json Dockerfile "${SUMMARY_PATCH_SCRIPT}"
     fi
     log "[ERROR] File not found: ${WORKDIR}/${IMAGE_VER}_sbom.html"
     exit 1
@@ -452,13 +329,12 @@ echo "[INFO] Generated ${IMAGE_VER}_sbom.html.md5 "
 
 echo
 echo "[INFO] Back on host. Verify outputs:"
-ls -al "${WORKDIR}" | egrep 'trivy_to_dashboard_html\.py|SBOM\.json|CVE\.json|${IMAGE_VER}\.html|${IMAGE_VER}.html.md5' || true
-sudo rm -rf CVE.* SBOM.json  Dockerfile  trivy_to_dashboard_html.py Linux_for_Tegra/
+ls -al "${WORKDIR}" | egrep "SBOM\.json|${IMAGE_VER}_sbom\.html|${IMAGE_VER}_sbom\.json|${IMAGE_VER}_sbom\.html\.md5|${IMAGE_VER}_sbom\.html\.audit\.json" || true
+sudo rm -rf SBOM.json Dockerfile "${SUMMARY_PATCH_SCRIPT}" Linux_for_Tegra/
 if [  -f "Linux_for_Tegra" ]; then
     sudo rm -rf Linux_for_Tegra
 fi
 sudo docker image rm ${IMAGE}
 
 echo
-echo "[INFO] Finished. ${IMAGE_VER}.html is in: ${WORKDIR}"
-
+echo "[INFO] Finished. ${IMAGE_VER}_sbom.html is in: ${WORKDIR}"

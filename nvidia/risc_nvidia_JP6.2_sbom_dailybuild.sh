@@ -24,7 +24,7 @@ LINUX_TEGRA="Linux_for_Tegra"
 IMAGE_VER="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}_${DATE}"
 
 
-set -euo pipefail
+set -uo pipefail
 
 # =========================
 # Config (edit if needed)
@@ -166,9 +166,6 @@ ensure_cve_bin_tool() {
   fi
 
   cve-bin-tool --version
-
-  log "Prepare cve-bin-tool CVE database cache"
-  cve-bin-tool --update daily -n json-mirror --disable-data-source OSV 
 }
 
 patch_cve_html_summary() {
@@ -258,7 +255,7 @@ echo "[INFO] Platform: ${PLATFORM}"
 echo
 
 read -r -d '' CONTAINER_CMD <<EOF || true
-set -euo pipefail
+set -uo pipefail
 
 echo "[INFO] Container OS:"
 cat /etc/os-release || true
@@ -304,7 +301,9 @@ cve-bin-tool --sbom spdx \
   --sbom-file "${WORKDIR}/SBOM.json" \
   --format html,json \
   --output-file "${WORKDIR}/${IMAGE_VER}_sbom" \
-  --update never
+  --update daily \
+  -n json-mirror \
+  --disable-data-source OSV
 
 log "Patch cve-bin-tool HTML summary with SBOM package count"
 python3 "${SUMMARY_PATCH_SCRIPT}" \

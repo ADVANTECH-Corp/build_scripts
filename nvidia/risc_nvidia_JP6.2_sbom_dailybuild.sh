@@ -39,6 +39,10 @@ ROOTFS_DIR="./Linux_for_Tegra/rootfs"
 # If you want a specific buildx builder name, set it here:
 BUILDER_NAME="nv-buildx"
 
+# Clean up the buildx builder and its BuildKit cache volume after this job.
+# Set to "false" if you want to keep build cache for faster local rebuilds.
+CLEANUP_BUILDX_STATE="true"
+
 # =========================
 # Helpers
 # =========================
@@ -334,6 +338,41 @@ if [  -f "Linux_for_Tegra" ]; then
     sudo rm -rf Linux_for_Tegra
 fi
 sudo docker image rm ${IMAGE}
+
+if [ "${CLEANUP_BUILDX_STATE}" = "true" ]; then
+    log "Clean up docker buildx builder and BuildKit state: ${BUILDER_NAME}"
+    if sudo docker buildx inspect "${BUILDER_NAME}" >/dev/null 2>&1; then
+        if sudo docker buildx rm "${BUILDER_NAME}"; then
+            log "Removed docker buildx builder: ${BUILDER_NAME}"
+        else
+            err "Failed to remove docker buildx builder: ${BUILDER_NAME}"
+        fi
+    else
+        log "Docker buildx builder already absent: ${BUILDER_NAME}"
+    fi
+
+    BUILDX_STATE_VOLUME="buildx_buildkit_${BUILDER_NAME}0_state"
+    if sudo docker volume inspect "${BUILDX_STATE_VOLUME}" >/dev/null 2>&1; then
+        if sudo docker volume rm "${BUILDX_STATE_VOLUME}"; then
+            log "Removed docker buildx state volume: ${BUILDX_STATE_VOLUME}"
+        else
+            err "Failed to remove docker buildx state volume: ${BUILDX_STATE_VOLUME}"
+        fi
+    else
+        log "Docker buildx state volume already absent: ${BUILDX_STATE_VOLUME}"
+    fi
+fi
+
+log "Clean up cve-bin-tool Python venv: ${CVE_BIN_TOOL_VENV}"
+if [ -d "${CVE_BIN_TOOL_VENV}" ]; then
+    if rm -rf "${CVE_BIN_TOOL_VENV}"; then
+        log "Removed cve-bin-tool Python venv: ${CVE_BIN_TOOL_VENV}"
+    else
+        err "Failed to remove cve-bin-tool Python venv: ${CVE_BIN_TOOL_VENV}"
+    fi
+else
+    log "cve-bin-tool Python venv already absent: ${CVE_BIN_TOOL_VENV}"
+fi
 
 echo
 echo "[INFO] Finished. ${IMAGE_VER}_sbom.html is in: ${WORKDIR}"

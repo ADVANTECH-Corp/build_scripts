@@ -490,6 +490,39 @@ function install_build_dependencies() {
     return 0
 }
 
+function generate_oeminfo() {
+    local oem_file="$CURR_PATH/$ROOT_DIR/debian_adv/overlay-adv/etc/OEMinfo.ini"
+    local image_version="V${SDK_VERSION}.${ADV_VERSION}"
+    log_info "Generating OEMinfo.ini..."
+    safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
+
+    cat > "$oem_file" << EOF
+[General]
+Manufacturer: Advantech, Inc.
+Support_URL:  www.advantech.com
+
+[AIM_Linux_Release]
+Platform_Name:     Rockchip
+Chip_Name:         ${CHIP_NAME}
+Product_Name:      ${PROJECT}
+OS_Distro:         ${OS_DISTRO}
+Image_Version:     ${image_version}
+Kernel_Version:    ${KERNEL_VERSION}
+Build_Date:        ${DATE}
+EOF
+
+    if [ $? -eq 0 ]; then
+        echo "-----------------------"
+        cat "$oem_file"
+        echo "-----------------------"
+        echo "$oem_file generation completed successfully"
+        return 0
+    else
+        echo "Error: Failed to write to $oem_file" >&2
+        return 1
+    fi
+}
+
 function apply_kernel_patch() {
     log_info "Applying kernel patches..."
     if [[ ${RT_PATCH:-} == "true" ]]; then
@@ -583,6 +616,10 @@ function build_component() {
         "rootfs")
             if ! install_build_dependencies; then
                 log_error "Failed to install build dependencies"
+                return 1
+            fi
+            if ! generate_oeminfo; then
+                log_error "Failed to generate OEMinfo.ini"
                 return 1
             fi
             ;;

@@ -567,17 +567,17 @@ else #"$PRODUCT" != "$VER_PREFIX"
 		prepare_images misc $MISC_DIR
 		copy_image_to_storage misc
 
-		echo "[ADV] create cve files"
-		DEPLOY_CVE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/cve"
-		CVE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_cve
-		prepare_images cve $CVE_DIR
-		copy_image_to_storage cve
+#		echo "[ADV] create cve files"
+#		DEPLOY_CVE_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/cve"
+#		CVE_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_cve
+#		prepare_images cve $CVE_DIR
+#		copy_image_to_storage cve
 
-		echo "[ADV] create sbom SPDX files"
-		DEPLOY_SPDX_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/spdx"
-		SPDX_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_spdx
-		prepare_images spdx $SPDX_DIR
-		copy_image_to_storage spdx
+#		echo "[ADV] create sbom SPDX files"
+#		DEPLOY_SPDX_PATH="$CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/deploy/spdx"
+#		SPDX_DIR="$OFFICIAL_VER"_"$CPU_TYPE"_"$MEMORY"_spdx
+#		prepare_images spdx $SPDX_DIR
+#		copy_image_to_storage spdx
 
         done
 

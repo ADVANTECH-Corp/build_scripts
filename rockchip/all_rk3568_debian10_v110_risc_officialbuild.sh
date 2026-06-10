@@ -67,6 +67,25 @@ if [ "$ROM5880A1" == "true" ]; then
 	./rk3568_debian10_v110_risc_officialbuild.sh $VERSION_NUM
 fi
 
+if [ "$ROM5880B1" == "true" ]; then
+	UBOOT_DEFCONFIG=rk3568_rom5880b1
+	KERNEL_DEFCONFIG=rk3568_adv_defconfig
+	KERNEL_DTB=rk3568-rom5880-b1.img
+	MACHINE_LIST="$MACHINE_LIST ROM5880"
+	MODEL_NAME="ROM5880"
+	HW_VER="B1"
+	BOARD_CONFIG="BoardConfig-rk3568-rom5880b1.mk"
+
+	export UBOOT_DEFCONFIG
+	export KERNEL_DEFCONFIG
+	export KERNEL_DTB
+	export MACHINE_LIST
+	export MODEL_NAME
+	export HW_VER
+	export BOARD_CONFIG
+	./rk3568_debian10_v110_risc_officialbuild.sh $VERSION_NUM
+fi
+
 if [ "$KEDGE350A1" == "true" ]; then
 	UBOOT_DEFCONFIG=rk3568_kedge350a1
 	KERNEL_DEFCONFIG=rk3568_adv_defconfig

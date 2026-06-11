@@ -8,7 +8,7 @@ BOOT_DEVICE_LIST=$4
 #--- [platform specific] ---
 VER_PREFIX="imx8"
 TMP_DIR="tmp"
-DEFAULT_DEVICE="imx8mprsb3720a2"
+DEFAULT_DEVICE="imx8mmebcrs16a1"
 #---------------------------
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
@@ -183,7 +183,7 @@ function check_tag_and_replace()
 		HASH_ID=$HASH_CSV
                 echo "[ADV] $REMOTE_URL isn't tagged , set HASH_ID to $HASH_ID"
         fi
-        sed -i "s/"\$\{AUTOREV\}"/$HASH_ID/g" $ROOT_DIR/$FILE_PATH
+        sed -i "s/^SRCREV = \".*\"$/SRCREV = \"$HASH_ID\"/" $ROOT_DIR/$FILE_PATH
 }
 
 function commit_tag_and_rollback()
@@ -203,10 +203,10 @@ function commit_tag_and_rollback()
                         git tag -a $VER_TAG -m "[Official Release] $VER_TAG"
                         git push --follow-tags
                         # Rollback
-                        HEAD_HASH_ID=`git rev-parse HEAD`
-                        git revert $HEAD_HASH_ID --no-edit
-                        git push
-                        git reset --hard $HEAD_HASH_ID
+ #                       HEAD_HASH_ID=`git rev-parse HEAD`
+ #                       git revert $HEAD_HASH_ID --no-edit
+ #                       git push
+ #                       git reset --hard $HEAD_HASH_ID
                 fi
                 cd $CURR_PATH
         else
@@ -498,10 +498,10 @@ else # "$PRODUCT" != "$VER_PREFIX"
 		check_tag_and_checkout $META_ADVANTECH_PATH $META_ADVANTECH_BRANCH $HASH_ADVANTECH
 
 		# Check tag exist or not, and replace bbappend file SRCREV
-#		check_tag_and_replace $U_BOOT_PATH $U_BOOT_URL $HASH_UBOOT
-#		check_tag_and_replace $KERNEL_PATH $KERNEL_URL $HASH_KERNEL
+		check_tag_and_replace $U_BOOT_PATH $U_BOOT_URL $HASH_UBOOT
+		check_tag_and_replace $KERNEL_PATH $KERNEL_URL $HASH_KERNEL
 
-#                commit_tag_and_rollback $META_ADVANTECH_PATH
+                commit_tag_and_rollback $META_ADVANTECH_PATH
 
                 # Add git tag and Package kernel & u-boot
                 echo "[ADV] Add tag"

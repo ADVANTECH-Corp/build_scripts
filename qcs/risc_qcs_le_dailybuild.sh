@@ -42,6 +42,9 @@ function get_source_code()
 	repo sync -c -j8
 	repo sync -c -j8
 	repo sync -c -j8
+	cp layers/meta-advantech/conf/machine/qcm6490.conf layers/meta-qcom-hwe/conf/machine/qcm6490.conf
+	cp layers/meta-advantech/recipes-sdk/files/content_config.json layers/meta-qcom-robotics-sdk/recipes-sdk/files/content_config.json
+	cp layers/meta-advantech/recipes-core/base-files/base-files/fstab layers/poky/meta/recipes-core/base-files/base-files/fstab
 	popd
 }
 

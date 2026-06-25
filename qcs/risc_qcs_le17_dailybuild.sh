@@ -26,6 +26,8 @@ SPDX_DIR="${IMAGE_VER}_spdx"
 
 if [[ "$CHIP_NAME" == *"qcs6490"* ]]; then
     YOCTO_MACHINE_NAME="qcs6490${PROJECT}"
+elif [[ "$CHIP_NAME" == *"iq9075"* ]]; then
+    YOCTO_MACHINE_NAME="qcs9075${PROJECT}"
 fi
 
 YOCTO_IMAGE_DIR="$CURR_PATH/$ROOT_DIR/build-qcom-robotics-ros2-humble/tmp-glibc/deploy/images/${YOCTO_MACHINE_NAME}"

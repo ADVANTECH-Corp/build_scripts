@@ -24,7 +24,7 @@ LINUX_TEGRA="Linux_for_Tegra"
 IMAGE_VER="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}_${DATE}"
 
 
-set -uo pipefail
+set -euo pipefail
 
 # =========================
 # Config (edit if needed)
@@ -119,13 +119,8 @@ EOF
 # 5) Ensure buildx builder exists and is selected
 # =========================
 log "Setup docker buildx builder: ${BUILDER_NAME}"
-if ! sudo docker buildx inspect "${BUILDER_NAME}" >/dev/null 2>&1; then
-  sudo docker buildx create --name "${BUILDER_NAME}" --use
-else
-  sudo docker buildx use "${BUILDER_NAME}"
-fi
-
-# (Optional but often helpful)
+sudo docker buildx rm "${BUILDER_NAME}" 2>/dev/null || true
+sudo docker buildx create --name "${BUILDER_NAME}" --use
 sudo docker buildx inspect --bootstrap >/dev/null
 
 # =========================
@@ -137,6 +132,7 @@ log "Build image: ${TAG_NAME} (platform=${PLATFORM})"
 sudo docker image rm ${TAG_NAME} >/dev/null 2>&1 || true
 
 sudo docker buildx build \
+  --no-cache \
   --platform "${PLATFORM}" \
   -t "${TAG_NAME}" \
   --load \

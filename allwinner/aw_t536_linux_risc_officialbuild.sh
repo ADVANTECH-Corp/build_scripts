@@ -470,6 +470,39 @@ function apply_kernel_patch() {
     Log_Success "All kernel patches applied successfully"
 }
 
+function Generate_OEMinfo() {
+    local OEM_FILE="$CURR_PATH/$ROOT_DIR/target/t536/buildroot/common/overlay/etc/OEMinfo.ini"
+    local IMAGE_VERSION_AW="V${SDK_VERSION}.${ADV_VERSION}"
+    Log_Info "Generating OEMinfo.ini..."
+    Safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
+
+    cat > "$OEM_FILE" << EOF
+[General]
+Manufacturer: Advantech, Inc.
+Support_URL:  www.advantech.com
+
+[AIM_Linux_Release]
+Platform_Name:     AllWinner
+Chip_Name:         ${CHIP_NAME}
+Product_Name:      ${PROJECT}
+OS_Distro:         ${OS_DISTRO}
+Image_Version:     ${IMAGE_VERSION_AW}
+Kernel_Version:    ${KERNEL_VERSION}
+Build_Date:        ${DATE}
+EOF
+
+    if [ $? -eq 0 ]; then
+        echo "-----------------------"
+        cat "$OEM_FILE"
+        echo "-----------------------"
+        echo "$OEM_FILE generation completed successfully"
+        return 0
+    else
+        echo "Error: Failed to write to $OEM_FILE" >&2
+        return 1
+    fi
+}
+
 function Build_Component() {
     local component="$1"
     
@@ -506,6 +539,11 @@ function Build_Component() {
     case $component in
         "bootloader")
             echo " V${SDK_VERSION}.${ADV_VERSION}" > brandy/brandy-2.0/u-boot-2023/.scmversion
+
+            if ! Generate_OEMinfo; then
+                Log_Error "Failed to generate OEMinfo.ini"
+                return 1
+            fi
             ;;
     esac
 

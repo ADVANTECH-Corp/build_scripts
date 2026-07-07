@@ -89,14 +89,14 @@ function Safe_cd() {
 # Validate and set ROOTFS
 function Validate_And_Set_Rootfs() {
     Log_Info "Validating ROOTFS configuration..."
-    
+
     # If ROOTFS is empty, set to buildroot
     if [[ -z "${ROOTFS_AW}" ]]; then
         ROOTFS_AW="buildroot"
         Log_Info "ROOTFS not set, using default: $ROOTFS_AW"
         return 0
     fi
-    
+
     # Check if ROOTFS is a supported value
     case "${ROOTFS_AW}" in
         "debian"|"ubuntu"|"yocoto"|"buildroot")
@@ -107,7 +107,7 @@ function Validate_And_Set_Rootfs() {
             ROOTFS_AW="buildroot"
             ;;
     esac
-    
+
     Log_Info "Final ROOTFS configuration: $ROOTFS_AW"
     return 0
 }
@@ -115,13 +115,13 @@ function Validate_And_Set_Rootfs() {
 # Validate required environment variables
 function Validate_Environment() {
     local MISSING_VARS=()
-    
+
     for var in "${REQUIRED_VARS[@]}"; do
         if [[ -z "${!var}" ]]; then
             MISSING_VARS+=("$var")
         fi
     done
-    
+
     if [[ ${#MISSING_VARS[@]} -gt 0 ]]; then
         Log_Error "Required variables not set: ${MISSING_VARS[*]}"
         return 1
@@ -171,15 +171,15 @@ function Create_Root_Dir() {
             return 1
         fi
     fi
-    
+
     Safe_cd "$target_dir" || return 1
 }
 
 function Create_Output_Dir() {
     Safe_cd "$CURR_PATH" || return 1
-    
+
     local output_subdirs=("bsp" "image" "others")
-    
+
     for subdir in "${output_subdirs[@]}"; do
         local full_path="$OUTPUT_DIR/${PROJECT}/$subdir"
         if [[ -e "$full_path" ]]; then
@@ -202,13 +202,13 @@ function Get_First_Project() {
     for _ in $PROJECT_LIST; do
         ((idx++)) || true
     done
-    
+
     if [[ $idx -gt 1 ]]; then
         FIRST_PROJECT="false"
     else
         FIRST_PROJECT="true"
     fi
-    
+
     Log_Info "First project flag: $FIRST_PROJECT"
 
     return 0
@@ -220,7 +220,7 @@ function Get_Adv_Version() {
     else
         local version_file="$CURR_PATH/$ROOT_DIR/.repo/manifests/version/${PROJECT}"
     fi
-    
+
     if [[ ! -f "$version_file" ]]; then
         VERSION_K_LAST="0"
         VERSION_M_LAST="0"
@@ -233,7 +233,7 @@ function Get_Adv_Version() {
 
         Log_Info "Previous version: $VERSION_K_LAST.$VERSION_M_LAST.$VERSION_P_LAST"
     fi
-    
+
     # Validate version numbers are numeric
     if ! [[ "$VERSION_K_LAST" =~ ^[0-9]+$ ]] || ! [[ "$VERSION_M_LAST" =~ ^[0-9]+$ ]] || ! [[ "$VERSION_P_LAST" =~ ^[0-9]+$ ]]; then
         Log_Error "Invalid version format detected: VERSION_K_LAST='$VERSION_K_LAST', VERSION_M_LAST='$VERSION_M_LAST', VERSION_P_LAST='$VERSION_P_LAST'"
@@ -297,19 +297,19 @@ function Get_Adv_Version() {
 
 function Get_Kernel_Version() {
     Safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
-    
+
     local makefile="$CURR_PATH/$ROOT_DIR/kernel/${BOARD_CONFIG_AW}/Makefile"
     if [[ ! -f "$makefile" ]]; then
         Log_Error "Makefile not found in kernel directory"
         return 1
     fi
-    
+
     local version patchlevel sublevel extraversion
     version=$(grep -E '^VERSION\s*=' "$makefile" | head -1 | sed -E 's/.*=\s*([0-9]+).*/\1/')
     patchlevel=$(grep -E '^PATCHLEVEL\s*=' "$makefile" | head -1 | sed -E 's/.*=\s*([0-9]+).*/\1/')
     sublevel=$(grep -E '^SUBLEVEL\s*=' "$makefile" | head -1 | sed -E 's/.*=\s*([0-9]+).*/\1/')
     extraversion=$(grep -E '^EXTRAVERSION\s*=' "$makefile" | head -1 | sed -E 's/.*=\s*([^#]*).*/\1/' | tr -d ' ')
-    
+
     KERNEL_VERSION="${version}.${patchlevel}.${sublevel}${extraversion}"
     Log_Info "Kernel version: $KERNEL_VERSION"
     return 0
@@ -328,7 +328,7 @@ function Init_Global_Variable() {
     VER_IMAGE="${VER_TAG}_${RAM_SIZE}_${STORAGE}_${DATE}.img"
     VER_BSP="${VER_TAG}_${RAM_SIZE}_${STORAGE}_${DATE}.bsp"
     VER_OTHERS="${VER_TAG}_${RAM_SIZE}_${STORAGE}_${DATE}.others"
-    
+
     Log_Success "Global variables initialized successfully"
 
     return 0
@@ -382,25 +382,25 @@ function Get_Source_Code() {
     else
         repo_cmd="$REPO init -u $BSP_URL -b $BSP_BRANCH -m $BSP_XML"
     fi
-    
+
     Log_Info "Executing: $repo_cmd"
     if ! $repo_cmd; then
         Log_Error "repo init failed"
         return 1
     fi
-    
+
     Log_Info "Syncing repositories..."
     if ! $REPO sync; then
         Log_Error "repo sync failed"
         return 1
     fi
-    
+
     # Setup tracking branches
     local remote_server
     cd "brandy"
     remote_server=$(git remote -v | grep push | awk '{print $1}')
     Safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
-    
+
     Log_Info "Creating local tracking branches..."
     if ! $REPO forall -c "git checkout -b local --track $remote_server/$BSP_BRANCH"; then
         Log_Warning "Failed to create tracking branches"
@@ -414,7 +414,7 @@ function Get_Source_Code() {
         Log_Warning "Failed to create tracking branches for .repo/manifests"
     fi
     Safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
-    
+
     Safe_cd "$CURR_PATH" || return 1
     Log_Success "Source code preparation completed successfully"
 
@@ -423,7 +423,7 @@ function Get_Source_Code() {
 
 function generate_md5() {
     local filename="$1"
-    
+
     if [[ -e "$filename" ]]; then
         Log_Info "Generating MD5 for: $filename"
         md5sum -b "$filename" | cut -d ' ' -f 1 > "${filename}.md5"
@@ -441,7 +441,7 @@ function apply_kernel_patch() {
         git apply patch/RT/*.patch
         Log_Success "RT patch applied successfully"
     fi
-    
+
     if [[ ${ETHERCAT:-} == "true" ]]; then
         Log_Info "Applying EtherCAT driver patch..."
         local TARGET_LINE="obj-m += ethercat/"
@@ -511,21 +511,21 @@ function Build_Component() {
         Log_Error "Component name is required"
         return 1
     fi
-    
+
     # Check if component is in BUILD_COMPONENTS
     if [[ ! " ${BUILD_COMPONENTS[@]} " =~ " ${component} " ]]; then
         Log_Error "Invalid component: $component"
         return 1
     fi
-    
+
     local log_file="${VER_TAG}_Build_${component}.log"
     local start_time end_time duration
-    
+
     Log_Info "Building component: $component"
     start_time=$(date +%s)
-    
+
     Safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
-    
+
     # Define success pattern matching
     local -A success_patterns=(
         ["bootloader"]="build brandy OK."
@@ -560,7 +560,7 @@ function Build_Component() {
     if [[ $component == "all" ]]; then
             build_cmd="./build.sh "
     fi
-    
+
     Log_Info "Executing: $build_cmd"
     {
         Log_Info "Build started at: $(Get_Timestamp)"
@@ -578,21 +578,21 @@ function Build_Component() {
 
     end_time=$(date +%s)
     duration=$((end_time - start_time))
-    
+
     if [[ $build_status -ne 0 ]]; then
         Log_Error "$component build failed after $duration seconds. Check log: $log_file"
         return 1
     else
         Log_Success "$component build completed in $duration seconds"
     fi
-    
+
     return 0
 }
 
 function Build_Linux_Images() {
     local start_time end_time duration
     start_time=$(date +%s)
-    
+
     Log_Info "Starting Linux images build process..."
     Safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
 
@@ -633,7 +633,7 @@ set -euo pipefail
             return 1
         fi
     done
-        
+
     end_time=$(date +%s)
     duration=$((end_time - start_time))
     Log_Success "Linux images build completed in $duration seconds"
@@ -643,13 +643,13 @@ set -euo pipefail
 function Prepare_Image_Package() {
     Log_Info "Preparing image packages for distribution..."
     Safe_cd "$CURR_PATH" || return 1
-    
+
     # Create image package
     if [[ -d "$VER_IMAGE" ]]; then
         rm -rf "$VER_IMAGE"
     fi
     mkdir -p "$VER_IMAGE"
-    
+
     # Copy tools
     local tools_dirs=("tools/tools_win")
     local tools_copied=false
@@ -660,7 +660,7 @@ function Prepare_Image_Package() {
             break
         fi
     done
-    
+
     if [[ "$tools_copied" == "false" ]]; then
         Log_Warning "No tools directory found"
     fi
@@ -684,7 +684,7 @@ function Prepare_Image_Package() {
         Log_Error "Failed to create image archive"
         return 1
     fi
-    
+
     if ! generate_md5 "${VER_IMAGE}.tgz"; then
         Log_Error "Failed to generate MD5 for image"
         return 1
@@ -697,17 +697,17 @@ function Prepare_Image_Package() {
 function Prepare_BSP_Package() {
     Log_Info "Preparing BSP (Board Support Package)..."
     Safe_cd "$CURR_PATH" || return 1
-    
+
     if [[ -d "$VER_BSP" ]]; then
         rm -rf "$VER_BSP"
     fi
     mkdir -p "$VER_BSP"
-    
+
     # Clean and prepare source directories
-    local source_dirs=("brandy" "kernel" "bsp" "build" "device" "buildroot" "platform" "prebuilt" "tools")
-    
+    local source_dirs=("brandy" "kernel" "bsp" "build" "device" "buildroot" "platform" "prebuilt" "target" "tools")
+
     Safe_cd "$CURR_PATH" || return 1
-    
+
     # Copy BSP components
     for dir in "${source_dirs[@]}"; do
         if [[ -d "$CURR_PATH/$ROOT_DIR/$dir" ]]; then
@@ -737,12 +737,12 @@ function Prepare_BSP_Package() {
         Log_Error "Failed to create BSP archive"
         return 1
     fi
-    
+
     if ! generate_md5 "${VER_BSP}.tgz"; then
         Log_Error "Failed to generate MD5 for BSP"
         return 1
     fi
-    
+
     return 0
 }
 
@@ -750,7 +750,7 @@ function Prepare_BSP_Package() {
 function Prepare_Others_Package() {
     Log_Info "Preparing other packages for distribution..."
     Safe_cd "$CURR_PATH" || return 1
-    
+
     # Create image package
     if [[ -d "$VER_OTHERS" ]]; then
         rm -rf "$VER_OTHERS"
@@ -779,7 +779,7 @@ function Prepare_Others_Package() {
         Log_Error "out/  directory not found"
         return 1
     fi
-    
+
     sync
     # Create archive
     Log_Info "Creating archive: ${VER_OTHERS}.tgz"
@@ -787,7 +787,7 @@ function Prepare_Others_Package() {
         Log_Error "Failed to create others archive"
         return 1
     fi
-    
+
     if ! generate_md5 "${VER_OTHERS}.tgz"; then
         Log_Error "Failed to generate MD5 for others"
         return 1
@@ -800,7 +800,7 @@ function Prepare_Others_Package() {
 function Copy_Image_To_Storage() {
     Log_Info "Copying images to storage: $OUTPUT_DIR"
     Safe_cd "$CURR_PATH" || return 1
-    
+
     # Image package
     if [[ -f "${VER_IMAGE}.tgz" ]]; then
         mv -f "${VER_IMAGE}.tgz" "$OUTPUT_DIR/${PROJECT}/image/"
@@ -843,7 +843,7 @@ function Copy_Log_To_Storage() {
         rm -rf "$VER_LOG"
     fi
     mkdir -p "$VER_LOG"
-    
+
     # Collect all log files
     for component in "${BUILD_COMPONENTS[@]}"; do
         local log_file="${VER_TAG}_Build_${component}.log"
@@ -859,16 +859,16 @@ function Copy_Log_To_Storage() {
         Log_Error "Failed to create log archive"
         return 1
     fi
-    
+
     if ! generate_md5 "${VER_LOG}.tgz"; then
         Log_Error "Failed to generate MD5 for log"
         return 1
     fi
-    
+
     # Move to storage
     mv -f "${VER_LOG}.tgz" "$OUTPUT_DIR/${PROJECT}/others/"
     mv -f "${VER_LOG}.tgz.md5" "$OUTPUT_DIR/${PROJECT}/others/"
-    
+
     # Cleanup
     rm -rf "$VER_LOG"
 
@@ -881,7 +881,7 @@ function Copy_Manifest_To_Storage() {
     Log_Info "Generating and storing manifest..."
     local manifest_dir=".repo/manifests"
     Safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
-    
+
     if ! $REPO manifest -o "${VER_MANIFEST}.xml" -r; then
         Log_Error "Failed to generate manifest"
         return 1
@@ -925,11 +925,11 @@ EOF
     else
         Log_Info "Skip creating version file because VERSION_FIXED is true"
     fi
-    
+
     # Commit changes
     local remote_server
     remote_server=$(git remote -v | grep push | awk '{print $1}')
-    
+
     git add "${VER_MANIFEST}.xml"
     if ! git commit -m "[Official Release] ${VER_TAG}"; then
         Log_Info "INFO: No changes to commit"
@@ -937,7 +937,7 @@ EOF
         Log_Info "Committing manifest and version to remote..."
         git push $remote_server local:$BSP_BRANCH
     fi
-    
+
     Log_Success "Manifest and version committed successfully"
     return 0
 }
@@ -971,7 +971,7 @@ function find_max_suffix_of_exist_tag() {
             Log_Warning "Repository directory not found: $full_path" >&2
         fi
     done
-    
+
     # Special repository tag handling
     for dir in "${SPECIAL_GIT_REPOSITORY[@]}"; do
         local full_path="$CURR_PATH/$ROOT_DIR/$dir"
@@ -1015,18 +1015,18 @@ function rename_exist_tag() {
     else
         Log_Info "Remote tag $VER_TAG already deleted"
     fi
-    
+
     Log_Success "Renamed tag: $VER_TAG -> $new_tag"
 }
 
 function Commit_Tag() {
     Log_Info "Creating and pushing tags..."
-    
+
     Safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
-    
+
     local suffix
     suffix=$(find_max_suffix_of_exist_tag)
-    
+
     Log_Info "Suffix for old tag is $suffix"
     if [ "$suffix" -le 0 ] || [ "$suffix" -gt 999 ]; then
         Log_Error "Suffix must be 1-999, got $suffix"
@@ -1043,7 +1043,7 @@ function Commit_Tag() {
             repos_with_tag+=("$repo_dir")
         fi
     done < <($REPO list -p)
-    
+
     # Rename tags in each repository if the tag exists
     for dir in "${repos_with_tag[@]}"; do
         Log_Info "Processing repository: $dir"
@@ -1059,7 +1059,7 @@ function Commit_Tag() {
             Log_Warning "Repository directory not found: $full_path"
         fi
     done
-    
+
     # Special repository tag handling
     for dir in "${SPECIAL_GIT_REPOSITORY[@]}"; do
         Log_Info "Processing repository: $dir"
@@ -1075,9 +1075,9 @@ function Commit_Tag() {
             Log_Warning "Repository directory not found: $full_path"
         fi
     done
-    
+
     Log_Success "Existing tags checked successfully"
-    
+
     # Create new tags
     Safe_cd "$CURR_PATH/$ROOT_DIR/kernel" || return 1
     local remote_server=$(git remote -v | grep push | awk '{print $1}')
@@ -1088,7 +1088,7 @@ function Commit_Tag() {
         Log_Error "Failed to create tags"
         return 1
     fi
-    
+
     if ! $REPO forall -c "git push '$remote_server' '$VER_TAG'"; then
         Log_Error "Failed to push tags"
         return 1
@@ -1108,7 +1108,7 @@ function Commit_Tag() {
             Log_Warning "Special repository directory not found: $dir_full_path"
         fi
     done
-    
+
     Log_Success "Tags created successfully"
     return 0
 }
@@ -1122,7 +1122,7 @@ function main() {
 
     Log_Info "Build script version: $SCRIPT_VERSION"
     Log_Info "Build process started at $(Get_Timestamp)"
-    
+
     # Execute steps in order
     local steps=(
         "Validate_Environment"
@@ -1147,7 +1147,7 @@ function main() {
 
     local total_steps=${#steps[@]}
     local current_step=0
-    
+
     for step in "${steps[@]}"; do
         ((current_step++))
         echo "📋 [ADV] === Step $current_step/$total_steps: $step ==="
@@ -1157,7 +1157,7 @@ function main() {
         fi
         echo "✅ [ADV] ✓ Step $current_step: $step completed successfully"
     done
-    
+
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
     Log_Success "Build process completed in $duration seconds"

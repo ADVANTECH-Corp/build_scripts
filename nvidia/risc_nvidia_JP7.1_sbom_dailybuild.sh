@@ -29,7 +29,6 @@ set -euo pipefail
 # =========================
 # Config (edit if needed)
 # =========================
-BASE_IMAGE="nvcr.io/nvidia/l4t-jetpack:r36.4.0"
 QEMU_IMAGE="multiarch/qemu-user-static:latest"
 TAG_NAME="nv_cve_docker_image"
 PLATFORM="linux/arm64"
@@ -77,10 +76,11 @@ if [[ ! -d "${ROOTFS_DIR}" ]]; then
 fi
 
 # =========================
-# 1) Pull base image
+# 1) (No NVIDIA base image needed — Dockerfile below builds FROM scratch
+#    directly on top of Linux_for_Tegra/rootfs/, which is already a
+#    complete userspace. This avoids OS-version mismatches against
+#    l4t-jetpack, e.g. r36.4.0/Ubuntu 22.04 vs. our r38.4.0/Ubuntu 24.04.)
 # =========================
-log "Pull base image: ${BASE_IMAGE}"
-sudo docker pull "${BASE_IMAGE}"
 
 # =========================
 # 2) Install qemu-user-static + binfmt-support
@@ -102,21 +102,19 @@ log "Generate Dockerfile: ${DOCKERFILE_PATH}"
 cat > "${DOCKERFILE_PATH}" <<'EOF'
 # Dockerfile
 
-# 1) First start from nvcr.io/nvidia/l4t-jetpack:r36.4.0
-FROM nvcr.io/nvidia/l4t-jetpack:r36.4.0
+# 1) Start from an empty image. Linux_for_Tegra/rootfs/ is already a
+#    complete userspace (this is how official Ubuntu Docker images are
+#    built too), so no NVIDIA base image is needed. This also avoids
+#    OS-version mismatches (e.g. l4t-jetpack r36.4.0/Ubuntu 22.04 vs.
+#    our own r38.4.0/Ubuntu 24.04 rootfs) that broke plain COPY and
+#    rsync merges in earlier versions of this Dockerfile.
+FROM scratch
 
-# 2) Copy QEMU static files from qemu-static docker image
+# 2) Copy QEMU static files so aarch64 binaries can run under emulation
 COPY --from=multiarch/qemu-user-static:latest /usr/bin/qemu-aarch64-static /usr/bin
 
-# 2.5) Install rsync so we can merge the rootfs instead of COPY-overwriting it
-RUN apt-get update && apt-get install -y --no-install-recommends rsync \
-    && rm -rf /var/lib/apt/lists/*
-
-# 3) Copy target rootfs to a staging path, then merge it onto / with rsync.
-#    (plain COPY fails when a path is a directory in the base image but a
-#    file in the rootfs, e.g. /usr/share/doc/cpp)
-COPY Linux_for_Tegra/rootfs/ /tmp/rootfs/
-RUN rsync -a --force /tmp/rootfs/ / && rm -rf /tmp/rootfs
+# 3) Copy target rootfs directly onto the empty image
+COPY Linux_for_Tegra/rootfs/ /
 
 # 4) Set default command system
 CMD ["/bin/bash"]

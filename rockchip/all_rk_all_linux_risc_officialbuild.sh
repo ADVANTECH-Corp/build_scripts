@@ -2,6 +2,20 @@
 
 PROJECT_LIST=""
 
+#rk3399_projects
+if [ "$RSB4710A2" == "true" ]; then
+	PROJECT_LIST="$PROJECT_LIST RSB4710"
+	PROJECT="rsb4710a2"
+	BOARD_CONFIG="rk3399_rsb4710a2_defconfig"
+	RT_PATCH="false"
+
+	export PROJECT_LIST
+	export PROJECT
+	export BOARD_CONFIG
+	export RT_PATCH
+	./rk_all_linux_risc_officialbuild.sh
+fi
+
 #rk3568_projects
 if [ "$AFEE630A1" == "true" ]; then
 	PROJECT_LIST="$PROJECT_LIST AFEE630"

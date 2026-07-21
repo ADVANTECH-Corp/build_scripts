@@ -93,6 +93,21 @@ function build_image()
 	scripts/build_release.sh -${BUILD_RELEASE_TYPE} -${UBUNTU_MACHINE} -${DISTRO_IMAGE}
 }
 
+function generate_sbom()
+{
+	echo "[ADV] generate_sbom ..."
+	echo "[ADV] mount ..."
+	make mount
+	sudo chroot rootfs/ bash
+	echo "[ADV] in chroot ..."
+	apt update
+	apt install curl
+	syft / --output spdx-json > ${LOG_FILE}.json
+	exit
+	make unmount
+	echo "[ADV] unmount ..."
+}
+
 function generate_md5()
 {
 	FILENAME=$1
@@ -177,6 +192,14 @@ QCS_TOOLS, ${HASH_TOOLS}
 END_OF_CSV
 
 	popd
+}
+
+function prepare_and_copy_sbom()
+{
+        echo "[ADV] creating sbom files ..."
+        pushd $CURR_PATH/$ROOT_DIR/rootfs/ 2>&1 > /dev/null
+        mv -f ${LOG_FILE}.json $OUTPUT_DIR
+        popd
 }
 
 function prepare_and_copy_csv()

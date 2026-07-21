@@ -275,7 +275,7 @@ function create_aim_linux_release_xml()
         git commit -m "[Official Release] ${DEFAULT_VER_TAG}"
         git push
     else
-        if [ "$(cat $BSP_XML)" != "$(cat ${DEFAULT_VER_TAG}.xml)" ]; then
+        if [ "$(cat $CURR_PATH/$ROOT_DIR/.repo/manifests/${BSP_XML})" != "$(cat ${DEFAULT_VER_TAG}.xml)" ]; then
             echo "[ADV] Update the ${DEFAULT_VER_TAG}.xml"
             cp $CURR_PATH/$ROOT_DIR/.repo/manifests/${BSP_XML} ./${DEFAULT_VER_TAG}.xml
             git add ${DEFAULT_VER_TAG}.xml

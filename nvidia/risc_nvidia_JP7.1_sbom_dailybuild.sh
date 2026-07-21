@@ -108,12 +108,20 @@ FROM nvcr.io/nvidia/l4t-jetpack:r36.4.0
 # 2) Copy QEMU static files from qemu-static docker image
 COPY --from=multiarch/qemu-user-static:latest /usr/bin/qemu-aarch64-static /usr/bin
 
-# 3) Copy target rootfs, to override original rootfs
-COPY Linux_for_Tegra/rootfs/ /
+# 2.5) Install rsync so we can merge the rootfs instead of COPY-overwriting it
+RUN apt-get update && apt-get install -y --no-install-recommends rsync \
+    && rm -rf /var/lib/apt/lists/*
+
+# 3) Copy target rootfs to a staging path, then merge it onto / with rsync.
+#    (plain COPY fails when a path is a directory in the base image but a
+#    file in the rootfs, e.g. /usr/share/doc/cpp)
+COPY Linux_for_Tegra/rootfs/ /tmp/rootfs/
+RUN rsync -a --force /tmp/rootfs/ / && rm -rf /tmp/rootfs
 
 # 4) Set default command system
 CMD ["/bin/bash"]
 EOF
+
 
 # =========================
 # 5) Ensure buildx builder exists and is selected

@@ -299,17 +299,54 @@ sudo docker run --rm -i --platform="${PLATFORM}" \
   "${IMAGE}" \
   bash -lc "${CONTAINER_CMD}"
 
+filter_sbom_unknown_versions() {
+  # cve-bin-tool crashes with an unhandled "UnknownVersion: version string =
+  # UNKNOWN" exception on any SBOM package whose versionInfo is UNKNOWN
+  # (upstream bug: https://github.com/ossf/cve-bin-tool/issues/5302, still
+  # open as of cve-bin-tool 3.4). syft marks every Linux kernel module (.ko)
+  # this way since most don't embed a MODULE_VERSION() string, so a full
+  # rootfs scan reliably hits this. Drop those entries before handing the
+  # SBOM to cve-bin-tool — the kernel itself is still tracked (and scanned)
+  # as its own versioned package, so CVE coverage isn't lost.
+  log "Filter SBOM packages with UNKNOWN version (cve-bin-tool crashes on these)"
+  python3 - "${WORKDIR}/SBOM.json" "${WORKDIR}/SBOM_filtered.json" <<'PY'
+import json
+import sys
+
+src, dst = sys.argv[1], sys.argv[2]
+with open(src) as f:
+    data = json.load(f)
+
+before = len(data.get("packages", []))
+data["packages"] = [
+    p for p in data.get("packages", [])
+    if p.get("versionInfo", "").strip().upper() != "UNKNOWN"
+]
+after = len(data["packages"])
+
+with open(dst, "w") as f:
+    json.dump(data, f)
+
+print(f"[INFO] SBOM packages: {before} -> {after} (removed {before - after} with UNKNOWN version)")
+PY
+}
+
 ensure_cve_bin_tool
 patch_cve_html_summary
+filter_sbom_unknown_versions
 
 log "Generate CVE report HTML/JSON by cve-bin-tool on host"
+# cve-bin-tool exits 1 (not 0) whenever it finds any CVEs at all — that's
+# its documented success-with-findings signal, not a failure. With set -e
+# that would otherwise abort the script on every normal run. The real
+# failure check is the "${IMAGE_VER}_sbom.html exists" check further below.
 cve-bin-tool --sbom spdx \
-  --sbom-file "${WORKDIR}/SBOM.json" \
+  --sbom-file "${WORKDIR}/SBOM_filtered.json" \
   --format html,json \
   --output-file "${WORKDIR}/${IMAGE_VER}_sbom" \
   --update daily \
   -n json-mirror \
-  --disable-data-source OSV
+  --disable-data-source OSV || true
 
 log "Patch cve-bin-tool HTML summary with SBOM package count"
 python3 "${SUMMARY_PATCH_SCRIPT}" \
@@ -321,7 +358,7 @@ python3 "${SUMMARY_PATCH_SCRIPT}" \
 if [ ! -f "${WORKDIR}/${IMAGE_VER}_sbom.html" ]; then
     if [  -f "Linux_for_Tegra" ]; then
       sudo rm -rf Linux_for_Tegra
-      sudo rm -f SBOM.json Dockerfile "${SUMMARY_PATCH_SCRIPT}"
+      sudo rm -f SBOM.json SBOM_filtered.json Dockerfile "${SUMMARY_PATCH_SCRIPT}"
     fi
     log "[ERROR] File not found: ${WORKDIR}/${IMAGE_VER}_sbom.html"
     exit 1
@@ -335,7 +372,7 @@ echo "[INFO] Generated ${IMAGE_VER}_sbom.html.md5 "
 echo
 echo "[INFO] Back on host. Verify outputs:"
 ls -al "${WORKDIR}" | egrep "SBOM\.json|${IMAGE_VER}_sbom\.html|${IMAGE_VER}_sbom\.json|${IMAGE_VER}_sbom\.html\.md5|${IMAGE_VER}_sbom\.html\.audit\.json" || true
-sudo rm -rf SBOM.json Dockerfile "${SUMMARY_PATCH_SCRIPT}" Linux_for_Tegra/
+sudo rm -rf SBOM.json SBOM_filtered.json Dockerfile "${SUMMARY_PATCH_SCRIPT}" Linux_for_Tegra/
 if [  -f "Linux_for_Tegra" ]; then
     sudo rm -rf Linux_for_Tegra
 fi

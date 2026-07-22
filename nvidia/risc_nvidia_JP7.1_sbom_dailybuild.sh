@@ -66,7 +66,7 @@ if [ ! -f "${IMAGE_VER}.tgz" ]; then
     exit 1
 fi
 
-sudo tar -zxvf ${IMAGE_VER}.tgz
+sudo tar -zxvf ${IMAGE_VER}.tgz 
 
 
 if [[ ! -d "${ROOTFS_DIR}" ]]; then
@@ -111,7 +111,7 @@ cat > "${DOCKERFILE_PATH}" <<'EOF'
 FROM scratch
 
 # 2) Copy QEMU static files so aarch64 binaries can run under emulation
-COPY --from=multiarch/qemu-user-static:latest /usr/bin/qemu-aarch64-static /usr/bin
+COPY --from=multiarch/qemu-user-static:latest /usr/bin/qemu-aarch64-static /usr/bin/
 
 # 3) Copy target rootfs directly onto the empty image
 COPY Linux_for_Tegra/rootfs/ /

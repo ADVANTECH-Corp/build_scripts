@@ -6,6 +6,7 @@ CURR_PATH="${PWD}"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DAILY_DATE}"
 
 REPOS=(
+    "MTK|https://AIM-Linux@dev.azure.com/AIM-Linux/AIM_Linux_BSP_Launcher/_git/MTK"
     "NXP|https://AIM-Linux@dev.azure.com/AIM-Linux/AIM_Linux_BSP_Launcher/_git/NXP"
     "NVIDIA|https://AIM-Linux@dev.azure.com/AIM-Linux/AIM_Linux_BSP_Launcher/_git/NVIDIA"
     "Qualcomm|https://AIM-Linux@dev.azure.com/AIM-Linux/AIM_Linux_BSP_Launcher/_git/Qualcomm"

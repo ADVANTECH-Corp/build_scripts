@@ -19,6 +19,7 @@ function get_source_code_and_gen_csv_file()
 	
     # 多個 Azure DevOps Repo URL
     REPOS=(
+	"https://AIM-Linux@dev.azure.com/AIM-Linux/AIM_Linux_BSP_Launcher/_git/MTK"
         "https://AIM-Linux@dev.azure.com/AIM-Linux/AIM_Linux_BSP_Launcher/_git/NXP"
         "https://AIM-Linux@dev.azure.com/AIM-Linux/AIM_Linux_BSP_Launcher/_git/NVIDIA"
         "https://AIM-Linux@dev.azure.com/AIM-Linux/AIM_Linux_BSP_Launcher/_git/Qualcomm"

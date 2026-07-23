@@ -29,7 +29,6 @@ set -euo pipefail
 # =========================
 # Config (edit if needed)
 # =========================
-BASE_IMAGE="nvcr.io/nvidia/l4t-jetpack:r36.4.0"
 QEMU_IMAGE="multiarch/qemu-user-static:latest"
 TAG_NAME="nv_cve_docker_image"
 PLATFORM="linux/arm64"
@@ -67,7 +66,7 @@ if [ ! -f "${IMAGE_VER}.tgz" ]; then
     exit 1
 fi
 
-sudo tar -zxvf ${IMAGE_VER}.tgz
+sudo tar -zxvf ${IMAGE_VER}.tgz 
 
 
 if [[ ! -d "${ROOTFS_DIR}" ]]; then
@@ -77,10 +76,11 @@ if [[ ! -d "${ROOTFS_DIR}" ]]; then
 fi
 
 # =========================
-# 1) Pull base image
+# 1) (No NVIDIA base image needed — Dockerfile below builds FROM scratch
+#    directly on top of Linux_for_Tegra/rootfs/, which is already a
+#    complete userspace. This avoids OS-version mismatches against
+#    l4t-jetpack, e.g. r36.4.0/Ubuntu 22.04 vs. our r38.4.0/Ubuntu 24.04.)
 # =========================
-log "Pull base image: ${BASE_IMAGE}"
-sudo docker pull "${BASE_IMAGE}"
 
 # =========================
 # 2) Install qemu-user-static + binfmt-support
@@ -102,18 +102,19 @@ log "Generate Dockerfile: ${DOCKERFILE_PATH}"
 cat > "${DOCKERFILE_PATH}" <<'EOF'
 # Dockerfile
 
-# 1) First start from nvcr.io/nvidia/l4t-jetpack:r36.4.0
-FROM nvcr.io/nvidia/l4t-jetpack:r36.4.0
+# 1) Start from an empty image. 
+FROM scratch
 
-# 2) Copy QEMU static files from qemu-static docker image
-COPY --from=multiarch/qemu-user-static:latest /usr/bin/qemu-aarch64-static /usr/bin
+# 2) Copy QEMU static files so aarch64 binaries can run under emulation
+COPY --from=multiarch/qemu-user-static:latest /usr/bin/qemu-aarch64-static /usr/bin/
 
-# 3) Copy target rootfs, to override original rootfs
+# 3) Copy target rootfs directly onto the empty image
 COPY Linux_for_Tegra/rootfs/ /
 
 # 4) Set default command system
 CMD ["/bin/bash"]
 EOF
+
 
 # =========================
 # 5) Ensure buildx builder exists and is selected
@@ -255,7 +256,7 @@ echo "[INFO] Platform: ${PLATFORM}"
 echo
 
 read -r -d '' CONTAINER_CMD <<EOF || true
-set -uo pipefail
+set -euo pipefail
 
 echo "[INFO] Container OS:"
 cat /etc/os-release || true
@@ -293,17 +294,54 @@ sudo docker run --rm -i --platform="${PLATFORM}" \
   "${IMAGE}" \
   bash -lc "${CONTAINER_CMD}"
 
+filter_sbom_unknown_versions() {
+  # cve-bin-tool crashes with an unhandled "UnknownVersion: version string =
+  # UNKNOWN" exception on any SBOM package whose versionInfo is UNKNOWN
+  # (upstream bug: https://github.com/ossf/cve-bin-tool/issues/5302, still
+  # open as of cve-bin-tool 3.4). syft marks every Linux kernel module (.ko)
+  # this way since most don't embed a MODULE_VERSION() string, so a full
+  # rootfs scan reliably hits this. Drop those entries before handing the
+  # SBOM to cve-bin-tool — the kernel itself is still tracked (and scanned)
+  # as its own versioned package, so CVE coverage isn't lost.
+  log "Filter SBOM packages with UNKNOWN version (cve-bin-tool crashes on these)"
+  python3 - "${WORKDIR}/SBOM.json" "${WORKDIR}/SBOM_filtered.json" <<'PY'
+import json
+import sys
+
+src, dst = sys.argv[1], sys.argv[2]
+with open(src) as f:
+    data = json.load(f)
+
+before = len(data.get("packages", []))
+data["packages"] = [
+    p for p in data.get("packages", [])
+    if p.get("versionInfo", "").strip().upper() != "UNKNOWN"
+]
+after = len(data["packages"])
+
+with open(dst, "w") as f:
+    json.dump(data, f)
+
+print(f"[INFO] SBOM packages: {before} -> {after} (removed {before - after} with UNKNOWN version)")
+PY
+}
+
 ensure_cve_bin_tool
 patch_cve_html_summary
+filter_sbom_unknown_versions
 
 log "Generate CVE report HTML/JSON by cve-bin-tool on host"
+# cve-bin-tool exits 1 (not 0) whenever it finds any CVEs at all — that's
+# its documented success-with-findings signal, not a failure. With set -e
+# that would otherwise abort the script on every normal run. The real
+# failure check is the "${IMAGE_VER}_sbom.html exists" check further below.
 cve-bin-tool --sbom spdx \
-  --sbom-file "${WORKDIR}/SBOM.json" \
+  --sbom-file "${WORKDIR}/SBOM_filtered.json" \
   --format html,json \
   --output-file "${WORKDIR}/${IMAGE_VER}_sbom" \
   --update daily \
   -n json-mirror \
-  --disable-data-source OSV
+  --disable-data-source OSV || true
 
 log "Patch cve-bin-tool HTML summary with SBOM package count"
 python3 "${SUMMARY_PATCH_SCRIPT}" \
@@ -315,7 +353,7 @@ python3 "${SUMMARY_PATCH_SCRIPT}" \
 if [ ! -f "${WORKDIR}/${IMAGE_VER}_sbom.html" ]; then
     if [  -f "Linux_for_Tegra" ]; then
       sudo rm -rf Linux_for_Tegra
-      sudo rm -f SBOM.json Dockerfile "${SUMMARY_PATCH_SCRIPT}"
+      sudo rm -f SBOM.json SBOM_filtered.json Dockerfile "${SUMMARY_PATCH_SCRIPT}"
     fi
     log "[ERROR] File not found: ${WORKDIR}/${IMAGE_VER}_sbom.html"
     exit 1
@@ -329,7 +367,7 @@ echo "[INFO] Generated ${IMAGE_VER}_sbom.html.md5 "
 echo
 echo "[INFO] Back on host. Verify outputs:"
 ls -al "${WORKDIR}" | egrep "SBOM\.json|${IMAGE_VER}_sbom\.html|${IMAGE_VER}_sbom\.json|${IMAGE_VER}_sbom\.html\.md5|${IMAGE_VER}_sbom\.html\.audit\.json" || true
-sudo rm -rf SBOM.json Dockerfile "${SUMMARY_PATCH_SCRIPT}" Linux_for_Tegra/
+sudo rm -rf SBOM.json SBOM_filtered.json Dockerfile "${SUMMARY_PATCH_SCRIPT}" Linux_for_Tegra/
 if [  -f "Linux_for_Tegra" ]; then
     sudo rm -rf Linux_for_Tegra
 fi

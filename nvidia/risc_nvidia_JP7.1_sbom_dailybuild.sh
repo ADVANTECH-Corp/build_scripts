@@ -102,12 +102,7 @@ log "Generate Dockerfile: ${DOCKERFILE_PATH}"
 cat > "${DOCKERFILE_PATH}" <<'EOF'
 # Dockerfile
 
-# 1) Start from an empty image. Linux_for_Tegra/rootfs/ is already a
-#    complete userspace (this is how official Ubuntu Docker images are
-#    built too), so no NVIDIA base image is needed. This also avoids
-#    OS-version mismatches (e.g. l4t-jetpack r36.4.0/Ubuntu 22.04 vs.
-#    our own r38.4.0/Ubuntu 24.04 rootfs) that broke plain COPY and
-#    rsync merges in earlier versions of this Dockerfile.
+# 1) Start from an empty image. 
 FROM scratch
 
 # 2) Copy QEMU static files so aarch64 binaries can run under emulation

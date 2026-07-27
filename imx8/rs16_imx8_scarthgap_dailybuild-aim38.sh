@@ -521,8 +521,14 @@ else #"$PRODUCT" != "$VER_PREFIX"
 	for MEMORY in $MEMORY_LIST;do
                 if [ "$PRE_MEMORY" != "" ]; then
                         PRE_MEMORY=$MEMORY
+                        sed -i 's/^SRCREV = ".*"$/SRCREV = "${AUTOREV}"/' $ROOT_DIR/$U_BOOT_PATH
+                        sed -i 's/^SRCREV = ".*"$/SRCREV = "${AUTOREV}"/' $ROOT_DIR/$KERNEL_PATH
+                        sync
                         rebuild_bootloader $PRE_MEMORY
                 else
+                        sed -i 's/^SRCREV = ".*"$/SRCREV = "${AUTOREV}"/' $ROOT_DIR/$U_BOOT_PATH
+                        sed -i 's/^SRCREV = ".*"$/SRCREV = "${AUTOREV}"/' $ROOT_DIR/$KERNEL_PATH
+                        sync
                         PRE_MEMORY=$MEMORY
                         echo "[ADV] build images"
                         build_yocto_images

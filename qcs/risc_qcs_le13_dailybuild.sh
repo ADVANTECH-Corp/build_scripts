@@ -45,6 +45,7 @@ function get_source_code()
 	repo init -u $BSP_URL -b ${BSP_BRANCH} -m ${BSP_XML}
 	repo sync -c -j8
 	repo sync -c -j8
+	ln -sf layers/meta-advantech/set_bb_env.sh setup-environment
 	popd
 }
 

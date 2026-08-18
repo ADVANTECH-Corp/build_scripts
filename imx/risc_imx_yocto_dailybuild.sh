@@ -253,7 +253,11 @@ function clean_yocto_packages()
 
 	for PACKAGE in ${PACKAGE_LIST}
 	do
-		building ${PACKAGE} cleansstate
+		if bitbake -e "${PACKAGE}" >/dev/null 2>&1; then
+			building ${PACKAGE} cleansstate
+		else
+			echo "[ADV] Skip ${PACKAGE}: recipe not available"
+		fi
 	done
 
 	echo "[ADV] build_yocto_image: clean for qt5"
@@ -265,7 +269,11 @@ function clean_yocto_packages()
 
 	for PACKAGE in ${PACKAGE_LIST}
 	do
-		building ${PACKAGE} cleansstate
+		if bitbake -e "${PACKAGE}" >/dev/null 2>&1; then
+			building ${PACKAGE} cleansstate
+		else
+			echo "[ADV] Skip ${PACKAGE}: recipe not available"
+		fi
 	done
 
 	echo "[ADV] build_yocto_image: clean for other packages"

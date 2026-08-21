@@ -48,6 +48,19 @@ MEMORY=""
 # ===========
 #  Functions
 # ===========
+function imx_car_navigation()
+{
+    RECIPE="$CURR_PATH/$ROOT_DIR/sources/meta-nxp-demo-experience/recipes-examples/imx-car-navigation/imx-car-navigation.bb"
+    echo "${RECIPE}"
+    echo "===== Before ====="
+    grep -n 'CANopenLinux' "${RECIPE}"
+    sed -i 's|git://github.com/CANopenNode/CANopenLinux.git|gitsm://github.com/CANopenNode/CANopenLinux.git|' "${RECIPE}"
+
+    echo "===== After ====="
+    grep -n 'CANopenLinux' "${RECIPE}"
+    echo "===== Workaround applied ====="
+}
+
 function get_source_code()
 {
     echo "[ADV] get yocto source code"
@@ -301,7 +314,13 @@ function build_yocto_images()
 {
 	set_environment
 	bitbake-layers add-layer ../sources/meta-advantech
-
+	if [[ "${OS_DISTRO}" == yocto6.0* ]]; then
+		echo "===== Waiting for imx-car-navigation.bb ====="
+		imx_car_navigation
+		echo "===== Workaround applied ====="
+	else
+		echo "===== skip Waiting for imx-car-navigation.bb ====="	
+	fi
 	# Re-build U-Boot & kernel
 	echo "[ADV] build_yocto_image: build u-boot"
 	building u-boot-imx cleansstate

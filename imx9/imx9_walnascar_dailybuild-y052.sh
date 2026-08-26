@@ -153,6 +153,15 @@ function save_temp_log()
 	find . -name "temp" | xargs rm -rf
 }
 
+function get_kernel_srcrev()
+{
+    cd $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR
+
+    bitbake -e linux-imx 2>/dev/null |
+        sed -n -E 's/^SRCREV="([^"]*)"/\1/p' |
+        tail -n 1
+}
+
 # ===============================
 #  Functions [platform specific]
 # ===============================
@@ -171,8 +180,14 @@ function generate_csv()
 
     HASH_BSP=$(cd $CURR_PATH/$ROOT_DIR/.repo/manifests && git rev-parse HEAD)
     HASH_ADV=$(cd $CURR_PATH/$ROOT_DIR/$META_ADVANTECH_PATH && git rev-parse HEAD)
-    HASH_KERNEL=$(cd $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/linux-imx/$KERNEL_VERSION*/git && git rev-parse HEAD)
     HASH_UBOOT=$(cd $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/u-boot-imx/*$U_BOOT_VERSION*/git && git rev-parse HEAD)
+
+    HASH_KERNEL=$(get_kernel_srcrev)
+    if [ -z "$HASH_KERNEL" ] || [ "$HASH_KERNEL" = "AUTOINC" ]; then
+        echo "[ADV] Failed to get linux-imx SRCREV!"
+	exit 1
+    fi
+
     cd $CURR_PATH
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV

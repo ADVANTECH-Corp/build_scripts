@@ -59,13 +59,36 @@ function update_oeminfo()
     fi
 
     echo "[INFO] Updating OEMInfo.ini ..."
+    echo "[INFO] Chip_Name: ${CHIP_NAME}"
+    echo "[INFO] Product_Name: ${PROJECT}"
+    echo "[INFO] Ram_Size: ${RAM_SIZE}"
+    echo "[INFO] OS_Distro: ${OS_DISTRO}"
+    echo "[INFO] Kernel_Version: ${KERNEL_VERSION}"
     echo "[INFO] Build_Date: $DATE"
     echo "[INFO] Image_Version: v${RELEASE_VERSION}"
+    echo "[INFO] STORAGE: $STORAGE"
 
-    # Build_Date
+    # Convert values: replace + with ", " and uppercase
+    local chip_name_value=$(echo "$CHIP_NAME" | sed 's/+/, /g' | tr '[:lower:]' '[:upper:]')
+    local ram_size_value=$(echo "$RAM_SIZE" | sed 's/+/, /g' | tr '[:lower:]' '[:upper:]')
+    local storage_value=$(echo "$STORAGE" | sed 's/+/, /g' | tr '[:lower:]' '[:upper:]')
+
+    # Update Chip_Name
+    sed -i "s/^Chip_Name:.*/Chip_Name: ${chip_name_value}/" "$ini_file"
+    # Update Product_Name
+    sed -i "s/^Product_Name:.*/Product_Name: ${PROJECT^^}/" "$ini_file"
+    # Update Ram_Size
+    sed -i "s/^Ram_Size:.*/Ram_Size: ${ram_size_value}/" "$ini_file"
+    # Update OS_Distro
+    sed -i "s/^OS_Distro:.*/OS_Distro: ${OS_DISTRO^^}/" "$ini_file"
+    # Update Kernel_Version
+    sed -i "s/^Kernel_Version:.*/Kernel_Version: ${KERNEL_VERSION#kernel-}/" "$ini_file"
+    # Update Build_Date
     sed -i "s/^Build_Date:.*/Build_Date: $DATE/" "$ini_file"
-    # Image_Version
+    # Update Image_Version
     sed -i "s/^Image_Version:.*/Dailybuild_Image_Version: V${RELEASE_VERSION}/" "$ini_file"
+    # Update Storage
+    sed -i "s/^Storage:.*/Storage: ${storage_value}/" "$ini_file"
 
     echo "[INFO] Done updating $ini_file."
 }

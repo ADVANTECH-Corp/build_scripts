@@ -37,6 +37,7 @@ ROOT_DIR="${VER_TAG}"_"$DATE"
 STORAGE_PATH="$CURR_PATH/$STORED/$DATE"
 
 PRE_MEMORY=""
+PRE_HASH_KERNEL=""
 
 # Make storage folder
 if [ -e $STORAGE_PATH ] ; then
@@ -153,6 +154,20 @@ function save_temp_log()
 	find . -name "temp" | xargs rm -rf
 }
 
+function get_kernel_rev_hash()
+{
+    local KERNEL_SRC_PATH
+
+    KERNEL_SRC_PATH=$(echo $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/linux-imx/$KERNEL_VERSION*/git)
+
+    if [ ! -d "$KERNEL_SRC_PATH/.git" ]; then
+        echo "[ADV] Invalid linux-imx source directory: $KERNEL_SRC_PATH"
+        return 1
+    fi
+
+    git -C "$KERNEL_SRC_PATH" rev-parse HEAD
+}
+
 # ===============================
 #  Functions [platform specific]
 # ===============================
@@ -171,8 +186,15 @@ function generate_csv()
 
     HASH_BSP=$(cd $CURR_PATH/$ROOT_DIR/.repo/manifests && git rev-parse HEAD)
     HASH_ADV=$(cd $CURR_PATH/$ROOT_DIR/$META_ADVANTECH_PATH && git rev-parse HEAD)
-    HASH_KERNEL=$(cd $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/linux-imx/$KERNEL_VERSION*/git && git rev-parse HEAD)
     HASH_UBOOT=$(cd $CURR_PATH/$ROOT_DIR/$BUILDALL_DIR/$TMP_DIR/work/${KERNEL_CPU_TYPE}${PRODUCT}-poky-linux/u-boot-imx/*$U_BOOT_VERSION*/git && git rev-parse HEAD)
+
+    if [ -z "$PRE_HASH_KERNEL" ]; then
+        echo "[ADV] Failed to get linux-imx revision hash!"
+	exit 1
+    fi
+
+    HASH_KERNEL=${PRE_HASH_KERNEL}
+
     cd $CURR_PATH
 
     cat > ${FILENAME%.*}.csv << END_OF_CSV
@@ -320,6 +342,14 @@ function build_yocto_images()
 
         echo "[ADV] build_yocto_image: build kernel"
         building linux-imx cleansstate
+        building linux-imx unpack
+
+        PRE_HASH_KERNEL=$(get_kernel_rev_hash)
+        if [ -z "$PRE_HASH_KERNEL" ]; then
+                echo "[ADV] Failed to get linux-imx revision hash!"
+                exit 1
+        fi
+
         building linux-imx
 
         # Clean package to avoid build error

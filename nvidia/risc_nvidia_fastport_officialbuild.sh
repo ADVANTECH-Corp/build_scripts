@@ -68,6 +68,32 @@ function do_repo_init()
     repo init $REPO_OPT
 }
 
+function repo_sync_with_retry()
+{
+    local max_retry=3
+    local retry=1
+    local retry_delay=30
+
+    while [ "$retry" -le "$max_retry" ]; do
+        echo "[ADV] repo sync attempt ${retry}/${max_retry}"
+
+        if repo sync -j1 --fail-fast; then
+            echo "[ADV] repo sync succeeded"
+            return 0
+        fi
+
+        if [ "$retry" -lt "$max_retry" ]; then
+            echo "[ADV] repo sync failed; retrying after ${retry_delay} seconds"
+            sleep "$retry_delay"
+        fi
+
+        retry=$((retry + 1))
+    done
+
+    echo "[ERROR] repo sync failed after ${max_retry} attempts"
+    return 1
+}
+
 function get_source_code()
 {
     echo "[ADV] get android source code"
@@ -78,7 +104,10 @@ function get_source_code()
     EXISTED_VERSION=`find .repo/manifests -name ${VER_TAG}.xml`
     if [ -z "$EXISTED_VERSION" ] ; then
         echo "[ADV] This is a new VERSION"
-        repo sync
+        if ! repo_sync_with_retry; then
+            echo "[ERROR] Abort official build because repo sync failed"
+            exit 1
+        fi
     else
         echo "[ADV] v$RELEASE_VERSION already exists!"
     fi

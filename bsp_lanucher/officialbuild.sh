@@ -112,11 +112,12 @@ function process_repos() {
 }
 
 # === 所有 repo 都通過 dry-run 才 push，避免中途失敗只推一半 ===
+# Azure Repos 不支援 --atomic，每個 repo 以單一 push 送出所有 ref（已由 dry-run 驗證）
 function push_repos() {
     for i in "${!PUSH_NAMES[@]}"; do
         NAME="${PUSH_NAMES[$i]}"
         echo "[PUSH] $NAME:${PUSH_REFS[$i]}"
-        git -C "$NAME" push --atomic origin ${PUSH_REFS[$i]}
+        git -C "$NAME" push origin ${PUSH_REFS[$i]}
     done
     echo "[PUSH] All repos pushed."
     echo "=================================================="

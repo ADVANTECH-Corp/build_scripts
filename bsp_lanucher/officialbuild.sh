@@ -3,6 +3,7 @@ set -e
 
 CSV_FILE="aim_linux_bsp_launcher_v${DAILY_VERSION}_${DAILY_DATE}.csv"
 CURR_PATH="${PWD}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DAILY_DATE}"
 
 REPOS=(
@@ -28,25 +29,12 @@ fi
 # Functions
 # ===========
 
-function check_existing_tags() {
-    for entry in "${REPOS[@]}"; do
-        NAME="${entry%%|*}"
-        URL="${entry##*|}"
+PUSH_NAMES=()
+PUSH_REFS=()
+CHECK_FAILED=()   # 全部 repo 檢查完才統一報錯
 
-        echo "[CHECK] Checking tags in $NAME ..."
-        git ls-remote --tags "$URL" | grep -q "refs/tags/v${OFFICIAL_VERSION}$" && {
-            echo "[ERROR] Tag v${OFFICIAL_VERSION} already exists in $NAME!"
-            exit 1
-        }
-        git ls-remote --tags "$URL" | grep -q "refs/tags/v${OFFICIAL_VERSION}_develop$" && {
-            echo "[ERROR] Tag v${OFFICIAL_VERSION}_develop already exists in $NAME!"
-            exit 1
-        }
-    done
-    echo "[CHECK] No existing tags found. Proceeding ..."
-    echo "=================================================="
-}
-
+# 發版規則只有一條：正式分支只能 fast-forward 到 daily 快照，且 tag 不可已存在。
+# 規則交給 git push 本身判斷（不加 force），先以 --dry-run 檢查所有 repo，全部通過才真正 push。
 function process_repos() {
     for entry in "${REPOS[@]}"; do
         NAME="${entry%%|*}"
@@ -60,66 +48,88 @@ function process_repos() {
             continue
         fi
 
+        # 不抓 tag：本地一定能建立 tag，遠端是否已存在交給 push --dry-run 判斷
         rm -rf "$NAME"
-        git clone "$URL" "$NAME"
+        git clone --no-tags "$URL" "$NAME"
         cd "$NAME"
 
-        git fetch --all --tags
-
+        REFS=""
         for line in $DEVELOP_BRANCHES; do
             BRANCH=$(echo "$line" | cut -d',' -f1)
             COMMIT_HASH=$(echo "$line" | cut -d',' -f2)
             OFFICIAL_BRANCH="${BRANCH%_develop}"
-
-            echo "[INFO] Found develop branch: $BRANCH"
-            echo "[INFO] Commit hash to rebase until: $COMMIT_HASH"
-            echo "[INFO] Target official branch: $OFFICIAL_BRANCH"
-
-            # === check if official branch exists on remote ===
-            if git ls-remote --heads origin "$OFFICIAL_BRANCH" | grep -q "$OFFICIAL_BRANCH"; then
-                echo "[INFO] Remote branch '$OFFICIAL_BRANCH' exists."
-            else
-                echo "[WARN] Remote branch '$OFFICIAL_BRANCH' does NOT exist. Creating from '$BRANCH' ..."
-                git checkout -B "$BRANCH" "origin/$BRANCH"
-                git checkout -B "$OFFICIAL_BRANCH"
-                git push origin "$OFFICIAL_BRANCH"
-                echo "[INFO] Remote branch '$OFFICIAL_BRANCH' created from '$BRANCH'."
-            fi
-
-            # === official branch rebase ===
-            git fetch origin "$OFFICIAL_BRANCH"
-            git checkout -B "$OFFICIAL_BRANCH" "origin/$OFFICIAL_BRANCH"
-            git pull origin "$OFFICIAL_BRANCH"
-
-            MERGE_BASE=$(git merge-base "$OFFICIAL_BRANCH" "origin/$BRANCH" || true)
-            echo "[INFO] Merge-base between $OFFICIAL_BRANCH and $BRANCH is $MERGE_BASE"
-
-            git checkout -B tmp_rebase_branch "$COMMIT_HASH"
-            echo "[INFO] Rebasing commits from $MERGE_BASE..$COMMIT_HASH onto $OFFICIAL_BRANCH ..."
-            git rebase --onto "$OFFICIAL_BRANCH" "$MERGE_BASE" || true
-
-            git checkout "$OFFICIAL_BRANCH"
-            git merge --ff-only tmp_rebase_branch || true
-            git push origin "$OFFICIAL_BRANCH"
-
             TAG_NAME="v${OFFICIAL_VERSION}_${OFFICIAL_BRANCH}"
             DEV_TAG_NAME="v${OFFICIAL_VERSION}_${BRANCH}"
 
-            # === tag on official branch ===
-            echo "[INFO] Tagging $OFFICIAL_BRANCH with $TAG_NAME ..."
-            git tag -a "$TAG_NAME" -m "Official release $TAG_NAME"
-            git push origin "$TAG_NAME"
+            if ! git rev-parse -q --verify "$COMMIT_HASH^{commit}" > /dev/null; then
+                CHECK_FAILED+=("$NAME: snapshot commit $COMMIT_HASH of $BRANCH not found")
+                continue
+            fi
 
-            # === tag on develop branch ===
-            echo "[INFO] Tagging $BRANCH with $DEV_TAG_NAME at commit $COMMIT_HASH ..."
-            git checkout -B "$BRANCH" "origin/$BRANCH"
+            echo "[INFO] $OFFICIAL_BRANCH -> ${COMMIT_HASH:0:10}, tags $TAG_NAME / $DEV_TAG_NAME"
+            git tag -a "$TAG_NAME" "$COMMIT_HASH" -m "Official release $TAG_NAME"
             git tag -a "$DEV_TAG_NAME" "$COMMIT_HASH" -m "Develop snapshot for $TAG_NAME"
-            git push origin "$DEV_TAG_NAME"
+            REFS+=" $COMMIT_HASH:refs/heads/$OFFICIAL_BRANCH refs/tags/$TAG_NAME refs/tags/$DEV_TAG_NAME"
         done
+
+        if [ -z "$REFS" ]; then
+            cd ..
+            continue
+        fi
+
+        # === dry-run：由 git 判斷 non-fast-forward / tag already exists ===
+        if ! RESULT=$(git push --dry-run --porcelain origin $REFS 2>&1); then
+            FAILED_BEFORE=${#CHECK_FAILED[@]}
+            while IFS=$'\t' read -r FLAG REF SUMMARY; do
+                [ "$FLAG" = "!" ] || continue
+                DST="${REF#*:}"
+                CHECK_FAILED+=("$NAME: ${DST#refs/*/} $SUMMARY")
+                # 診斷資訊：列出正式分支上不在快照裡的 commit
+                if [[ "$DST" == refs/heads/* ]]; then
+                    echo "[CHECK][ERROR] $NAME ${DST#refs/heads/} $SUMMARY, commits not in snapshot:"
+                    git log --format='    %h %ad %an %s' --date=short "${REF%%:*}..origin/${DST#refs/heads/}"
+                fi
+            done <<< "$RESULT"
+            # 非 ref 層級的失敗（權限、網路等）
+            if [ ${#CHECK_FAILED[@]} -eq "$FAILED_BEFORE" ]; then
+                echo "$RESULT"
+                CHECK_FAILED+=("$NAME: dry-run push failed (see log above)")
+            fi
+        fi
+
+        PUSH_NAMES+=("$NAME")
+        PUSH_REFS+=("$REFS")
 
         cd ..
         echo "=================================================="
     done
+
+    if [ ${#CHECK_FAILED[@]} -gt 0 ]; then
+        echo "[ERROR] ${#CHECK_FAILED[@]} check(s) failed. Nothing pushed:"
+        printf '  - %s\n' "${CHECK_FAILED[@]}"
+        exit 1
+    fi
+}
+
+# === 所有 repo 都通過 dry-run 才 push，避免中途失敗只推一半 ===
+function push_repos() {
+    for i in "${!PUSH_NAMES[@]}"; do
+        NAME="${PUSH_NAMES[$i]}"
+        echo "[PUSH] $NAME:${PUSH_REFS[$i]}"
+        git -C "$NAME" push --atomic origin ${PUSH_REFS[$i]}
+    done
+    echo "[PUSH] All repos pushed."
+    echo "=================================================="
+}
+
+# === 函數: 產生 release notes（與上一版 official 比較）到產出目錄 ===
+function generate_release_notes() {
+    python3 "${SCRIPT_DIR}/gen_release_notes.py" \
+        --csv "$CSV_FILE" \
+        --version "$OFFICIAL_VERSION" \
+        --daily-version "$DAILY_VERSION" \
+        --daily-date "$DAILY_DATE" \
+        --output "${OUTPUT_DIR}/aim_linux_bsp_launcher_v${OFFICIAL_VERSION}_${DAILY_DATE}_release_notes.txt"
 }
 
 # === 函數: prepend OfficialVersion 到 CSV ===
@@ -194,8 +204,9 @@ else
 	mkdir -p $OUTPUT_DIR
 fi
 
-check_existing_tags
 process_repos
+generate_release_notes
+push_repos
 prepend_official_version_to_csv "$CSV_FILE" "v${OFFICIAL_VERSION}"
 prepare_official_package "$DAILY_VERSION" "$DAILY_DATE" "$OFFICIAL_VERSION"
 copy_official_files "$OFFICIAL_VERSION" "$DAILY_DATE"

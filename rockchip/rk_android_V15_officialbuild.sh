@@ -381,7 +381,7 @@ function prepare_images()
     cp -aRL $CURR_PATH/$ROOT_DIR/$SUB_DIR/rockdev/Image-$TARGET_PRODUCT/* $IMAGE_DIR/rockdev/image
 
 
-    echo "[ADV] creating ${IMAGE_DIR}.tgz ..."
+    echo "[ADV] creating ${IMAGE_DIR}.img.tgz ..."
     tar czf ${IMAGE_DIR}.img.tgz -C $IMAGE_DIR .
     generate_md5 ${IMAGE_DIR}.img.tgz
 }
@@ -394,11 +394,11 @@ function copy_image_to_storage()
 	    mv ${VER_TAG}.xml $OUTPUT_DIR
 	fi
 
-    generate_csv ${IMAGE_DIR}.tgz
-    mv ${IMAGE_DIR}.csv $OUTPUT_DIR/${MODEL_NAME}/others
+    generate_csv ${IMAGE_DIR}.img.tgz
+    mv ${IMAGE_DIR}.img.csv $OUTPUT_DIR/${MODEL_NAME}/others
 
-    mv -f ${IMAGE_DIR}.tgz $OUTPUT_DIR/${MODEL_NAME}/image
-    mv -f ${IMAGE_DIR}.tgz.md5 $OUTPUT_DIR/${MODEL_NAME}/image
+    mv -f ${IMAGE_DIR}.img.tgz $OUTPUT_DIR/${MODEL_NAME}/image
+    mv -f ${IMAGE_DIR}.img.tgz.md5 $OUTPUT_DIR/${MODEL_NAME}/image
 
 }
 

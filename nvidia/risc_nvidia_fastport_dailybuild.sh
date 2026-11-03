@@ -18,8 +18,8 @@ require_env DATE STORED BSP_URL BSP_BRANCH BSP_XML PLATFORM_PREFIX \
 	TARGET_BOARD PROJECT OS_VERSION KERNEL_VERSION SOC_MEM STORAGE RELEASE_VERSION
 
 if [[ -z "$PRODUCT" ]]; then
-	echo "[ERROR] Usage: $0 <product>" >&2
-	exit 2
+	echo "[WARN] No <product> argument supplied; Tested Platform field in the CSV will be left blank." >&2
+	PRODUCT="unknown"
 fi
 
 echo "[ADV] DATE = ${DATE}"

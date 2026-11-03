@@ -1,5 +1,26 @@
 #!/bin/bash
-PRODUCT=$1
+set -Eeuo pipefail
+
+PRODUCT="${1:-}"
+
+require_env()
+{
+	local name
+	for name in "$@"; do
+		if [[ -z "${!name:-}" ]]; then
+			echo "[ERROR] Required environment variable is missing: $name" >&2
+			exit 2
+		fi
+	done
+}
+
+require_env DATE STORED BSP_URL BSP_BRANCH BSP_XML PLATFORM_PREFIX \
+	TARGET_BOARD PROJECT OS_VERSION KERNEL_VERSION SOC_MEM STORAGE RELEASE_VERSION
+
+if [[ -z "$PRODUCT" ]]; then
+	echo "[ERROR] Usage: $0 <product>" >&2
+	exit 2
+fi
 
 echo "[ADV] DATE = ${DATE}"
 echo "[ADV] STORED = ${STORED}"
@@ -20,6 +41,8 @@ ROOT_DIR="${PLATFORM_PREFIX}_${TARGET_BOARD}_${RELEASE_VERSION}_${DATE}"
 OUTPUT_DIR="${CURR_PATH}/${STORED}/${DATE}"
 LINUX_TEGRA="Linux_for_Tegra"
 IMAGE_VER="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARGET_BOARD}_${SOC_MEM}_${STORAGE}_${DATE}"
+ROOTFS_DIR="${CURR_PATH}/${ROOT_DIR}/${LINUX_TEGRA}/rootfs"
+BUILD_MARKER="${CURR_PATH}/${ROOT_DIR}/.dailybuild-in-progress"
 
 
 # ===========
@@ -28,11 +51,75 @@ IMAGE_VER="${PROJECT}_${OS_VERSION}_v${RELEASE_VERSION}_${KERNEL_VERSION}_${TARG
 function get_source_code()
 {
 	echo "[ADV] get nVidia source code"
-	mkdir $ROOT_DIR
-	pushd $ROOT_DIR 2>&1 > /dev/null
-	repo init -u $BSP_URL -b $BSP_BRANCH -m ${BSP_XML}
+	if [[ -e "$ROOT_DIR" ]]; then
+		if [[ -f "$ROOT_DIR/.dailybuild-in-progress" ]]; then
+			echo "[WARN] Removing stale failed workspace: $ROOT_DIR"
+			sudo rm -rf -- "$ROOT_DIR"
+		else
+			echo "[ERROR] Build workspace already exists and is not marked as a failed build: $ROOT_DIR" >&2
+			echo "[ERROR] Refusing to reuse a possibly valid or concurrent workspace." >&2
+			return 1
+		fi
+	fi
+	mkdir -p -- "$ROOT_DIR"
+	touch "$BUILD_MARKER"
+	pushd "$ROOT_DIR" >/dev/null
+	repo init -u "$BSP_URL" -b "$BSP_BRANCH" -m "$BSP_XML"
 	repo sync -j8
 	popd
+}
+
+function rootfs_mounts()
+{
+	local mounts
+	mounts="$(findmnt -R "$ROOTFS_DIR" -n -o TARGET 2>/dev/null || true)"
+	[[ -n "$mounts" ]] && printf '%s\n' "$mounts"
+}
+
+function cleanup_rootfs_mounts()
+{
+	local target
+	for target in \
+		"$ROOTFS_DIR/dev/pts" \
+		"$ROOTFS_DIR/dev" \
+		"$ROOTFS_DIR/proc" \
+		"$ROOTFS_DIR/sys"; do
+		if mountpoint -q "$target"; then
+			echo "[INFO] Unmounting $target"
+			sudo umount "$target" 2>/dev/null || sudo umount -l "$target"
+		fi
+	done
+}
+
+function assert_rootfs_unmounted()
+{
+	local mounts
+	mounts="$(rootfs_mounts)"
+	if [[ -n "$mounts" ]]; then
+		echo "[ERROR] Rootfs still has active mounts:" >&2
+		echo "$mounts" >&2
+		return 1
+	fi
+}
+
+function on_exit()
+{
+	local status="$1"
+	trap - EXIT
+
+	if [[ "$status" -ne 0 ]]; then
+		echo "[ERROR] Daily build failed with exit code $status" >&2
+		if [[ -d "$ROOT_DIR" && -f "$BUILD_MARKER" ]]; then
+			if cleanup_rootfs_mounts && assert_rootfs_unmounted; then
+				echo "[INFO] Removing failed workspace: $ROOT_DIR" >&2
+				sudo rm -rf -- "$ROOT_DIR"
+			else
+				echo "[ERROR] Failed workspace was preserved because rootfs mounts remain: $ROOT_DIR" >&2
+			fi
+		fi
+	fi
+
+	exit "$status"
 }
 
 function update_oeminfo()
@@ -82,49 +169,62 @@ function update_oeminfo()
 
 function build_image()
 {
-	cd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
+	cd "$CURR_PATH/$ROOT_DIR" >/dev/null
 	echo "[ADV] building ..."
-	cd adv-jetson-custom
-	./generate_profile.py --project ${PROJECT}
-	./apply_profile.py --project ${PROJECT}
-	cd ..
-	sudo ./scripts/build_release.sh -v ${RELEASE_VERSION}
+	pushd adv-jetson-custom >/dev/null
+	./generate_profile.py --project "$PROJECT"
+	./apply_profile.py --project "$PROJECT"
+	popd >/dev/null
+	sudo ./scripts/build_release.sh -v "$RELEASE_VERSION"
 }
 
 function generate_md5()
 {
-	FILENAME=$1
+	local FILENAME="$1"
 
-	if [ -e $FILENAME ]; then
-		MD5_SUM=`md5sum -b $FILENAME | cut -d ' ' -f 1`
-		echo $MD5_SUM > $FILENAME.md5
+	if [[ -e "$FILENAME" ]]; then
+		local MD5_SUM
+		MD5_SUM="$(md5sum -b "$FILENAME" | cut -d ' ' -f 1)"
+		printf '%s\n' "$MD5_SUM" > "$FILENAME.md5"
+	else
+		echo "[ERROR] Cannot generate MD5; file not found: $FILENAME" >&2
+		return 1
 	fi
 }
 
 function prepare_images()
 {
 	echo "[ADV] creating ${IMAGE_VER}.tgz ..."
-	pushd $CURR_PATH/$ROOT_DIR/ 2>&1 > /dev/null
+	cleanup_rootfs_mounts
+	assert_rootfs_unmounted
+	pushd "$CURR_PATH/$ROOT_DIR/" >/dev/null
 
-	sudo tar czf ${IMAGE_VER}.tgz $LINUX_TEGRA
-	generate_md5 ${IMAGE_VER}.tgz
+	sudo tar czf "${IMAGE_VER}.tgz" \
+		--exclude="${LINUX_TEGRA}/rootfs/sys" \
+		--exclude="${LINUX_TEGRA}/rootfs/proc" \
+		--exclude="${LINUX_TEGRA}/rootfs/dev" \
+		"$LINUX_TEGRA"
+	generate_md5 "${IMAGE_VER}.tgz"
 	popd
 }
 
 function generate_csv()
 {
-	FILENAME=$1
-	MD5_SUM=
-	FILE_SIZE_BYTE=
-	FILE_SIZE=
+	local FILENAME="$1"
+	local MD5_SUM=""
+	local FILE_SIZE_BYTE=""
+	local FILE_SIZE=""
 
-	if [ -e $FILENAME ]; then
-		MD5_SUM=`cat ${FILENAME}.md5`
-		set - `ls -l ${FILENAME}`; FILE_SIZE_BYTE=$5
-		set - `ls -lh ${FILENAME}`; FILE_SIZE=$5
+	if [[ -e "$FILENAME" && -f "${FILENAME}.md5" ]]; then
+		MD5_SUM="$(<"${FILENAME}.md5")"
+		FILE_SIZE_BYTE="$(stat -c '%s' "$FILENAME")"
+		FILE_SIZE="$(du -h "$FILENAME" | cut -f1)"
+	else
+		echo "[ERROR] Image or MD5 file is missing: $FILENAME" >&2
+		return 1
 	fi
 	
-	pushd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
+	pushd "$CURR_PATH/$ROOT_DIR" >/dev/null
 
 	HASH_BSP=$(cd .repo/manifests && git rev-parse --short HEAD)
 	HASH_DOWNLOAD=$(cd download && git rev-parse --short HEAD)
@@ -132,7 +232,7 @@ function generate_csv()
 	HASH_LINUX_FOR_TEGRA=$(cd Linux_for_Tegra && git rev-parse --short HEAD)
 	HASH_ADV_CUST=$(cd adv-jetson-custom && git rev-parse --short HEAD)
 
-	cat > ${FILENAME}.csv << END_OF_CSV
+	cat > "${FILENAME}.csv" << END_OF_CSV
 ESSD Software/OS Update News
 OS,Ubuntu,${OS_VERSION}
 Part Number,N/A
@@ -160,25 +260,25 @@ END_OF_CSV
 function copy_image_to_storage()
 {
 	echo "[ADV] copy images to $OUTPUT_DIR"
-	pushd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
-	generate_csv ${IMAGE_VER}.tgz
-	mv ${IMAGE_VER}.tgz.csv $OUTPUT_DIR
-	mv -f ${IMAGE_VER}.tgz $OUTPUT_DIR
-	mv -f *.md5 $OUTPUT_DIR
+	pushd "$CURR_PATH/$ROOT_DIR" >/dev/null
+	generate_csv "${IMAGE_VER}.tgz"
+	mv -- "${IMAGE_VER}.tgz.csv" "$OUTPUT_DIR/"
+	mv -f -- "${IMAGE_VER}.tgz" "$OUTPUT_DIR/"
+	mv -f -- *.md5 "$OUTPUT_DIR/"
 	popd
 }
 
 function save_temp_log()
 {
-	LOG_DIR="log"
-	LOG_FILE="${IMAGE_VER}"_log
-	pushd $CURR_PATH/$ROOT_DIR 2>&1 > /dev/null
+	local LOG_DIR="log"
+	local LOG_FILE="${IMAGE_VER}_log"
+	pushd "$CURR_PATH/$ROOT_DIR" >/dev/null
 	echo "[ADV] creating ${LOG_FILE}.tgz ..."
-	sudo tar czf $LOG_FILE.tgz $LOG_DIR
-	generate_md5 $LOG_FILE.tgz
-	mv -f $LOG_FILE.tgz $OUTPUT_DIR
-	mv -f $LOG_FILE.tgz.md5 $OUTPUT_DIR
-	sudo rm -rf $LOG_DIR
+	sudo tar czf "${LOG_FILE}.tgz" "$LOG_DIR"
+	generate_md5 "${LOG_FILE}.tgz"
+	mv -f -- "${LOG_FILE}.tgz" "$OUTPUT_DIR/"
+	mv -f -- "${LOG_FILE}.tgz.md5" "$OUTPUT_DIR/"
+	sudo rm -rf -- "$LOG_DIR"
 	popd
 }
 
@@ -187,11 +287,13 @@ function save_temp_log()
 # ================
 
 # Make storage folder
-if [ -e $OUTPUT_DIR ] ; then
+	trap 'on_exit $?' EXIT
+
+if [[ -e "$OUTPUT_DIR" ]] ; then
 	echo "[ADV] $OUTPUT_DIR had already been created"
 else
 	echo "[ADV] mkdir $OUTPUT_DIR"
-	mkdir -p $OUTPUT_DIR
+	mkdir -p -- "$OUTPUT_DIR"
 fi
 
 export GIT_SSL_NO_VERIFY=1
@@ -204,6 +306,6 @@ update_oeminfo
 prepare_images
 copy_image_to_storage
 save_temp_log
-cd $CURR_PATH
+rm -f -- "$BUILD_MARKER"
+cd "$CURR_PATH"
 echo "[ADV] build script done!"
-

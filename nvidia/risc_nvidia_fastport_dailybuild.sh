@@ -198,11 +198,7 @@ function prepare_images()
 	assert_rootfs_unmounted
 	pushd "$CURR_PATH/$ROOT_DIR/" >/dev/null
 
-	sudo tar czf "${IMAGE_VER}.tgz" \
-		--exclude="${LINUX_TEGRA}/rootfs/sys" \
-		--exclude="${LINUX_TEGRA}/rootfs/proc" \
-		--exclude="${LINUX_TEGRA}/rootfs/dev" \
-		"$LINUX_TEGRA"
+	sudo tar czf "${IMAGE_VER}.tgz" "$LINUX_TEGRA"
 	generate_md5 "${IMAGE_VER}.tgz"
 	popd
 }

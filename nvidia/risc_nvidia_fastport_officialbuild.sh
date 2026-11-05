@@ -202,19 +202,27 @@ function create_aim_linux_release_xml()
     pushd $AIM_LINUX_RELEASE_BSP_PLATFORM
 
     # check the default latest xml file
-    EXISTED_VERSION=`find . -name ${DEFAULT_VER_TAG}.xml`
+    local source_manifest="${CURR_PATH}/${ROOT_DIR}/.repo/manifests/${BSP_XML}"
+    local default_manifest="${DEFAULT_VER_TAG}.xml"
+
+    if [ ! -f "$source_manifest" ]; then
+        echo "[ERROR] Source manifest not found: $source_manifest" >&2
+        return 1
+    fi
+
+    EXISTED_VERSION=$(find . -name "$default_manifest")
     if [ -z "$EXISTED_VERSION" ] ; then
         echo "[ADV] No the default latest xml file"
         # push to github
-        cp $CURR_PATH/$ROOT_DIR/.repo/manifests/${BSP_XML} ./${DEFAULT_VER_TAG}.xml
-        git add ${DEFAULT_VER_TAG}.xml
+        cp "$source_manifest" "./$default_manifest"
+        git add "$default_manifest"
         git commit -m "[Official Release] ${DEFAULT_VER_TAG}"
         git push
     else
-        if [ "$(cat $BSP_XML)" != "$(cat ${DEFAULT_VER_TAG}.xml)" ]; then
-            echo "[ADV] Update the ${DEFAULT_VER_TAG}.xml"
-            cp $CURR_PATH/$ROOT_DIR/.repo/manifests/${BSP_XML} ./${DEFAULT_VER_TAG}.xml
-            git add ${DEFAULT_VER_TAG}.xml
+        if ! cmp -s "$source_manifest" "$default_manifest"; then
+            echo "[ADV] Update the ${default_manifest}"
+            cp "$source_manifest" "./$default_manifest"
+            git add "$default_manifest"
             git commit -m "[Official Release] Update the ${DEFAULT_VER_TAG}"
             git push
         fi

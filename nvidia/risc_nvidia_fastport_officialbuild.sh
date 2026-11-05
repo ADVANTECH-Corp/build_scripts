@@ -77,7 +77,7 @@ function repo_sync_with_retry()
     while [ "$retry" -le "$max_retry" ]; do
         echo "[ADV] repo sync attempt ${retry}/${max_retry}"
 
-        if repo sync -j1 --fail-fast; then
+        if repo sync -j4 --fail-fast; then
             echo "[ADV] repo sync succeeded"
             return 0
         fi

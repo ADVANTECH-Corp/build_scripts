@@ -671,12 +671,12 @@ function build_linux_images() {
     safe_cd "$CURR_PATH/$ROOT_DIR" || return 1
     
     # Initial setup
-    log_info "Building board configuration: $BOARD_CONFIG"
-    if ! ./build.sh "$BOARD_CONFIG"; then
+    log_info "Building board configuration: chip:${CHIP_NAME}:${BOARD_CONFIG}"
+    if ! ./build.sh "chip:${CHIP_NAME}:${BOARD_CONFIG}"; then
         log_error "Initial build setup failed"
         return 1
     fi
-    
+
     # Build components
     for component in "${BUILD_COMPONENTS[@]}"; do
         if ! build_component "$component"; then
@@ -689,6 +689,24 @@ function build_linux_images() {
     duration=$((end_time - start_time))
     log_success "Linux images build completed in $duration seconds"
     return 0
+}
+
+# Create generic config files from chip-specific ones if they do not exist
+function create_chip_alias() {
+    local dir="$1"
+    local alias_name="$2"
+    local src_name="${CHIP_NAME}-${alias_name}"
+
+    if [[ -e "$dir/$alias_name" || -L "$dir/$alias_name" ]]; then
+        return 0
+    fi
+
+    if [[ -f "$dir/$src_name" ]]; then
+        cp -a "$dir/$src_name" "$dir/$alias_name"
+        log_info "Created $alias_name from $src_name"
+    else
+        log_warning "$src_name not found in $dir"
+    fi
 }
 
 function prepare_image_package() {
@@ -719,7 +737,11 @@ function prepare_image_package() {
     # Copy drivers and tools
     cp -aRL "$CURR_PATH/$ROOT_DIR"/tools/windows/DriverAssitant_*.zip "$VER_IMAGE/" 2>/dev/null || true
     cp -aRL "$CURR_PATH/$ROOT_DIR"/tools/windows/SDDiskTool_*.zip "$VER_IMAGE/" 2>/dev/null || true
-    
+
+    create_chip_alias "$VER_IMAGE/RKDevTool_Release" "config.cfg"
+    create_chip_alias "$VER_IMAGE/rockdev" "mkupdate.bat"
+    create_chip_alias "$VER_IMAGE/rockdev" "package-file"
+
     # Copy rockdev images
     mkdir -p "$VER_IMAGE/rockdev/image"
     if [[ -d "$CURR_PATH/$ROOT_DIR/rockdev" ]]; then

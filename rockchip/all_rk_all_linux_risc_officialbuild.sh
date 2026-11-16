@@ -101,8 +101,13 @@ fi
 if [ "$EBCRS19A1" == "true" ]; then
 	PROJECT_LIST="$PROJECT_LIST EBCRS19"
 	PROJECT="ebcrs19a1"
-	BOARD_CONFIG="adv_rk3588_ebcrs19a1_defconfig"
 	RT_PATCH="true"
+
+	if [ "$BSP_BRANCH" == "debian12-linux6.1-v130" ]; then
+		BOARD_CONFIG="adv_rk3588_ebcrs19a1_defconfig"
+	else
+		BOARD_CONFIG="rk3588_ebcrs19a1_defconfig"
+	fi
 
 	export PROJECT_LIST
 	export PROJECT

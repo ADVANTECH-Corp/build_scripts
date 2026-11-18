@@ -103,7 +103,7 @@ if [ "$EBCRS19A1" == "true" ]; then
 	PROJECT="ebcrs19a1"
 	RT_PATCH="true"
 
-	if [[ "$BSP_BRANCH" == debian13* ]]; then
+	if [[ "$BSP_BRANCH" == debian12* ]]; then
 		BOARD_CONFIG="adv_rk3588_ebcrs19a1_defconfig"
 	else
 		BOARD_CONFIG="rk3588_ebcrs19a1_defconfig"

@@ -486,6 +486,35 @@ function install_build_dependencies() {
     sudo apt-get install gettext -y
     log_success "gettext installed successfully"
 
+    if [[ "$BSP_BRANCH" == debian13* ]]; then
+        log_info "Installing debian13 extra dependencies..."
+
+        if ! sudo apt-get install -y libgmp-dev libmpc-dev file; then
+            log_error "Failed to install debian13 build packages"
+            return 1
+        fi
+
+        local pkg_dir="$CURR_PATH/$ROOT_DIR/debian/ubuntu-build-service/packages"
+        if ls "$pkg_dir"/* >/dev/null 2>&1; then
+            sudo dpkg -i "$pkg_dir"/* || true
+            if ! sudo apt-get install -f -y; then
+                log_error "Failed to fix debian13 package dependencies"
+                return 1
+            fi
+        else
+            log_warning "No packages found in $pkg_dir"
+        fi
+
+        # binfmt_misc (requires privileged container)
+        if [[ ! -e /proc/sys/fs/binfmt_misc/status ]]; then
+            sudo mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc || \
+                log_warning "Failed to mount binfmt_misc"
+        fi
+        sudo update-binfmts --enable qemu-aarch64 || true
+
+        log_success "debian13 extra dependencies installed"
+    fi
+
     log_success "All build dependencies installed successfully"
     return 0
 }

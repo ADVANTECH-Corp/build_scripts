@@ -632,6 +632,10 @@ function build_component() {
             safe_cd ".."
             ;;
         "kernel")
+            if ! install_build_dependencies; then
+                log_error "Failed to install build dependencies"
+                return 1
+            fi
             safe_cd "kernel"
             make clean 2>/dev/null || true
             git add . -f 2>/dev/null || true
@@ -643,10 +647,6 @@ function build_component() {
             rm -rf buildroot/output/rockchip_rk*_recovery
             ;;
         "rootfs")
-            if ! install_build_dependencies; then
-                log_error "Failed to install build dependencies"
-                return 1
-            fi
             if ! generate_oeminfo; then
                 log_error "Failed to generate OEMinfo.ini"
                 return 1

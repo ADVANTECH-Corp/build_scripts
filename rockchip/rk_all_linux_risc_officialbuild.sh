@@ -520,11 +520,11 @@ function install_build_dependencies() {
 }
 
 function generate_oeminfo() {
-    local oem_dir
+    local oem_file
     if [[ "$BSP_BRANCH" == debian13* ]]; then
-        oem_dir="$CURR_PATH/$ROOT_DIR/debian_std/overlay-std/etc"
+        oem_file="$CURR_PATH/$ROOT_DIR/debian_std/overlay-std/etc/OEMinfo.ini"
     else
-        oem_dir="$CURR_PATH/$ROOT_DIR/debian_adv/overlay-adv/etc"
+        oem_file="$CURR_PATH/$ROOT_DIR/debian_adv/overlay-adv/etc/OEMinfo.ini"
     fi
     local image_version="V${SDK_VERSION}.${ADV_VERSION}"
     log_info "Generating OEMinfo.ini..."

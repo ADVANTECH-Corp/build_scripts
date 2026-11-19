@@ -436,93 +436,6 @@ function generate_md5() {
     return 0
 }
 
-function diagnose_rootfs_env() {
-    local sec
-    _diag() { log_info "[DIAG] ===== $1 ====="; }
-    _run()  { echo "+ $*"; "$@" 2>&1 | sed 's/^/    /'; true; }
-
-    _diag "1. host/container identity"
-    _run uname -a
-    _run cat /etc/os-release
-    _run id
-    _run cat /proc/1/cgroup
-
-    _diag "2. privileged? (capabilities / seccomp / apparmor)"
-    _run grep -E "Cap(Eff|Bnd)|Seccomp" /proc/self/status
-    _run cat /proc/self/attr/current
-
-    _diag "3. binfmt_misc registration (kernel-level, host shared)"
-    _run mount -t binfmt_misc
-    _run ls -l /proc/sys/fs/binfmt_misc/
-    for f in /proc/sys/fs/binfmt_misc/qemu-aarch64 /proc/sys/fs/binfmt_misc/status; do
-        echo "+ cat $f"; cat "$f" 2>&1 | sed 's/^/    /'
-    done
-
-    _diag "4. qemu binaries and versions"
-    _run bash -c 'command -v qemu-aarch64-static; qemu-aarch64-static --version | head -n1'
-    _run ls -l /usr/bin/qemu-aarch64-static /usr/libexec/qemu-binfmt/ 
-    _run dpkg -l qemu-user-static binfmt-support
-    _run update-binfmts --display qemu-aarch64
-
-    _diag "5. can qemu run an arm64 binary + fcntl lock test"
-    local t; t=$(mktemp -d)
-    # use arm64 busybox-less check: python is not arm64 here, so test via host-side flock with qemu itself
-    _run bash -c "qemu-aarch64-static -h | head -n1"
-    rm -rf "$t"
-
-    _diag "6. filesystem / lock support of BSP and chroot locations"
-    _run df -T "$CURR_PATH" /tmp /var/tmp
-    _run findmnt -T "$CURR_PATH"
-    _run mount
-    _run bash -c "cd '$CURR_PATH' && python3 - <<'PY'
-import fcntl, os, tempfile
-d = os.getcwd()
-f = tempfile.NamedTemporaryFile(dir=d, delete=True)
-for name in ('LOCK_EX', 'F_SETLK', 'F_OFD_SETLK'):
-    try:
-        if name == 'LOCK_EX':
-            fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        elif name == 'F_SETLK':
-            fcntl.lockf(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        else:
-            import struct
-            fcntl.fcntl(f, 37, struct.pack('hhqqi', 1, 0, 0, 0, 0))  # F_OFD_SETLK=37, F_WRLCK=1
-        print(name, 'OK on', d)
-    except Exception as e:
-        print(name, 'FAIL on', d, e)
-PY"
-
-    _diag "7. docker storage / host resources"
-    _run bash -c 'docker info 2>/dev/null | grep -iE "storage driver|backing|cgroup|security|kernel|operating system|runtimes"'
-    _run df -h "$CURR_PATH"
-    _run free -m
-    _run ulimit -a
-
-    _diag "8. live-build / debootstrap versions and duplicates"
-    _run bash -c 'command -v -a live-build lb debootstrap'
-    _run cat /usr/share/live/build/VERSION
-    _run dpkg -l live-build debootstrap distro-info-data
-    _run ls -l /usr/bin/lb /usr/bin/live-build
-    _run bash -c 'ls /usr/lib/live/ | head -n 20'
-
-    _diag "9. apt/dpkg state in container"
-    _run dpkg --audit
-    _run apt-cache policy qemu-user-static
-
-    _diag "10. env that may affect chroot"
-    _run bash -c 'env | grep -iE "^(LANG|LC_|http_proxy|https_proxy|no_proxy|SUDO|DEBIAN)" '
-    _run cat /etc/sudoers.d/* 
-
-    _diag "11. SDK debian build scripts (what rootfs build will run)"
-    _run bash -c "ls -l '$CURR_PATH/$ROOT_DIR/debian/' 2>/dev/null | head -n 40"
-    _run bash -c "grep -nE 'qemu|chroot|mount|lb |live-build|binfmt' '$CURR_PATH/$ROOT_DIR/debian/mk-base-debian.sh' 2>/dev/null | head -n 60"
-    _run bash -c "cat '$CURR_PATH/$ROOT_DIR/device/rockchip/common/scripts/check-debian.sh' 2>/dev/null | head -n 60"
-
-    _diag "end"
-    unset -f _diag _run
-    return 0
-}
-
 function install_build_dependencies() {
     log_info "Installing/updating build dependencies..."
 
@@ -598,8 +511,6 @@ function install_build_dependencies() {
                 log_warning "Failed to mount binfmt_misc"
         fi
         sudo update-binfmts --enable qemu-aarch64 || true
-
-        diagnose_rootfs_env || true
 
         log_success "debian13 extra dependencies installed"
     fi
